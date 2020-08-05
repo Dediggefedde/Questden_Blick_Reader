@@ -1,3 +1,5 @@
+package de.dediggefedde.questden_blick_reader;
+
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -10,7 +12,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.myapplication.R;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
