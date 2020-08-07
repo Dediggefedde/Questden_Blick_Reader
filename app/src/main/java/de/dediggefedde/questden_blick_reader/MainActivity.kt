@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.text.*
 import android.text.Html.TagHandler
 import android.text.method.LinkMovementMethod
@@ -16,7 +17,6 @@ import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -160,7 +160,7 @@ class IngredientsListAdapter(var items: List<TgThread>, var mContext: Context) :
 
         private fun updateWatchState() {
             if (mMain.isWatched(mtg.url)) {
-                val w: Watch = mMain.getWatch(mtg)
+                val w: Watch = mMain.getWatch(mtg.url)
 
                 mWatchBut!!.setTextColor(Color.parseColor("#FF37A523"))
                 mWatchBut!!.text = mContext.getString(R.string.wBut_watched)
@@ -286,7 +286,11 @@ class HTMLTagHandler(private var mContext: Context) : TagHandler {
     }
 }
 
-class Clickabl(private var span: URLSpan?, private var spoiler: Boolean, private var colUnSpoil: Int, private var mContext: Context) : ClickableSpan() {
+class Clickabl(private var span: URLSpan?,
+               private var spoiler: Boolean,
+               private var colUnSpoil: Int,
+               private var mContext: Context
+) : ClickableSpan() {
     private var spoiled = false
     override fun onClick(view: View) {
         val rexTag = Regex(">>(\\d+)$")
@@ -295,16 +299,8 @@ class Clickabl(private var span: URLSpan?, private var spoiler: Boolean, private
             val main = mContext as MainActivity
             val pos = main.listAdapt.items.indexOfFirst { it.postID == rexTag.find(span!!.url)!!.groupValues[1] }
             main.ingredients_list.smoothScrollToPosition(pos)
-            val oldpos = main.ingredients_list.scrollY
-            val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    Log.d("back", oldpos.toString())
-                    main.ingredients_list.scrollTo(0, oldpos)
-                }
-            }
-            main.onBackPressedDispatcher.addCallback(main, callback)
-
-
+            main.recylerViewState = main.ingredients_list.layoutManager!!.onSaveInstanceState()
+            main.oldPos=(main.ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         }
         spoiled = !spoiled
         view.invalidate()
@@ -326,6 +322,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     val listAdapt = IngredientsListAdapter(emptyList(), this)
     private var watchlist = mutableListOf<Watch>()
     private var sets: Settings = Settings()
+    private var lastUrl="https://questden.org/kusaba/quest/"
+    var oldPos=0
+    var recylerViewState:Parcelable?=null
+
+    override fun onBackPressed() {
+        /*case back is url switch
+        Log.d("back",lastUrl + " . "+sets.curpage)
+        if(sets.curpage!=lastUrl)
+            requestPage(lastUrl)
+         */
+        if(recylerViewState!=null)
+            ingredients_list.layoutManager!!.onRestoreInstanceState(recylerViewState)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -411,7 +420,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.menu_sort_img -> {
                 listAdapt.items = listAdapt.items.sortedByDescending {
                     if (isWatched(it.url)) {
-                        getWatch(it).newImg
+                        getWatch(it.url).newImg
                     } else {
                         0
                     }
@@ -420,7 +429,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.menu_sort_posts -> {
                 listAdapt.items = listAdapt.items.sortedByDescending {
                     if (isWatched(it.url)) {
-                        getWatch(it).newPosts
+                        getWatch(it.url).newPosts
                     } else {
                         0
                     }
@@ -441,12 +450,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.menu_quest -> requestPage("https://questden.org/kusaba/quest/")
             R.id.menu_questdis -> requestPage("https://questden.org/kusaba/questdis/")
             R.id.menu_tg -> requestPage("https://questden.org/kusaba/tg/")
-            R.id.menu_watch -> showWatches()
+            R.id.menu_watch -> requestPage("watch")
             R.id.menu_settings -> {
-                val th = TgThread("chup", "", "/kusaba/quest/res/956815.html", "", "", "", true)
-                displaySingleThread(th)
+
             }
-            else -> return false
         }
 
         drawer_layout.closeDrawer(GravityCompat.START)
@@ -500,7 +507,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 displayThreadList(posts.toList())
 
                 if (isWatched(tg.url)) {
-                    val w: Watch = getWatch(tg)
+                    val w: Watch = getWatch(tg.url)
                     val scrollpos = listAdapt.items.indexOfFirst { it.postID == w.lastReadId }
                     ingredients_list.scrollToPosition(scrollpos)
                     w.lastReadId = w.newestId
@@ -525,7 +532,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     /** Called when the user taps the Send button */
     private fun requestPage(url: String) {
         // Do something in response to button
+        lastUrl=sets.curpage
         sets.curpage = url
+
+        if(url=="watch"){
+            showWatches()
+            return
+        }
+
         progressBar.visibility = View.VISIBLE
         val queue = Volley.newRequestQueue(this)
 
@@ -583,7 +597,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun addToWatch(tg: TgThread) {
         if (isWatched(tg.url)) return
         watchlist.add(Watch(tg))
-        requestThread(watchlist.last().thread)
+        requestThread(watchlist.last().thread.url)
         storeData()
     }
 
@@ -593,15 +607,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         storeData()
     }
 
-    fun getWatch(tg: TgThread): Watch {
-        return watchlist.first { it.thread.url == tg.url }
+    fun getWatch(url: String): Watch {
+        return watchlist.first { it.thread.url == url }
     }
 
     fun isWatched(url: String): Boolean {
         return watchlist.any { it.thread.url == url }
     }
 
-    private fun updateWatch(w: Watch) {
+    private fun updateWatch(w: Watch) { //thread might only contain url
         val oldw: Watch = watchlist.first { it.thread.url == w.thread.url }
         oldw.lastReadId = w.lastReadId
         oldw.newImg = w.newImg
@@ -611,17 +625,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         storeData()
     }
 
-    private fun requestThread(tg: TgThread) {
+    private fun requestThread(url: String) {
         progressBar.visibility = View.VISIBLE
         val queue = Volley.newRequestQueue(this)
-        val stringRequest = StringRequest(Request.Method.GET, "https://questden.org" + tg.url,
+        val stringRequest = StringRequest(Request.Method.GET,  "https://questden.org"+url,
             Response.Listener<String> { response ->
 
                 val rexLastPos = Regex(
                     ".*class=\"reflink\".*?a href=\"(.*?(\\d+))\"",
                     RegexOption.DOT_MATCHES_ALL
                 )// /kusaba/quest/res/957117.html#957117
-                val curW: Watch = getWatch(tg)
+                val curW: Watch = getWatch(url)
 //                curW.lastReadId
                 var newRespPart: String
 
@@ -638,7 +652,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val newImgs = newRespPart.split("class=\"thumb\"").size - 1
 
                 if (rexLastPos.containsMatchIn(response)) {
-                    val newW = Watch(tg, curW.lastReadId, newReadId, newPosts, newImgs)
+                    val newW = Watch(TgThread("","",url), curW.lastReadId, newReadId, newPosts, newImgs)
                     updateWatch(newW)
                 }
                 progressBar.visibility = View.GONE
@@ -657,13 +671,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun updateWatchlist() {
         for (w in watchlist) {
-            requestThread(w.thread)
+            requestThread(w.thread.url)
         }
     }
 
-    fun btnUpdateButton() {
-        if (sets.curpage != "watch") requestPage(sets.curpage)
+    fun btnUpdateButton(view: View) { //view is needed even not used, otherwise crash
         updateWatchlist()
+        requestPage(sets.curpage)
+        view.animate()//for sake of using view, so git would ignore the warning
     }
 
     private fun parseHTMLThread(tex: String) {
