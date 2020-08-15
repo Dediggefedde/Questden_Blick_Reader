@@ -1,3 +1,4 @@
+/*
 package de.dediggefedde.questden_blick_reader;
 
 import android.content.res.Resources;
@@ -66,23 +67,6 @@ public class PicassoImageGetter2 implements Html.ImageGetter {
                 }
             }
         }
-/*
-        private void checkBounds() {
-            float defaultProportion = (float) drawable.getIntrinsicWidth() / (float) drawable.getIntrinsicHeight();
-            int width = Math.min(textView.getWidth(), drawable.getIntrinsicWidth());
-            int height = (int) ((float) width / defaultProportion);
-
-            if (getBounds().right != textView.getWidth() || getBounds().bottom != height) {
-                setBounds(0, 0, textView.getWidth(), height); //set to full width
-                drawable.setBounds(
-                        0, //centering an image
-                        0,
-                        width,
-                        height);
-                textView.setText(textView.getText()); //refresh text
-            }
-        }
- */
 
         //------------------------------------------------------------------//
 
@@ -105,3 +89,4 @@ public class PicassoImageGetter2 implements Html.ImageGetter {
 
     }
 }
+*/
