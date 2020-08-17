@@ -866,7 +866,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun displayThreadList() {
-        listAdapt.items = displayDataList.take(10)//.takeLast(10) //.joinToString("\n")
+        listAdapt.items = displayDataList.take(10)//.takeLast(10)
         listAdapt.notifyDataSetChanged()
         ingredients_list.scrollToPosition(0)
     }
