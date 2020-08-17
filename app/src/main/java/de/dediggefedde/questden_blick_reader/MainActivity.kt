@@ -24,12 +24,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
-import androidx.paging.ItemKeyedDataSource
-import androidx.paging.PagedList
-import androidx.paging.PagedListAdapter
-import androidx.recyclerview.widget.DiffUtil
+//import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Request
@@ -63,23 +58,42 @@ import java.lang.reflect.Field
 * fallback display html tags.
 * */
 
-// display data
-// ListOf used in listview, filled from frontview, volatile, don't use as source of features
-// used again in watchlist
+object RequestValues {
+    const val DRAW = "https://questden.org/kusaba/draw/"
+    const val MEEP = "https://questden.org/kusaba/meep/"
+    const val QUEST = "https://questden.org/kusaba/quest/"
+    const val QUESTDIS = "https://questden.org/kusaba/questdis/"
+    const val TG = "https://questden.org/kusaba/tg/"
+    const val WATCH = "watch"
+}
+
+/**
+ * display data
+ *
+ *  ListOf used in listview, filled from frontview, volatile, don't use as source of features
+ *  used again in watchlist
+ * @property imgUrl all urls require https://questden.org prepended
+ * @property isThread true=overview, false=single-thread entry
+ * @property url used as unique identifier to thread (first post is also thread-url)
+ * @property postID also unique identifier to single post
+ */
 data class TgThread(
     var title: String = "",
-    var imgUrl: String = "", //all urls require https://questden.org prepended
-    var url: String = "",  //used as unique identifier
+    var imgUrl: String = "",
+    var url: String = "",
     var author: String = "",
     var summary: String = "",
     var postID: String = "",
-    var isThread: Boolean = false //true to be used in reader
+    var isThread: Boolean = false
 )
 
-// watch processing data
-// listOf in mainActivity, stable source of data for features
-// alternative minimalizing: thread-ID/url instead of tgThread
-// but: display watches would require scanning pages, while direct ID scans are already done
+/**
+ * watchlist processing data
+ *
+ *  listOf in mainActivity, stable source of data for features
+ *  alternative minimalizing: thread-ID/url instead of tgThread
+ *  but: display watches would require scanning pages, while direct ID scans are already done
+ */
 data class Watch(
     var thread: TgThread = TgThread(),
     var lastReadId: String = "",
@@ -88,50 +102,45 @@ data class Watch(
     var newImg: Int = 0
 )
 
-//settings object for later
-//default sorting, default pages, sync-options
-//loaded at start, saved on change
+/**
+ * settings object for later
+ *  default sorting, default pages, sync-options
+ *  loaded at start, saved on change
+ */
 data class Settings(
-    var curpage: String = "https://questden.org/kusaba/quest/"
+    var curpage: String = RequestValues.QUEST
 )
 
-//
+/**
+ * enum for navigation object
+ * page for quest/tg etc switch, link for quote-clicked, thread for thread opened
+ */
 enum class NavOperation { PAGE, LINK, THREAD }
+
+/**
+ * navigation object for chronic (back-button)
+ */
 data class Navis(
     var operation: NavOperation,
     var prop: String,
     var navStat: Parcelable? = null
 )
 
+/**
+ * RecyclerView custom adapter to display tgthread correctly
+ *  currently has copy of tgthread, perhaps index/reference to external list better
+ *  context given for image click zoom capabilities
+ *  planned to have alternative compact layout
+ *  need investigation for memory management
+ */
+class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
+    RecyclerView.Adapter<QuestDenListAdapter.ViewHolder>() {
 
-class DiffCallback : DiffUtil.ItemCallback<TgThread>() {
-    override fun areItemsTheSame(oldItem: TgThread, newItem: TgThread): Boolean {
-        return oldItem.url == newItem.url
-    }
-
-    override fun areContentsTheSame(oldItem: TgThread, newItem: TgThread): Boolean {
-        return oldItem == newItem
-    }
-}
-
-class IngredientsListAdapter(var items: List<TgThread>, var mContext: Context) :
-    RecyclerView.Adapter<IngredientsListAdapter.ViewHolder>() {
-    //    PagedListAdapter<TgThread, IngredientsListAdapter.ViewHolder>(DiffCallback()) {
-    /*
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewholder {
-        return ItemViewholder(
-                LayoutInflater.from(parent.context)
-                        .inflate(R.layout.${Item_Layout_ID}, parent, false)
-        )
-    }
-
-    override fun onBindViewHolder(holder: ${NAME}.ItemViewholder, position: Int) {
-        holder.bind(getItem(position))
-    }
-
-    }
-    */
-    inner class ViewHolder(inflater: LayoutInflater, parent: ViewGroup, itemView: View) :
+    /**
+     * custom viewholder for one tgthread object
+     */
+//    inner class ViewHolder(inflater: LayoutInflater, parent: ViewGroup, itemView: View) :
+        inner class ViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
         private var mTitleView: TextView? = null
         private var mSummaryView: TextView? = null
@@ -158,26 +167,16 @@ class IngredientsListAdapter(var items: List<TgThread>, var mContext: Context) :
 
             //event listeners
             val evThreadTitleClick = View.OnClickListener {
-//                val openURL = Intent(Intent.ACTION_VIEW)
-//                openURL.data = Uri.parse("https://questden.org" + mtg.url)
-                //it.context.startActivity(openURL)
-
                 mMain.displaySingleThread(mtg.url)
-
             }
             mTitleView?.setOnClickListener(evThreadTitleClick)
             mImgView?.setOnClickListener {
                 mMain.progressBar.visibility = View.VISIBLE
                 mMain.imageZoom.visibility = View.VISIBLE
                 val str = "https://questden.org" + mtg.imgUrl.replace("thumb", "src").replace("s.", ".")
-//                mMain.button2.text = str
 
-                Glide.with(mMain.imageZoom)  //2
-                    .load(str) //3
-//                    .resize(800, 600).onlyScaleDown().centerInside() //done automatically?
-//                    .placeholder(R.drawable.ic_image_place_holder) //5
-//                    .error(R.drawable.ic_broken_image) //6
-//                    .fallback(R.drawable.ic_no_image) //7
+                Glide.with(mMain.imageZoom)
+                    .load(str)
                     .listener(object : RequestListener<Drawable> {
                         override fun onLoadFailed(e: GlideException?, model: Any?, target: com.bumptech.glide.request.target.Target<Drawable>?, isFirstResource: Boolean): Boolean {
                             mMain.progressBar.visibility = View.GONE
@@ -192,11 +191,11 @@ class IngredientsListAdapter(var items: List<TgThread>, var mContext: Context) :
                             return false
                         }
                     })
-                    .into(mMain.imageZoom) //8
+                    .into(mMain.imageZoom)
             }
             mWatchBut?.setOnClickListener {
                 if (mMain.isWatched(mtg.url)) {
-                    mMain.removeFromWatch(mtg)
+                    mMain.removeFromWatch(mtg.url)
                 } else {
                     mMain.addToWatch(mtg)
                 }
@@ -233,6 +232,11 @@ class IngredientsListAdapter(var items: List<TgThread>, var mContext: Context) :
             }
         }
 
+        /**
+         * binds a thread object to an item for the recycle view
+         * also sets visible, parses html, updates watch-state and fetches image
+         * sets internally used mtg to the thread.
+         */
         fun bind(tg: TgThread) {
             mtg = tg
 
@@ -275,18 +279,23 @@ class IngredientsListAdapter(var items: List<TgThread>, var mContext: Context) :
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val comView=inflater.inflate(R.layout.list_item, parent, false)
-        return ViewHolder(inflater, parent,comView)
+        return ViewHolder(comView)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-
         holder.bind(items[position])
-//        holder.bind(getItem(position)!!)
     }
-
 }
 
-
+/**
+ * HTML tag handler for fromHTML, parsing special html tags
+ *  Needed to have custom reactions on links and special css behavior
+ *  realized by replacing regex with custom tags.
+ *  More specifically:
+ *   >>123 link jumps to questid,
+ *   <span> with spoiler blackened until clicked
+ *   redirect http-links to browser
+ */
 class HTMLTagHandler(private var mContext: Context) : TagHandler {
     private var startQuote = 0
     private var startSpoil = 0
@@ -349,6 +358,11 @@ class HTMLTagHandler(private var mContext: Context) : TagHandler {
     }
 }
 
+/**
+ * Clickable text created by fromHTML and inserted by HTMLTagHandler
+ *  spoiler (blackened) toggle readable
+ *  http links opening browsers (to be done)
+ */
 class Clickabl(
     private var span: URLSpan?,
     private var spoiler: Boolean,
@@ -385,14 +399,18 @@ class Clickabl(
 
 }
 
+/**
+ * Main activity
+ * So far only activity
+ * sets up all layouts, requests html, parses, fills data, manages back-click/menus etc.
+ */
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    val listAdapt = IngredientsListAdapter(emptyList(), this)
+    val listAdapt = QuestDenListAdapter(emptyList(), this)
     var displayDataList = listOf<TgThread>()
     private var watchlist = mutableListOf<Watch>()
     private var sets: Settings = Settings()
     var chronic = mutableListOf<Navis>()
 
-    //   var displayData:PagedList<TgThread> = PagingData.from(displayDataList)
     private val lastVisibleItemPosition: Int
         get() = (ingredients_list.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
 
@@ -427,13 +445,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 super.onScrollStateChanged(recyclerView, newState)
                 val totalItemCount = recyclerView.layoutManager?.itemCount
                 if (totalItemCount == lastVisibleItemPosition + 1) {
-                    Log.d("MyTAG", "Load new list")
                     ingredients_list.removeOnScrollListener(scrollListener)
                     var nmax=listAdapt.items.size+10
-                    Log.d("MyTAG", nmax.toString())
                     if(nmax>displayDataList.size)
                         nmax=displayDataList.size
-                    Log.d("MyTAG", nmax.toString())
                     listAdapt.items=displayDataList.take(nmax)
                     listAdapt.notifyDataSetChanged()
                     setRecyclerViewScrollListener()
@@ -484,6 +499,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return ret
     }
 
+    /**
+     * sets up fromhtml to work on view if phone is higher version than N
+     */
     fun setTextViewHTML(text: TextView, html: String?) {
         val imgGet = GlideImageGetter(text)
         val tagHandler = HTMLTagHandler(this)
@@ -555,12 +573,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
-            R.id.menu_draw -> requestPage("https://questden.org/kusaba/draw/")
-            R.id.menu_general -> requestPage("https://questden.org/kusaba/meep/")
-            R.id.menu_quest -> requestPage("https://questden.org/kusaba/quest/")
-            R.id.menu_questdis -> requestPage("https://questden.org/kusaba/questdis/")
-            R.id.menu_tg -> requestPage("https://questden.org/kusaba/tg/")
-            R.id.menu_watch -> requestPage("watch")
+            R.id.menu_draw -> requestPage(RequestValues.DRAW)
+            R.id.menu_general -> requestPage(RequestValues.MEEP)
+            R.id.menu_quest -> requestPage(RequestValues.QUEST)
+            R.id.menu_questdis -> requestPage(RequestValues.QUESTDIS)
+            R.id.menu_tg -> requestPage(RequestValues.TG)
+            R.id.menu_watch -> requestPage(RequestValues.WATCH)
             R.id.menu_settings -> {
 
             }
@@ -571,7 +589,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun showWatches() {
-        sets.curpage = "watch"
+        sets.curpage = RequestValues.WATCH
 
         displayDataList=watchlist.map {
                 it.thread.isThread = true
@@ -580,6 +598,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         displayThreadList()
     }
 
+    /**
+     * requests https://questden.org + relative url, expecting it to be a single thread
+     * regex is used to parse this into displayDataList
+     * calls displayThreadList() then to refresh recycleViewer
+     * watchlist count update if watched
+     * storedata to open again on start +watchlist save)
+     */
     fun displaySingleThread(url: String) {
         progressBar.visibility = View.VISIBLE
         chronic.add(Navis(NavOperation.THREAD, url))
@@ -615,7 +640,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 displayThreadList()
 
                 if (isWatched(url)) {
-                    val w: Watch = getWatch(url)
+                    val w: Watch = getWatch(url) //copy returned? then w.(...)=... will not do anything
                     val scrollpos = listAdapt.items.indexOfFirst { it.postID == w.lastReadId }
                     ingredients_list.scrollToPosition(scrollpos)
                     w.lastReadId = w.newestId
@@ -635,14 +660,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         queue.add(stringRequest)
     }
 
-    /** Called when the user taps the Send button */
     private fun requestPage(url: String) {
-        // Do something in response to button
-        //lastUrl=sets.curpage
         sets.curpage = url
         chronic.add(Navis(NavOperation.PAGE, url))
 
-        if (url == "watch") {
+        if (url == RequestValues.WATCH) {
             showWatches()
             return
         }
@@ -696,12 +718,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         if (firstStart) {
-            requestPage("https://questden.org/kusaba/quest/")
+            requestPage(RequestValues.QUEST)
         } else {
             listAdapt.notifyDataSetChanged()
         }
     }
 
+    /**
+     * adds thread to watchlist, updates counts and saves data
+     */
     fun addToWatch(tg: TgThread) {
         if (isWatched(tg.url)) return
         watchlist.add(Watch(tg))
@@ -709,16 +734,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         storeData()
     }
 
-    fun removeFromWatch(tg: TgThread) {
-        watchlist.removeAll(watchlist.filter { it.thread.url == tg.url })
-        //watchlist.removeIf{it.thread.url==tg.url} API 24
+    /**
+     * remove watch entry by thread-url
+     */
+    fun removeFromWatch(url: String) {
+        watchlist.removeAll(watchlist.filter { it.thread.url == url })
         storeData()
     }
 
+    /**
+     * get watch object (copy) by url
+     */
     fun getWatch(url: String): Watch {
         return watchlist.first { it.thread.url == url }
     }
 
+    /**
+     * thread with url in watchlist?
+     */
     fun isWatched(url: String): Boolean {
         return watchlist.any { it.thread.url == url }
     }
@@ -783,7 +816,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    fun btnUpdateButton(view: View) { //view is needed even not used, otherwise crash
+    /**
+     * button click event handler
+     * view is needed even not used, otherwise crash
+     * updates current page list and all watched thread numbers
+     */
+    fun btnUpdateButton(view: View) {
         updateWatchlist()
         requestPage(sets.curpage)
         view.animate()//for sake of using view, so git would ignore the warning

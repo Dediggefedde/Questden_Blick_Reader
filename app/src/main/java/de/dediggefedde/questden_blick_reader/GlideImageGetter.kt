@@ -17,11 +17,15 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import java.lang.ref.WeakReference
 
+/**
+ * Image getter for .fromHTML call, turning <img> tags to their inline images.
+ * This class uses Glide for image requests and prepends "https://questden.org" in front of src attr
+ */
 class GlideImageGetter(
     textView: TextView,
     private val matchParentWidth: Boolean = false,
-    densityAware: Boolean = false,
-    private val imagesHandler: HtmlImagesHandler? = null
+    densityAware: Boolean = false//,
+//    private val imagesHandler: HtmlImagesHandler? = null
 ) : ImageGetter {
     private val container: WeakReference<TextView> = WeakReference(textView)
     private var density = 2f
@@ -45,7 +49,7 @@ class GlideImageGetter(
             post {
                 Glide.with(context)
                     .asBitmap()
-                    .load("https://questden.org" +source)
+                    .load("https://questden.org$source")
                     .into(drawable)
             }
         }
@@ -103,18 +107,23 @@ class GlideImageGetter(
             sizeReadyCallback.onSizeReady(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
         }
 
-        override fun removeCallback(cb: SizeReadyCallback) {}
-        override fun setRequest(request: Request?) {}
+        override fun removeCallback(cb: SizeReadyCallback) { // no-op
+        }
+        override fun setRequest(request: Request?) { // no-op
+        }
         override fun getRequest(): Request? {
             return null
         }
 
-        override fun onStart() {}
-        override fun onStop() {}
-        override fun onDestroy() {}
+        override fun onStart() { // no-op
+        }
+        override fun onStop() { // no-op
+        }
+        override fun onDestroy() { // no-op
+        }
     }
 
-    interface HtmlImagesHandler {
-        fun addImage(uri: String?)
-    }
+//    interface HtmlImagesHandler {
+//        fun addImage(uri: String?)
+//    }
 }
