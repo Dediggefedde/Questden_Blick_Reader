@@ -58,6 +58,11 @@ import java.lang.reflect.Field
 * fallback display html tags.
 * */
 
+/**
+ * requestpage() acceptable values.
+ * In principle any valid url with matching regexp page layout
+ * also special links "watch" and "setting" (pending)
+ */
 object RequestValues {
     const val DRAW = "https://questden.org/kusaba/draw/"
     const val MEEP = "https://questden.org/kusaba/meep/"
