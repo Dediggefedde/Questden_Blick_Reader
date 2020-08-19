@@ -17,7 +17,7 @@
         android:id="@+id/tx_newImg"
         android:layout_width="80dp"
         android:layout_height="wrap_content"
-        android:text="New Img: 0"
+        android:text="@string/list_placeholder_newImgCnt"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tx_newPosts" />
@@ -33,7 +33,8 @@
         app:layout_constraintEnd_toStartOf="@+id/tx_postID"
         app:layout_constraintStart_toStartOf="@id/barrier2"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintVertical_chainStyle="packed"
+        android:layout_marginLeft="5dp" />
 
     <TextView
         android:id="@+id/tx_Summary"
@@ -45,9 +46,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/barrier2"
         app:layout_constraintTop_toBottomOf="@+id/tx_author"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.0"
+        android:layout_marginLeft="5dp" />
 
     <ImageView
+        android:contentDescription="@string/list_img_descr"
         android:id="@+id/img_url"
         android:layout_width="80dp"
         android:layout_height="53dp"
@@ -67,7 +70,8 @@
         android:textColor="#117743"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/barrier2"
-        app:layout_constraintTop_toBottomOf="@+id/tx_title" />
+        app:layout_constraintTop_toBottomOf="@+id/tx_title"
+        android:layout_marginLeft="5dp" />
 
     <TextView
         android:id="@+id/tx_watch"
@@ -76,7 +80,7 @@
         android:layout_marginTop="5dp"
         android:background="#20E91E63"
         android:gravity="center"
-        android:text="Watch"
+        android:text="@string/list_placeholder_watch"
         android:textColor="#A52B23"
         android:textStyle="bold"
         android:typeface="normal"
@@ -88,7 +92,7 @@
         android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:text="New Posts: 0"
+        android:text="@string/list_placeholder_NewPostsCnt"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tx_watch" />
@@ -106,7 +110,7 @@
         android:id="@+id/tx_postID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="968318"
+        android:text="@string/list_placeholder_ID"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

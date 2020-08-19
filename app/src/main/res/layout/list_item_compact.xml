@@ -17,7 +17,7 @@
         android:id="@+id/tx_comp_newImg"
         android:layout_width="40dp"
         android:layout_height="wrap_content"
-        android:text="I: 0"
+        android:text="@string/slist_placeholder_newImgCnt"
         android:textSize="12sp"
         app:layout_constraintStart_toEndOf="@+id/tx_comp_newPosts"
         app:layout_constraintTop_toTopOf="@+id/tx_comp_newPosts" />
@@ -37,6 +37,7 @@
         android:layout_marginLeft="5dp" />
 
     <ImageView
+        android:contentDescription="@string/slist_img_descr"
         android:id="@+id/img_comp_url"
         android:layout_width="75dp"
         android:layout_height="21dp"
@@ -67,7 +68,7 @@
         android:layout_marginTop="5dp"
         android:background="#20E91E63"
         android:gravity="center"
-        android:text="W"
+        android:text="@string/slist_placeholder_watch"
         android:textColor="#A52B23"
         android:textStyle="bold"
         android:typeface="normal"
@@ -78,7 +79,7 @@
         android:id="@+id/tx_comp_newPosts"
         android:layout_width="40dp"
         android:layout_height="wrap_content"
-        android:text="P: 0"
+        android:text="@string/slist_placeholder_newPostsCnt"
         android:textSize="12sp"
         app:layout_constraintStart_toEndOf="@+id/tx_comp_watch"
         app:layout_constraintTop_toTopOf="@+id/tx_comp_watch" />
@@ -96,7 +97,7 @@
         android:id="@+id/tx_comp_postID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="968318"
+        android:text="@string/slist_placeholder_ID"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

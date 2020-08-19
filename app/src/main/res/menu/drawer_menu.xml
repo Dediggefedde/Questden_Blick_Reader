@@ -1,35 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:showIn="navigationView">
-    <item android:title="Tgchan">
+    <item android:title="@string/nav_pages_title">
         <menu>
             <item
                 android:id="@+id/menu_draw"
-                android:title="Draw"/>
+                android:title="@string/nav_pages_draw"/>
             <item
                 android:id="@+id/menu_general"
-                android:title="General"/>
+                android:title="@string/nav_pages_general"/>
             <item
                 android:id="@+id/menu_quest"
-                android:title="Quest"/>
+                android:title="@string/nav_pages_quest"/>
             <item
                 android:id="@+id/menu_questdis"
-                android:title="Questdis"/>
+                android:title="@string/nav_pages_questdis"/>
             <item
                 android:id="@+id/menu_tg"
-                android:title="Tg"/>
+                android:title="@string/nav_pages_tg"/>
         </menu>
     </item>
-    <item android:title="Reader" android:id="@+id/menu_reader">
+    <item android:title="@string/nav_special_title" android:id="@+id/menu_reader">
         <menu>
             <item
                 android:id="@+id/menu_watch"
-                android:title="Watched"/>
+                android:title="@string/nav_special_watch"/>
             <item
                 android:id="@+id/menu_settings"
-                android:title="Settings"/>
+                android:title="@string/nav_special_settings"/>
         </menu>
     </item>
 </menu>

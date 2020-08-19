@@ -30,7 +30,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:onClick="btnUpdateButton"
-            android:text="Update"
+            android:text="@string/btn_update"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -66,11 +66,12 @@
             android:id="@+id/imageZoom"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:contentDescription="@string/img_zoom_desc"
             app:layout_constraintBottom_toTopOf="@+id/guideline3"
             app:layout_constraintEnd_toEndOf="@+id/ingredients_list"
             app:layout_constraintStart_toStartOf="@+id/ingredients_list"
             app:layout_constraintTop_toTopOf="@+id/guideline"
-            app:srcCompat="@drawable/questden" />
+            android:src="@drawable/ic_questden" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
@@ -92,7 +93,7 @@
         android:id="@+id/navigationView"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="start|left"
+        android:layout_gravity="start"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/drawer_menu" />
 

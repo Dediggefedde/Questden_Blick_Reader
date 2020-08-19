@@ -7,6 +7,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
@@ -39,6 +40,8 @@ import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.*
+import org.jsoup.Jsoup
 import org.xml.sax.XMLReader
 import java.lang.reflect.Field
 
@@ -70,6 +73,7 @@ object RequestValues {
     const val QUESTDIS = "https://questden.org/kusaba/questdis/"
     const val TG = "https://questden.org/kusaba/tg/"
     const val WATCH = "watch"
+    const val SETTING = "/kusaba/quest/res/954051.html"
 }
 
 /**
@@ -584,9 +588,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.menu_questdis -> requestPage(RequestValues.QUESTDIS)
             R.id.menu_tg -> requestPage(RequestValues.TG)
             R.id.menu_watch -> requestPage(RequestValues.WATCH)
-            R.id.menu_settings -> {
-
-            }
+            R.id.menu_settings -> displaySingleThread(RequestValues.SETTING)
         }
 
         drawer_layout.closeDrawer(GravityCompat.START)
@@ -610,59 +612,96 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * watchlist count update if watched
      * storedata to open again on start +watchlist save)
      */
-    fun displaySingleThread(url: String) {
+    fun displaySingleThread(murl: String) {
         progressBar.visibility = View.VISIBLE
-        chronic.add(Navis(NavOperation.THREAD, url))
-        val queue = Volley.newRequestQueue(this)
-        val stringRequest = StringRequest(Request.Method.GET, "https://questden.org$url",
-            Response.Listener<String> { response ->
+        chronic.add(Navis(NavOperation.THREAD, murl))
+
+        val coro=CoroutineScope(Dispatchers.Main).launch {//GlobalScope.launch
+            val doc = withContext(Dispatchers.IO) {Jsoup.connect("https://questden.org$murl").get()}
+            val res=doc.select("#delform,#delform>table").map{
+                val tg=TgThread()
+                var lis=it.select("span.filetitle")
+                if(lis.isNotEmpty())tg.title=lis.first().text()
+                lis=it.select("span.postername")
+                if(lis.isNotEmpty())tg.author=lis.first().text()
+                lis=it.select("img.thumb") //spoiler missing
+                if(lis.isNotEmpty())tg.imgUrl=lis.first().attr("src")
+                lis=it.select("span.reflink a")
+                if(lis.isNotEmpty())tg.url=lis.first().attr("href") //postID missing
+                lis=it.select("blockquote")
+                if(lis.isNotEmpty())tg.summary=lis.first().html()
+                tg.isThread = false
+
+                tg
+            }
+            displayDataList=res.toList()
+            displayThreadList()
+
+            if (isWatched(murl)) {
+                val w: Watch = getWatch(murl) //copy returned? then w.(...)=... will not do anything
+                val scrollpos = listAdapt.items.indexOfFirst { it.postID == w.lastReadId }
+                ingredients_list.scrollToPosition(scrollpos)
+                w.lastReadId = w.newestId
+                w.newImg = 0
+                w.newPosts = 0
+            }
+            storeData()
+            progressBar.visibility = View.GONE
+        }
+
+//            val queue = Volley.newRequestQueue(this)
+//        val stringRequest = StringRequest(Request.Method.GET, "https://questden.org$murl",
+//            Response.Listener<String> { response ->
 
 //                var scrollpos=0
-                val rexSec = Regex("<div [^>]*? class=\"postwidth\">(.*?)</div>.*?<blockquote.*?>(.*?)</blockquote>", RegexOption.DOT_MATCHES_ALL)
-                val rexTitle = Regex("<span.*?class=\"filetitle\".*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
-                val rexAuthor = Regex("<span.*?class=\"postername\".*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
-                val rexImg = Regex("<img.*?src=\"(.*?)\"[^>]*class=\"thumb\"", RegexOption.DOT_MATCHES_ALL) // /kusaba/quest/thumb/159280999777s.png
-                val rexRef = Regex("class=\"reflink\".*?a href=\"(.*?(\\d+))\"", RegexOption.DOT_MATCHES_ALL)// /kusaba/quest/res/957117.html#957117
-                val rexSpoilerImg = Regex("firstChild.src='(.*?)'", RegexOption.DOT_MATCHES_ALL)
-
-                val posts = rexSec.findAll(response).map {
-                    val th = TgThread()
-                    val header = it.groupValues[1]
-                    val content = it.groupValues[2]
-                    if (rexTitle.containsMatchIn(header)) th.title = rexTitle.find(header)?.groupValues?.get(1)?.replace("\n", "") ?: ""
-                    if (rexAuthor.containsMatchIn(header)) th.author = rexAuthor.find(header)?.groupValues?.get(1)?.replace("\n", "")?: ""
-                    if (rexImg.containsMatchIn(header)) th.imgUrl = rexImg.find(header)?.groupValues?.get(1)?:""
-                    if (rexSpoilerImg.containsMatchIn(header)) th.imgUrl =  rexSpoilerImg.find(header)?.groupValues?.get(1)?:""
-                    if (rexRef.containsMatchIn(header)) {
-                        th.url = rexRef.find(header)?.groupValues?.get(1)?:""
-                        th.postID = rexRef.find(header)?.groupValues?.get(2)?:""
-                    }
-                    th.summary = content
-                    th.isThread = false
-                    th
-                }
-                displayDataList=posts.toList()
-                displayThreadList()
-
-                if (isWatched(url)) {
-                    val w: Watch = getWatch(url) //copy returned? then w.(...)=... will not do anything
-                    val scrollpos = listAdapt.items.indexOfFirst { it.postID == w.lastReadId }
-                    ingredients_list.scrollToPosition(scrollpos)
-                    w.lastReadId = w.newestId
-                    w.newImg = 0
-                    w.newPosts = 0
-                }
-                storeData()
-                progressBar.visibility = View.GONE
-            },
-            Response.ErrorListener {
-                listAdapt.items =
-                    listOf(TgThread("There was an error loading the Thread https://questden.org$url"))
-                listAdapt.notifyDataSetChanged()
-                progressBar.visibility = View.GONE
-            }
-        )
-        queue.add(stringRequest)
+//                val rexSec = Regex("<div [^>]*? class=\"postwidth\">(.*?)</div>.*?<blockquote.*?>(.*?)</blockquote>", RegexOption.DOT_MATCHES_ALL)
+//                val rexTitle = Regex("<span.*?class=\"filetitle\".*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
+//                val rexAuthor = Regex("<span.*?class=\"postername\".*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
+//                val rexImg = Regex("<img.*?src=\"(.*?)\"[^>]*class=\"thumb\"", RegexOption.DOT_MATCHES_ALL) // /kusaba/quest/thumb/159280999777s.png
+//                val rexRef = Regex("class=\"reflink\".*?a href=\"(.*?(\\d+))\"", RegexOption.DOT_MATCHES_ALL)// /kusaba/quest/res/957117.html#957117
+//                val rexSpoilerImg = Regex("firstChild.src='(.*?)'", RegexOption.DOT_MATCHES_ALL)
+//
+//                val posts=response.split("postwidth")
+//                val posts = rexSec.findAll(response).map {
+//                    it.groupValues[1]
+//                    val th = TgThread()
+//                    val header = it.groupValues[1]
+//                    val content = it.groupValues[2]
+//                    if (rexTitle.containsMatchIn(header)) th.title = rexTitle.find(header)?.groupValues?.get(1)?.replace("\n", "") ?: ""
+//                    if (rexAuthor.containsMatchIn(header)) th.author = rexAuthor.find(header)?.groupValues?.get(1)?.replace("\n", "")?: ""
+//                    if (rexImg.containsMatchIn(header)) th.imgUrl = rexImg.find(header)?.groupValues?.get(1)?:""
+//                    if (rexSpoilerImg.containsMatchIn(header)) th.imgUrl =  rexSpoilerImg.find(header)?.groupValues?.get(1)?:""
+//                    if (rexRef.containsMatchIn(header)) {
+//                        th.url = rexRef.find(header)?.groupValues?.get(1)?:""
+//                        th.postID = rexRef.find(header)?.groupValues?.get(2)?:""
+//                    }
+//                    th.summary = content
+//                    th.isThread = false
+//                    th
+//                }
+//                button2.text=posts.toList().size.toString()
+               // displayDataList=posts.toList()
+//                displayThreadList()
+//
+//                if (isWatched(url)) {
+//                    val w: Watch = getWatch(url) //copy returned? then w.(...)=... will not do anything
+//                    val scrollpos = listAdapt.items.indexOfFirst { it.postID == w.lastReadId }
+//                    ingredients_list.scrollToPosition(scrollpos)
+//                    w.lastReadId = w.newestId
+//                    w.newImg = 0
+//                    w.newPosts = 0
+//                }
+//                storeData()
+//                progressBar.visibility = View.GONE
+//            },
+//            Response.ErrorListener {
+//                listAdapt.items =
+//                    listOf(TgThread("There was an error loading the Thread https://questden.org$url"))
+//                listAdapt.notifyDataSetChanged()
+//                progressBar.visibility = View.GONE
+//            }
+//        )
+//        queue.add(stringRequest)
     }
 
     private fun requestPage(url: String) {
@@ -695,7 +734,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun storeData() {
         val sharedPref = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE)
         val gson = Gson()
-        val jsonstring = gson.toJson(listAdapt.items)
+        val jsonstring = gson.toJson(displayDataList)
         val jsonstring2 = gson.toJson(watchlist)
         with(sharedPref.edit()) {
             putString("tgchanItems", jsonstring)
@@ -712,7 +751,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var jsonString = sharedPref.getString("tgchanItems", "")
         if (jsonString != "") {
             val itemType = object : TypeToken<List<TgThread>>() {}.type
-            listAdapt.items = gson.fromJson<List<TgThread>>(jsonString, itemType)
+            displayDataList = gson.fromJson<List<TgThread>>(jsonString, itemType)
         } else {
             firstStart = true
         }
@@ -725,7 +764,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (firstStart) {
             requestPage(RequestValues.QUEST)
         } else {
-            listAdapt.notifyDataSetChanged()
+            displayThreadList()
         }
     }
 
