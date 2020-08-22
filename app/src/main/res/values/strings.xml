@@ -8,6 +8,8 @@
     <string name="summary">Summary</string>
     <string name="NewPosts">New Posts: %d</string>
     <string name="NewImg">New Img: %d</string>
+    <string name="NewCompPosts">P: %d</string>
+    <string name="NewCOMPImg">I: %d</string>
     <string name="open_menu">Opens the Menu</string>
     <string name="closesMenu">Closes the Menu</string>
     <string name="btn_update">Update</string>
@@ -37,4 +39,8 @@
     <string name="nav_header_title">Target Page</string>
     <string name="nav_header_img_desc">header image</string>
     <string name="img_zoom_desc">Zooming post image to fullscreen</string>
+    <string name="Bot_Nav_first"><![CDATA[<<]]></string>
+    <string name="Bot_Nav_prev"><![CDATA[<]]></string>
+    <string name="Bot_Nav_next"><![CDATA[>]]></string>
+    <string name="Bot_Nav_Last"><![CDATA[>>]]></string>
 </resources>
