@@ -66,18 +66,18 @@ import java.lang.reflect.Field
 * */
 
 /**
- * requestpage() acceptable values.
+ * displayThread() special values
  * In principle any valid url with matching regexp page layout
  * also special links "watch" and "setting" (pending)
  */
-object RequestValues {
-    const val DRAW = "https://questden.org/kusaba/draw/"
-    const val MEEP = "https://questden.org/kusaba/meep/"
-    const val QUEST = "https://questden.org/kusaba/quest/"
-    const val QUESTDIS = "https://questden.org/kusaba/questdis/"
-    const val TG = "https://questden.org/kusaba/tg/"
-    const val WATCH = "watch"
-    const val SETTING = "/kusaba/quest/res/954051.html"
+enum class RequestValues(val url: String) {
+    DRAW("/kusaba/draw/"),
+    MEEP("/kusaba/meep/"),
+    QUEST("/kusaba/quest/"),
+    QUESTDIS("/kusaba/questdis/"),
+    TG("/kusaba/tg/"),
+    WATCH("watch")//,
+//    SETTING("/kusaba/quest/res/954051.html")
 }
 
 /**
@@ -123,7 +123,8 @@ data class Watch(
  *  loaded at start, saved on change
  */
 data class Settings(
-    var curpage: String = RequestValues.QUEST
+    var curpage: String = RequestValues.QUEST.url,
+    var showOnlyPics:Boolean=false
 )
 
 /**
@@ -150,11 +151,14 @@ data class Navis(
 //    layoutManager?.startSmoothScroll(smoothScroller)
 //}
 
+/**
+ * Jsoup parse HTML code.
+ * @param trimLength for trimming content after parsing
+ */
 fun getHTMLtext(str: String, trimLength: Int): String {
     val doc = Jsoup.parse(str)
     val tex = doc.text()
-    if (tex.length > trimLength) return tex.substring(0, trimLength)
-    else return tex
+    return if (tex.length > trimLength) tex.substring(0, trimLength) else tex
 }
 
 /**
@@ -172,57 +176,60 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
      */
 //    inner class ViewHolder(inflater: LayoutInflater, parent: ViewGroup, itemView: View) :
     inner class FullViewHolder(itemView: View) : ViewHolder(itemView) {
-        init {
-        }
+//        init {
+//        }
     }
 
-    inner class CompactViewHolder(itemView: View) : ViewHolder(itemView) {
-        init {
-            mTitleView = itemView.findViewById(R.id.tx_comp_title)
-            mSummaryView = null//itemView.findViewById(R.id.tx_comp_Summary)
-            mAuthorView = itemView.findViewById(R.id.tx_comp_author)
-            mImgView = itemView.findViewById(R.id.img_comp_url)
-            mWatchBut = itemView.findViewById(R.id.tx_comp_watch)
-            mPostsNew = itemView.findViewById(R.id.tx_comp_newPosts)
-            mImgNew = itemView.findViewById(R.id.tx_comp_newImg)
-            mNoView = itemView.findViewById(R.id.tx_comp_postID)
-            mDate = itemView.findViewById(R.id.tx_comp_date)
-
-            setListener()
-        }
-
-        override fun updateWatchState() {
-            if (mMain.isWatched(mtg.url)) {
-                val w: Watch = mMain.getWatch(mtg.url)
-
-                mWatchBut?.setTextColor(Color.parseColor("#FF37A523"))
-//                mWatchBut?.text = mContext.getString(R.string.wBut_watched)
-                mPostsNew?.visibility = View.VISIBLE
-                mImgNew?.visibility = View.VISIBLE
-                mPostsNew?.text = mContext.getString(R.string.NewCompPosts, w.newPosts)
-                mImgNew?.text = mContext.getString(R.string.NewCOMPImg, w.newImg)
-            } else {
-                mWatchBut?.setTextColor(Color.parseColor("#A52B23"))
-                // mWatchBut?.text = mContext.getString(R.string.wBut_watch)
-                mPostsNew?.visibility = View.GONE
-                mImgNew?.visibility = View.GONE
-            }
-        }
-    }
-
+    //for alternative view layout
+//    inner class CompactViewHolder(itemView: View) : ViewHolder(itemView) {
+//        init {
+//            mTitleView = itemView.findViewById(R.id.tx_comp_title)
+//            mSummaryView = null//itemView.findViewById(R.id.tx_comp_Summary)
+//            mAuthorView = itemView.findViewById(R.id.tx_comp_author)
+//            mImgView = itemView.findViewById(R.id.img_comp_url)
+//            mWatchBut = itemView.findViewById(R.id.tx_comp_watch)
+//            mPostsNew = itemView.findViewById(R.id.tx_comp_newPosts)
+//            mImgNew = itemView.findViewById(R.id.tx_comp_newImg)
+//            mNoView = itemView.findViewById(R.id.tx_comp_postID)
+//            mDate = itemView.findViewById(R.id.tx_comp_date)
+//
+//            setListener()
+//        }
+//
+//        override fun updateWatchState() {
+//            if (mMain.isWatched(mtg.url)) {
+//                val w: Watch = mMain.getWatch(mtg.url)
+//
+//                mWatchBut?.setTextColor(Color.parseColor("#FF37A523"))
+////                mWatchBut?.text = mContext.getString(R.string.wBut_watched)
+//                mPostsNew?.visibility = View.VISIBLE
+//                mImgNew?.visibility = View.VISIBLE
+//                mPostsNew?.text = mContext.getString(R.string.NewCompPosts, w.newPosts)
+//                mImgNew?.text = mContext.getString(R.string.NewCOMPImg, w.newImg)
+//            } else {
+//                mWatchBut?.setTextColor(Color.parseColor("#A52B23"))
+//                // mWatchBut?.text = mContext.getString(R.string.wBut_watch)
+//                mPostsNew?.visibility = View.GONE
+//                mImgNew?.visibility = View.GONE
+//            }
+//        }
+//    }
+    /**
+     * Viewholder item. made abstract to offer multiple layouts. currently only one used
+     */
     abstract inner class ViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
-        var mTitleView: TextView? = null
-        var mSummaryView: TextView? = null
-        var mAuthorView: TextView? = null
-        var mImgView: ImageView? = null
-        var mWatchBut: TextView? = null
-        var mPostsNew: TextView? = null
-        var mImgNew: TextView? = null
-        var mNoView: TextView? = null
-        var mDate: TextView? = null
-        val mMain: MainActivity = (mContext as MainActivity)
-        var mtg = TgThread()
+        private var mTitleView: TextView? = null
+        private var mSummaryView: TextView? = null
+        private var mAuthorView: TextView? = null
+        private var mImgView: ImageView? = null
+        private var mWatchBut: TextView? = null
+        private var mPostsNew: TextView? = null
+        private var mImgNew: TextView? = null
+        private var mNoView: TextView? = null
+        private var mDate: TextView? = null
+        private val mMain: MainActivity = (mContext as MainActivity)
+        private var mtg = TgThread()
 
         init {
             //object access
@@ -239,16 +246,17 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
             //event listeners
         }
 
-        fun setListener() {
+        private fun setListener() {
             val evThreadTitleClick = View.OnClickListener {
                 if (mtg.isThread)
-                    mMain.displaySingleThread(mtg.url, false)
+                    mMain.displayThread(mtg.url, false)
             }
             mTitleView?.setOnClickListener(evThreadTitleClick)
             mAuthorView?.setOnClickListener(evThreadTitleClick)
             mImgView?.setOnClickListener {
                 mMain.progressBar.visibility = View.VISIBLE
                 mMain.imageZoom.visibility = View.VISIBLE
+                mMain.tx_img_path.visibility = View.VISIBLE
                 val str = "https://questden.org" + mtg.imgUrl.replace("thumb", "src").replace("s.", ".")
 
                 Glide.with(mMain.imageZoom)
@@ -268,6 +276,8 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
                         }
                     })
                     .into(mMain.imageZoom)
+                mMain.tx_img_path.text = str
+
             }
             mWatchBut?.setOnClickListener {
                 if (mMain.isWatched(mtg.url)) {
@@ -286,18 +296,26 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
             }
             mSummaryView?.setOnClickListener {
                 if (mtg.isThread) mMain.setTextViewHTML(mSummaryView!!, mtg.summary)
-                else
-                    if (mMain.toolbar.visibility == View.GONE) {
-                        mMain.toolbar.visibility = View.VISIBLE
-                        mMain.linearLayout2.visibility= View.VISIBLE
+                else {
+                    if (it.tag == "clickableClick") {
+                        it.tag = ""
                     } else {
-                        mMain.toolbar.visibility = View.GONE
-                        mMain.linearLayout2.visibility= View.GONE
+                        if (mMain.toolbar.visibility == View.GONE) {
+                            mMain.toolbar.visibility = View.VISIBLE
+                            mMain.linearLayout2.visibility = View.VISIBLE
+                        } else {
+                            mMain.toolbar.visibility = View.GONE
+                            mMain.linearLayout2.visibility = View.GONE
+                        }
                     }
+                }
             }
             updateWatchState()
         }
 
+        /**
+         * adapts item to current watch-state (new posts, imgs, iswatched etc
+         */
         open fun updateWatchState() {
             if (mMain.isWatched(mtg.url)) {
                 val w: Watch = mMain.getWatch(mtg.url)
@@ -324,9 +342,16 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
         fun bind(tg: TgThread) {
             mtg = tg
 
-            mWatchBut?.visibility = if (!mtg.isThread) View.GONE else View.VISIBLE
-            mPostsNew?.visibility = if (!mtg.isThread) View.GONE else View.VISIBLE
-            mImgNew?.visibility = if (!mtg.isThread) View.GONE else View.VISIBLE
+            if(mtg.isThread){
+                mWatchBut?.visibility=View.VISIBLE
+                mPostsNew?.visibility=View.VISIBLE
+                mImgNew?.visibility =  View.VISIBLE
+                updateWatchState()
+            }else{
+                mWatchBut?.visibility=View.GONE
+                mPostsNew?.visibility=View.GONE
+                mImgNew?.visibility =  View.GONE
+            }
 
             mAuthorView?.visibility = if (mtg.author == "") View.GONE else View.VISIBLE
             mTitleView?.visibility = if (mtg.title == "") View.GONE else View.VISIBLE
@@ -334,19 +359,15 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) { //75% of phones
                 mTitleView?.text = Html.fromHtml(mtg.title, Html.FROM_HTML_MODE_COMPACT)
-                //mSummaryView?.text = Html.fromHtml(mtg.summary, Html.FROM_HTML_MODE_COMPACT)
 
-                if (mSummaryView != null && !mtg.isThread) mMain.setTextViewHTML(mSummaryView!!, mtg.summary)
-                if (mSummaryView != null && mtg.isThread) mSummaryView?.text = getHTMLtext(mtg.summary, 100)
+                if (!mtg.isThread) mMain.setTextViewHTML(mSummaryView!!, mtg.summary)
+                else mSummaryView?.text = getHTMLtext(mtg.summary, 100)
 
                 mAuthorView?.text = Html.fromHtml(mtg.author, Html.FROM_HTML_MODE_COMPACT)
             } else {
                 mTitleView?.text = mtg.title
                 mSummaryView?.text = mtg.summary
                 mAuthorView?.text = mtg.author
-            }
-            if (mtg.isThread) {
-                updateWatchState()
             }
 
             mDate?.text = tg.date
@@ -363,27 +384,25 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
                 Glide.with(mImgView)
                     .load("https://questden.org" + mtg.imgUrl)
                     .into(mImgView)
-
-                Log.d("img", mtg.imgUrl)
             }
         }
 
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return 0 // if(items[position].isThread) 1 else 0
-    }
+//    override fun getItemViewType(position: Int): Int {
+//        return 0 // if(items[position].isThread) 1 else 0
+//    }
 
     override fun getItemCount(): Int = items.size
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        if (viewType == 0) {
+//        if (viewType == 0) {
             val comView = inflater.inflate(R.layout.list_item, parent, false)
             return FullViewHolder(comView)
-        } else {
-            val comView = inflater.inflate(R.layout.list_item_compact, parent, false)
-            return CompactViewHolder(comView)
-        }
+//        } else {
+//            val comView = inflater.inflate(R.layout.list_item_compact, parent, false)
+//            return CompactViewHolder(comView)
+//        }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -456,7 +475,10 @@ class HTMLTagHandler(private var mContext: Context) : TagHandler {
                 curURL = attributes["href"].toString()
                 startURL = output.length
             } else {
-                output.setSpan(Clickabl(URLSpan(curURL), spoiled, Color.BLUE, mContext), startURL, output.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                var endp = output.substring(startURL).indexOf("</CLink>")
+                if (endp == -1) endp = output.length - startURL
+                output.setSpan(Clickabl(URLSpan(curURL), spoiled, Color.BLUE, mContext), startURL, endp + startURL, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                Log.d("setasClick", output.toString())
             }
         }
     }
@@ -476,6 +498,7 @@ class Clickabl(
     private var spoiled = false
     override fun onClick(view: View) {
         val rexTag = Regex(">>(\\d+)$")
+        view.tag = "clickableClick"
 
         if (span != null && rexTag.matches(span!!.url)) {
             val main = mContext as MainActivity
@@ -484,11 +507,20 @@ class Clickabl(
             if (main.chronic.size > 0 && main.chronic[main.chronic.lastIndex].prop != pos.toString())
                 main.chronic.add(Navis(NavOperation.LINK, pos.toString(), main.ingredients_list.layoutManager?.onSaveInstanceState()))
 
-            main.ingredients_list.smoothScrollToPosition(pos)
+            main.scrollHighlight(pos)
+//            main.ingredients_list.smoothScrollToPosition(pos)
             main.listAdapt.items.forEach { it.isHighlight = false }
             main.listAdapt.items[pos].isHighlight = true
             main.chronic.add(Navis(NavOperation.LINK, pos.toString(), main.ingredients_list.layoutManager?.onSaveInstanceState()))
             main.listAdapt.notifyDataSetChanged()
+
+//            if (main.toolbar.visibility == View.GONE) {
+//                main.toolbar.visibility = View.VISIBLE
+//                main.linearLayout2.visibility= View.VISIBLE
+//            } else {
+//                main.toolbar.visibility = View.GONE
+//                main.linearLayout2.visibility= View.GONE
+//            }
         }
         spoiled = !spoiled
         view.invalidate()
@@ -518,10 +550,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     var chronic = mutableListOf<Navis>()
 //    private var lastlastpos=0
 
-//    private val lastVisibleItemPosition: Int
-//        get() = (ingredients_list.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+    private val lastVisibleItemPosition: Int
+        get() = (ingredients_list.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
 
-//    private lateinit var scrollListener: RecyclerView.OnScrollListener
+    private lateinit var scrollListener: RecyclerView.OnScrollListener
 
     override fun onBackPressed() {
         if (chronic.size == 0) return
@@ -537,7 +569,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             NavOperation.PAGE -> {
                 if (nav.prop != "" && sets.curpage != nav.prop)
-                    requestPage(nav.prop)
+                    displayThread(nav.prop)
             }
             NavOperation.THREAD -> {
 //                if (nav.prop != "" && sets.curpage != nav.prop)
@@ -546,10 +578,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    //    private fun setRecyclerViewScrollListener() {
-//        scrollListener = object : RecyclerView.OnScrollListener() {
-//            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-//                super.onScrollStateChanged(recyclerView, newState)
+    private fun setRecyclerViewScrollListener() {
+        scrollListener = object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                updatePositionDisplay()
+
 //                var curPos=lastVisibleItemPosition//(ingredients_list.layoutManager as LinearLayoutManager).getPosition(ingredients_list)
 //                Log.d("asdasa", "$curPos-$lastlastpos")
 //                if(lastlastpos<curPos){
@@ -570,11 +604,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //                    listAdapt.notifyDataSetChanged()
 //                    setRecyclerViewScrollListener()
 //                }
-//            }
-//        }
-//        ingredients_list.addOnScrollListener(scrollListener)
-//    }
+            }
+        }
+        ingredients_list.addOnScrollListener(scrollListener)
+    }
+
+    /**
+     * scrolls to position, aligns top and sets isHighlight on thread-object
+     * also remove isHighlight on others.
+     * also adds chronic event (LINK) and updates position display
+     */
     fun scrollHighlight(pos: Int) {
+        if (listAdapt.items.size < pos || pos < 0) return
+
         (ingredients_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0) //actuall scroll to position
 
         listAdapt.items.forEach { it.isHighlight = false } //unmark highlighted
@@ -586,6 +628,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         //highlights changed
         listAdapt.notifyDataSetChanged()
 
+        updatePositionDisplay(pos)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -598,16 +641,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         ingredients_list.adapter = listAdapt
         progressBar.visibility = View.GONE
         imageZoom.visibility = View.GONE
+        tx_img_path.visibility = View.GONE
 
 //        listAdapt.submitList()
         //event handlers
         imageZoom.setOnClickListener {
             imageZoom.visibility = View.GONE
+            tx_img_path.visibility = View.GONE
         }
 
         //start doing things with data
         loadData()
-//        setRecyclerViewScrollListener()
+        setRecyclerViewScrollListener()
     }
 
     private fun convertToCustomTags(str: String?): String {
@@ -622,17 +667,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         ret = rexSpoil.replace(ret) {
             "<CSpoil>" + it.groupValues[1] + "</CSpoil>"
         }
-        val rexLinks = Regex("<a[^>]*href=\"(.*?)\"[^>]*>(.*?)</a>", RegexOption.DOT_MATCHES_ALL)
+        val rexLinks = Regex("<a[^>]*?href=\"(.*?)\"[^>]*?>(.*?)</a>", RegexOption.DOT_MATCHES_ALL)
         ret = rexLinks.replace(ret) {
-            "<CLink href='" + it.groupValues[2] + "'>" + it.groupValues[2] + "</CLink>"
+            "<span><CLink href='" + it.groupValues[2] + "'>" + it.groupValues[2] + "</CLink></span>"
         }
+        Log.d("CLink", ret)
         return ret
     }
 
     /**
      * sets up fromhtml to work on view if phone is higher version than N
      */
-    fun setTextViewHTML(text: TextView, html: String?) {
+    fun setTextViewHTML(text: TextView?, html: String?) {
+        if(text==null)return
         val imgGet = GlideImageGetter(text)
         val tagHandler = HTMLTagHandler(this)
 
@@ -664,52 +711,51 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         navigationView.itemIconTintList = null
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.menu_sorting, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+////        val inflater: MenuInflater = menuInflater
+////        inflater.inflate(R.menu.menu_sorting, menu)
+////        return super.onCreateOptionsMenu(menu)
+////    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.menu_sort_date -> {
-                listAdapt.items = listAdapt.items.sortedBy { it.url }
-            }
-            R.id.menu_sort_img -> {
-                listAdapt.items = listAdapt.items.sortedByDescending {
-                    if (isWatched(it.url)) {
-                        getWatch(it.url).newImg
-                    } else {
-                        0
-                    }
-                }
-            }
-            R.id.menu_sort_posts -> {
-                listAdapt.items = listAdapt.items.sortedByDescending {
-                    if (isWatched(it.url)) {
-                        getWatch(it.url).newPosts
-                    } else {
-                        0
-                    }
-                }
-            }
-            R.id.menu_sort_jump -> {
-                scrollHighlight(36)
-            }
-        }
-        listAdapt.notifyDataSetChanged()
-        return super.onOptionsItemSelected(item)
-    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        when (item.itemId) {
+//            R.id.menu_sort_date -> {
+//                listAdapt.items = listAdapt.items.sortedBy { it.url }
+//            }
+//            R.id.menu_sort_img -> {
+//                listAdapt.items = listAdapt.items.sortedByDescending {
+//                    if (isWatched(it.url)) {
+//                        getWatch(it.url).newImg
+//                    } else {
+//                        0
+//                    }
+//                }
+//            }
+//            R.id.menu_sort_posts -> {
+//                listAdapt.items = listAdapt.items.sortedByDescending {
+//                    if (isWatched(it.url)) {
+//                        getWatch(it.url).newPosts
+//                    } else {
+//                        0
+//                    }
+//                }
+//            }
+//            R.id.menu_sort_jump -> {
+//                scrollHighlight(36)
+//            }
+//        }
+//        listAdapt.notifyDataSetChanged()
+//        return super.onOptionsItemSelected(item)
+//    }
 
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
-            R.id.menu_draw -> requestPage(RequestValues.DRAW)
-            R.id.menu_general -> requestPage(RequestValues.MEEP)
-            R.id.menu_quest -> requestPage(RequestValues.QUEST)
-            R.id.menu_questdis -> requestPage(RequestValues.QUESTDIS)
-            R.id.menu_tg -> requestPage(RequestValues.TG)
-            R.id.menu_watch -> requestPage(RequestValues.WATCH)
-            R.id.menu_settings -> displaySingleThread(RequestValues.SETTING, false)
+            R.id.menu_draw -> displayThread(RequestValues.DRAW.url)
+            R.id.menu_general -> displayThread(RequestValues.MEEP.url)
+            R.id.menu_quest -> displayThread(RequestValues.QUEST.url)
+            R.id.menu_questdis -> displayThread(RequestValues.QUESTDIS.url)
+            R.id.menu_tg -> displayThread(RequestValues.TG.url)
+            R.id.menu_watch_open -> displayThread(RequestValues.WATCH.url)
         }
 
         drawer_layout.closeDrawer(GravityCompat.START)
@@ -717,18 +763,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun showWatches() {
-        sets.curpage = RequestValues.WATCH
+        sets.curpage = RequestValues.WATCH.url
 
         displayDataList = watchlist.map {
             it.thread.isThread = true
             it.thread
-        }.toList()
-        displayThreadList()
-
-        listAdapt.items = listAdapt.items.sortedWith(compareBy({ -getWatch(it.url).newImg }, { -getWatch(it.url).newPosts }))
-        listAdapt.notifyDataSetChanged()
+        }.sortedWith(compareBy({ -getWatch(it.url).newImg }, { -getWatch(it.url).newPosts })).toList()
+        displayThreadList(0)
+//        listAdapt.notifyDataSetChanged()
         //sort by new imgs
     }
+
+    /**
+     * Returns `true` if enum T contains an entry with the specified name.
+     */
+//    private inline fun <reified T : Enum<T>> enumContains(name: String): Boolean {
+//        return enumValues<T>().any { it.name == name }
+//    }
 
     /**
      * requests https://questden.org + relative url, expecting it to be a single thread
@@ -736,15 +787,31 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * calls displayThreadList() then to refresh recycleViewer
      * watchlist count update if watched
      * storedata to open again on start +watchlist save)
+     *
+     * complex method since none of these parts is repeated somewhere else.
      */
 
-    fun displaySingleThread(murl: String, onlyCheckWatch: Boolean) {
-        if (onlyCheckWatch && !isWatched(murl)) {
+    fun displayThread(murl: String, onlyCheckWatch: Boolean=false) {
+
+        if(!onlyCheckWatch)sets.curpage = murl
+
+        if (murl == RequestValues.WATCH.url) {
+            showWatches()
+            storeData()
             return
         }
 
+        val viewSingle = !enumValues<RequestValues>().any{it.url==murl}
+
+        if (onlyCheckWatch && !isWatched(murl)) {
+            return
+        }
         progressBar.visibility = View.VISIBLE
-        chronic.add(Navis(NavOperation.THREAD, murl))
+
+        if (viewSingle)
+            chronic.add(Navis(NavOperation.THREAD, murl))
+        else
+            chronic.add(Navis(NavOperation.PAGE, murl))
 
         val queue = Volley.newRequestQueue(this)
         val stringRequest = StringRequest(
@@ -754,82 +821,85 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //        CoroutineScope(Dispatchers.Main).launch {//GlobalScope.launch
 //            val doc = withContext(Dispatchers.IO) { Jsoup.connect("https://questden.org$murl").get() }
 //
-                if (onlyCheckWatch) {
-                    val rexLastPos = Regex(
-                        ".*class=\"reflink\".*?a href=\"(.*?(\\d+))\"",
-                        RegexOption.DOT_MATCHES_ALL
-                    )
-                    val curW: Watch = getWatch(murl)
-                    var newRespPart: String
+                if(viewSingle) {
+                    if (onlyCheckWatch) {
+                        val rexLastPos = Regex(
+                            ".*class=\"reflink\".*?a href=\"(.*?(\\d+))\"",
+                            RegexOption.DOT_MATCHES_ALL
+                        )
+                        val curW: Watch = getWatch(murl)
+                        var newRespPart: String
 
-                    if (curW.lastReadId != "" && response.indexOf(curW.lastReadId) > 0) {
-                        newRespPart = response.substring(response.indexOf(curW.lastReadId))
-                        newRespPart =
-                            newRespPart.substring(newRespPart.indexOf("<blockquote>")) //avoid img found in last post always new
+                        if (curW.lastReadId != "" && response.indexOf(curW.lastReadId) > 0) {
+                            newRespPart = response.substring(response.indexOf(curW.lastReadId))
+                            newRespPart =
+                                newRespPart.substring(newRespPart.indexOf("<blockquote>")) //avoid img found in last post always new
+                        } else {
+                            newRespPart = response
+                        }
+
+                        val newReadId = rexLastPos.find(response)?.groupValues?.get(2) ?: ""
+                        val newPosts = newRespPart.split("class=\"reflink\"").size - 1
+                        val newImgs = newRespPart.split("class=\"thumb\"").size - 1
+
+                        if (rexLastPos.containsMatchIn(response)) {
+                            val newW = Watch(TgThread("", "", murl), curW.lastReadId, newReadId, newPosts, newImgs)
+                            updateWatch(newW)
+                        }
                     } else {
-                        newRespPart = response
-                    }
-
-                    val newReadId = rexLastPos.find(response)?.groupValues?.get(2) ?: ""
-                    val newPosts = newRespPart.split("class=\"reflink\"").size - 1
-                    val newImgs = newRespPart.split("class=\"thumb\"").size - 1
-
-                    if (rexLastPos.containsMatchIn(response)) {
-                        val newW = Watch(TgThread("", "", murl), curW.lastReadId, newReadId, newPosts, newImgs)
-                        updateWatch(newW)
-                    }
-                } else {
-                    val doc = Jsoup.parse(response)
+                        val doc = Jsoup.parse(response)
 
 
-                    val res = doc.select("#delform,#delform>table").map {
-                        val tg = TgThread()
-                        var lis = it.select("span.filetitle")
-                        if (lis.isNotEmpty()) tg.title = lis.first().text()
-                        lis = it.select("span.postername")
-                        if (lis.isNotEmpty()) tg.author = lis.first().text()
-                        lis = it.select("img.thumb")
-                        if (lis.isNotEmpty()) tg.imgUrl = lis.first().attr("src")
-                        if (tg.imgUrl.contains("spoiler.png")) {
-                            val indfirstCh = tg.imgUrl.indexOf("firstChild.src='")
-                            if (indfirstCh == -1) {
-                                tg.imgUrl = ""
-                            } else {
-                                tg.imgUrl = lis.first().attr("onmouseover")
-                                Log.d("oor", "${tg.imgUrl} _ ${tg.imgUrl.indexOf("firstChild.src='") + 16}_${tg.imgUrl.length - 1}")
-                                tg.imgUrl = tg.imgUrl.substring(tg.imgUrl.indexOf("firstChild.src='") + 16, tg.imgUrl.length - 1)
+                        val res = doc.select("#delform,#delform>table").map {
+                            val tg = TgThread()
+                            var lis = it.select("span.filetitle")
+                            if (lis.isNotEmpty()) tg.title = lis.first().text()
+                            lis = it.select("span.postername")
+                            if (lis.isNotEmpty()) tg.author = lis.first().text()
+                            lis = it.select("img.thumb")
+                            if (lis.isNotEmpty()) tg.imgUrl = lis.first().attr("src")
+                            if (tg.imgUrl.contains("spoiler.png")) {
+                                val indfirstCh = tg.imgUrl.indexOf("firstChild.src='")
+                                if (indfirstCh == -1) {
+                                    tg.imgUrl = ""
+                                } else {
+                                    tg.imgUrl = lis.first().attr("onmouseover")
+                                    Log.d("oor", "${tg.imgUrl} _ ${tg.imgUrl.indexOf("firstChild.src='") + 16}_${tg.imgUrl.length - 1}")
+                                    tg.imgUrl = tg.imgUrl.substring(tg.imgUrl.indexOf("firstChild.src='") + 16, tg.imgUrl.length - 1)
+                                }
                             }
+                            lis = it.select("div.postwidth label")
+                            if (lis.isNotEmpty()) {
+                                tg.date = lis.first().html()
+                                tg.date = tg.date.substring(tg.date.lastIndexOf("</span>") + 10)//-year
+                            }
+
+
+                            lis = it.select("span.reflink a")
+                            if (lis.isNotEmpty()) tg.url = lis.first().attr("href") //postID missing
+                            tg.postID = tg.url.substring(tg.url.indexOf("#") + 1)
+
+                            lis = it.select("blockquote")
+                            if (lis.isNotEmpty()) tg.summary = lis.first().html()
+                            tg.isThread = false
+
+                            tg
                         }
-                        lis = it.select("div.postwidth label")
-                        if (lis.isNotEmpty()) {
-                            tg.date = lis.first().html()
-                            tg.date = tg.date.substring(tg.date.lastIndexOf("</span>") + 10)//-year
+                        displayDataList = res.toList()
+                        displayThreadList(0)
+
+                        if (isWatched(murl)) {
+                            val w: Watch = getWatch(murl) //copy returned? then w.(...)=... will not do anything
+                            val scrollpos = listAdapt.items.indexOfFirst { it.postID == w.lastReadId }
+                            scrollHighlight(scrollpos)
+                            w.lastReadId = w.newestId
+                            w.newImg = 0
+                            w.newPosts = 0
                         }
-
-
-                        lis = it.select("span.reflink a")
-                        if (lis.isNotEmpty()) tg.url = lis.first().attr("href") //postID missing
-                        tg.postID = tg.url.substring(tg.url.indexOf("#") + 1)
-
-                        lis = it.select("blockquote")
-                        if (lis.isNotEmpty()) tg.summary = lis.first().html()
-                        tg.isThread = false
-
-                        tg
                     }
-                    displayDataList = res.toList()
-                    displayThreadList()
-
-                    if (isWatched(murl)) {
-                        val w: Watch = getWatch(murl) //copy returned? then w.(...)=... will not do anything
-                        val scrollpos = listAdapt.items.indexOfFirst { it.postID == w.lastReadId }
-                        scrollHighlight(scrollpos)
-                        w.lastReadId = w.newestId
-                        w.newImg = 0
-                        w.newPosts = 0
-                    }
+                }else{
+                    parseHTMLThread(response)
                 }
-
                 storeData()
                 progressBar.visibility = View.GONE
             },
@@ -896,32 +966,32 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //        queue.add(stringRequest)
     }
 
-    private fun requestPage(url: String) {
-        sets.curpage = url
-        chronic.add(Navis(NavOperation.PAGE, url))
-
-        if (url == RequestValues.WATCH) {
-            showWatches()
-            return
-        }
-
-        progressBar.visibility = View.VISIBLE
-        val queue = Volley.newRequestQueue(this)
-
-        val stringRequest = StringRequest(Request.Method.GET, url,
-            Response.Listener<String> { response ->
-                parseHTMLThread(response)
-                storeData()
-                progressBar.visibility = View.GONE
-            },
-            Response.ErrorListener {
-                listAdapt.items = listOf(TgThread("There was an error loading quests"))
-                listAdapt.notifyDataSetChanged()
-                progressBar.visibility = View.GONE
-            }
-        )
-        queue.add(stringRequest)
-    }
+//    private fun requestPage(url: String) {
+//        sets.curpage = url
+//        chronic.add(Navis(NavOperation.PAGE, url))
+//
+//        if (url == RequestValues.WATCH.url) {
+//            showWatches()
+//            return
+//        }
+//
+//        progressBar.visibility = View.VISIBLE
+//        val queue = Volley.newRequestQueue(this)
+//
+//        val stringRequest = StringRequest(Request.Method.GET, url,
+//            Response.Listener<String> { response ->
+//                parseHTMLThread(response)
+//                storeData()
+//                progressBar.visibility = View.GONE
+//            },
+//            Response.ErrorListener {
+//                listAdapt.items = listOf(TgThread("There was an error loading quests"))
+//                listAdapt.notifyDataSetChanged()
+//                progressBar.visibility = View.GONE
+//            }
+//        )
+//        queue.add(stringRequest)
+//    }
 
     private fun storeData() {
         val sharedPref = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE)
@@ -954,9 +1024,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         if (firstStart) {
-            requestPage(RequestValues.QUEST)
+            displayThread(RequestValues.QUEST.url)
         } else {
-            displayThreadList()
+            displayThreadList(0)
         }
     }
 
@@ -966,7 +1036,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun addToWatch(tg: TgThread) {
         if (isWatched(tg.url)) return
         watchlist.add(Watch(tg))
-        displaySingleThread(watchlist.last().thread.url, true)
+        displayThread(watchlist.last().thread.url, true)
         storeData()
     }
 
@@ -982,9 +1052,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * get watch object (copy) by url
      */
     fun getWatch(url: String): Watch {
-        val ret = watchlist.firstOrNull { it.thread.url == url }
-        if (ret == null) return Watch()
-        return ret
+        return watchlist.firstOrNull { it.thread.url == url } ?: return Watch()
     }
 
     /**
@@ -1002,6 +1070,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         oldw.newestId = w.newestId
         listAdapt.notifyDataSetChanged()
         storeData()
+    }
+
+    fun updatePositionDisplay(position: Int = -1) {
+        var pos = position + 1
+        if (position == -1) pos = lastVisibleItemPosition//(ingredients_list.layoutManager as LinearLayoutManager).getPosition(ingredients_list)
+        val totcnt = listAdapt.items.filter { it.imgUrl != "" }.size
+        val curcnt = listAdapt.items.take(pos).filter { it.imgUrl != "" }.size
+        tx_position.text = getString(R.string.CurPos,curcnt,totcnt)
     }
 
 //    private fun updateThreadInfo(url: String) {
@@ -1050,21 +1126,52 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun updateWatchlist() {
         for (w in watchlist) {
-            displaySingleThread(w.thread.url, true)
+            displayThread(w.thread.url, true)
         }
     }
 
-    /**
+    /*
      * button click event handler
      * view is needed even not used, otherwise crash
      * updates current page list and all watched thread numbers
      */
-    fun btnUpdateButton(view: View) {
-        updateWatchlist()
-        requestPage(sets.curpage)
+
+    /**
+     * path text of fullview-image. Opens image link in browser
+     */
+    fun btnimgZoomPath(view: View) {
+        val openURL = Intent(Intent.ACTION_VIEW)
+
+        val targeturl = (view as TextView).text
+        openURL.data = Uri.parse(targeturl.toString())
+        startActivity(openURL)
+
         view.animate()//for sake of using view, so git would ignore the warning
     }
 
+    /**
+     * update button, refreshes page, fetches updates when on watchlist
+     */
+    fun btnUpdateButton(view: View) {
+        if (sets.curpage == RequestValues.WATCH.url) updateWatchlist()
+        else displayThread(sets.curpage)
+        view.animate()//for sake of using view, so git would ignore the warning
+    }
+
+    /**
+     * picture btn click
+     * toggles showing all vs only posts with pictures
+     */
+    fun btnToggleOnlyPictures(view: View){
+        sets.showOnlyPics=!sets.showOnlyPics
+        displayThreadList()
+        view.animate()//for sake of using view, so git would ignore the warning
+    }
+
+    /**
+     * next image button
+     * jumps and highlight to target
+     */
     fun btnNextButton(view: View) {
         var pos = (ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         pos += 1 + listAdapt.items.takeLast(listAdapt.items.size - pos - 1).indexOfFirst { it.imgUrl != "" }
@@ -1073,6 +1180,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         view.animate()//for sake of using view, so git would ignore the warning
     }
 
+    /**
+     * previous image button
+     */
     fun btnPrevButton(view: View) {
         var pos = (ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         pos = listAdapt.items.take(pos).indexOfLast { it.imgUrl != "" }
@@ -1081,6 +1191,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         view.animate()//for sake of using view, so git would ignore the warning
     }
 
+    /**
+     * first image button
+     */
     fun btnFirstButton(view: View) {
         //var pos=(ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         val pos = listAdapt.items.indexOfFirst { it.imgUrl != "" }
@@ -1088,6 +1201,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         view.animate()//for sake of using view, so git would ignore the warning
     }
 
+    /**
+     * last image button
+     */
     fun btnLastButton(view: View) {
         //var pos=(ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         val pos = listAdapt.items.indexOfLast { it.imgUrl != "" }
@@ -1130,13 +1246,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 th
             }.filter { el -> el.url != "" }
         displayDataList = titles.toList()
-        displayThreadList()
+        displayThreadList(0)
     }
 
-    private fun displayThreadList() {
-        listAdapt.items = displayDataList//.take(10)
+    private fun displayThreadList(pos:Int=-1) {
+        if(sets.showOnlyPics)
+            listAdapt.items = displayDataList.filter{it.imgUrl!=""}
+        else
+            listAdapt.items = displayDataList//.take(10)
         listAdapt.notifyDataSetChanged()
-        (ingredients_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
+        if(pos>=0) {
+            (ingredients_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
+            updatePositionDisplay(pos)
+        }
     }
 
 }

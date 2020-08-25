@@ -36,7 +36,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:menu="@menu/menu_sorting"
             app:navigationIcon="@android:drawable/ic_search_category_default"
             app:title="@string/app_name" />
 
@@ -91,6 +90,21 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <Button
+                android:id="@+id/button2"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:onClick="btnToggleOnlyPictures"
+                android:text="🖼" />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <Button
                 android:id="@+id/button4"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
@@ -109,6 +123,12 @@
                 android:minHeight="0dp"
                 android:onClick="btnPrevButton"
                 android:text="@string/Bot_Nav_prev" />
+
+            <TextView
+                android:id="@+id/tx_position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1/100" />
 
             <Button
                 android:id="@+id/btn_next"
@@ -130,17 +150,32 @@
                 android:onClick="btnLastButton"
                 android:text="@string/Bot_Nav_Last" />
 
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
             <Button
-                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/btn_update"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:onClick="btnUpdateButton"
-                android:text="@string/btn_update" />
+                android:text="🔄" />
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/tx_img_path"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#8DC64B"
+            android:onClick="btnimgZoomPath"
+            android:text="TextView"
+            app:layout_constraintBottom_toTopOf="@+id/imageZoom"
+            app:layout_constraintStart_toStartOf="parent" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

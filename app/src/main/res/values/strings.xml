@@ -20,8 +20,8 @@
     <string name="nav_pages_questdis">Questdis</string>
     <string name="nav_pages_tg">Tg</string>
     <string name="nav_special_title">Reader</string>
-    <string name="nav_special_watch">Watched</string>
-    <string name="nav_special_settings">Settings</string>
+    <string name="nav_watchlist_open">Watch List</string>
+    <string name="nav_reader_settings">Settings</string>
     <string name="list_placeholder_newImgCnt">New Img: 0</string>
     <string name="list_placeholder_watch">Watch</string>
     <string name="list_placeholder_NewPostsCnt">New Posts: 0</string>
@@ -43,4 +43,8 @@
     <string name="Bot_Nav_prev"><![CDATA[<]]></string>
     <string name="Bot_Nav_next"><![CDATA[>]]></string>
     <string name="Bot_Nav_Last"><![CDATA[>>]]></string>
+    <string name="nav_watchlist">Watch List</string>
+    <string name="nav_watchlist_update">Update</string>
+    <string name="menu_reader_sync">Sync with BLICK</string>
+    <string name="CurPos">%d/%d</string>
 </resources>
