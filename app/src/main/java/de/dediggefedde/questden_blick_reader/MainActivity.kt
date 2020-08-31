@@ -1045,7 +1045,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     /**
      * set watch object (copy) by url
      */
-    private fun setWatch(w:Watch) {
+    fun setWatch(w:Watch) {
         val ind=watchlist.indexOfFirst{it.thread.url == w.thread.url }
         if(ind==-1)return
         watchlist[ind]=w
