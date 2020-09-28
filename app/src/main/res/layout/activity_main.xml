@@ -39,25 +39,12 @@
             app:navigationIcon="@android:drawable/ic_search_category_default"
             app:title="@string/app_name" />
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:max="100"
-            android:progress="0050"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="gone" />
-
         <ImageView
             android:id="@+id/imageZoom"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:contentDescription="@string/img_zoom_desc"
-            android:src="@drawable/ic_questden"
+            app:srcCompat="@drawable/ic_questden"
             app:layout_constraintBottom_toTopOf="@+id/guideline3"
             app:layout_constraintEnd_toEndOf="@+id/ingredients_list"
             app:layout_constraintHorizontal_bias="0.0"
@@ -78,6 +65,18 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.9" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="50"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/bottom_navigation"
@@ -191,7 +190,7 @@
         <LinearLayout
             android:id="@+id/tool_dropout"
             android:layout_width="0dp"
-            android:layout_height="70dp"
+            android:layout_height="wrap_content"
             android:gravity="start"
             android:orientation="horizontal"
             android:visibility="gone"
@@ -199,21 +198,24 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <Button
+
+            <ImageButton
                 android:id="@+id/btn_only_pics"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
+                android:scaleType="fitCenter"
                 android:onClick="btnToggleOnlyPictures"
-                android:text="🖼" />
+                app:srcCompat="@drawable/ic_inclnonimg" />
+
 
             <Button
                 android:id="@+id/btn_incFont"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:onClick="btnIncFont"
@@ -223,7 +225,7 @@
                 android:id="@+id/btn_decFont"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:onClick="btnDecFont"
@@ -233,7 +235,7 @@
                 android:id="@+id/btn_toggleSFW"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:onClick="btnTglSFW"
@@ -253,6 +255,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/drawer_menu" />
+        app:menu="@menu/drawer_menu"
+        tools:visibility="gone" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
