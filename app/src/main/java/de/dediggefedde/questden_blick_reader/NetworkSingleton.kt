@@ -73,6 +73,7 @@ class ThreadRequest(
             } else {
                 var resp = String(response.data, Charset.forName(HttpHeaderParser.parseCharset(response.headers)))
 
+                Log.d("check", "$viewSingle, $lastReadId")
                 if (viewSingle) { //single requests
                     if (lastReadId != null) { //check for new posts/images
                         //with lastreadid returns list of new entries with first cut off tag <td> of last read element

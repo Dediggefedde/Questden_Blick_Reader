@@ -327,12 +327,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val tr = ThreadRequest("https://questden.org$murl", viewSingle, if (onlyCheckWatch) curW.lastReadId else null, null, Response.Listener { response ->
             reqDone += 1
             if (onlyCheckWatch) {
+                Log.d("newposts",response.size.toString())
                 val newPosts = response.filter { it.postID != "" }.size
                 val newImgs = response.filter { it.imgUrl != "" }.size
-                val newestId = response.last().postID
-
-                val newW = Watch(curW.thread, curW.lastReadId, newestId, newPosts, newImgs)
-                updateWatch(newW)
+                if(newPosts>0) {
+                    val newestId = response.last().postID
+                    val newW = Watch(curW.thread, curW.lastReadId, newestId, newPosts, newImgs)
+                    updateWatch(newW)
+                }
             } else {
                 sets.curSingle = viewSingle
                 displayDataList = response
@@ -504,8 +506,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun updatePositionDisplay(position: Int = -1) {
         var pos = position + 1
         if (sets.curSingle && listAdapt.items.size > pos) {
+
                 if (position == -1) pos =
                 1 + (ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()//(ingredients_list.layoutManager as LinearLayoutManager).getPosition(ingredients_list)
+            if(listAdapt.items.size<pos)pos=0
             totcnt = listAdapt.items.filter { it.imgUrl != "" }.size
             curcnt = listAdapt.items.take(pos).filter { it.imgUrl != "" }.size
 
@@ -557,7 +561,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         progressBar.max = 100
         progressBar.progress = 0
         for (w in watchlist) {
-            displayThread(w.thread.url, false, true)
+            displayThread(w.thread.url, true, true)
         }
     }
 
