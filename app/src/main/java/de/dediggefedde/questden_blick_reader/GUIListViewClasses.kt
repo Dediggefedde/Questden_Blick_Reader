@@ -83,7 +83,7 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
         private fun setListener() {
             val evThreadTitleClick = View.OnClickListener {
                 if (mtg.isThread)
-                    mMain.displayThread(mtg.url, true,false)
+                    mMain.displayThread(mtg.url, viewSingle = true,onlyCheckWatch = false)
             }
             mTitleView?.setOnClickListener(evThreadTitleClick)
             mAuthorView?.setOnClickListener(evThreadTitleClick)
@@ -153,7 +153,7 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
          * Jsoup parse HTML code.
          * @param trimLength for trimming content after parsing
          */
-        fun getHTMLtext(str: String, trimLength: Int): String {
+        private fun getHTMLtext(str: String, trimLength: Int=100): String {
             val doc = Jsoup.parse(str)
             val tex = doc.text()
             return if (tex.length > trimLength) tex.substring(0, trimLength) else tex
@@ -211,7 +211,7 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
                 mTitleView?.text = Html.fromHtml(mtg.title, Html.FROM_HTML_MODE_COMPACT)
 
                 if (!mtg.isThread) mMain.setTextViewHTML(mSummaryView!!, mtg.summary)
-                else mSummaryView?.text = getHTMLtext(mtg.summary, 100)
+                else mSummaryView?.text = getHTMLtext(mtg.summary)
 
                 mAuthorView?.text = Html.fromHtml(mtg.author, Html.FROM_HTML_MODE_COMPACT)
             } else {

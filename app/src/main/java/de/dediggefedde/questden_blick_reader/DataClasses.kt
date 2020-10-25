@@ -59,11 +59,10 @@ data class TgThread(
  */
 data class Watch(
     var thread: TgThread = TgThread(),
-    var lastReadId: String = "",
     var newestId: String = "",
     var newPosts: Int = 0,
     var newImg: Int = 0,
-    var curReadId: String = ""
+    var lastReadId: String = ""
 )
 
 /**
@@ -73,13 +72,15 @@ data class Watch(
  */
 data class Settings(
     var curpage: String = RequestValues.QUEST.url,
+    var curThreadId:String="",
     var showOnlyPics: Boolean = false,
     var curSingle: Boolean = false,
     var boardPage:Int=0,
     var sfw: SFWModes = SFWModes.SFW_QUESTION,
     var txsize: Float = 16f,
     var user: String = "",
-    var pw: String = ""
+    var pw: String = "",
+    val lastReadIDs: MutableMap<String,String> = mutableMapOf() //thread ids → last read pos
 )
 
 /**

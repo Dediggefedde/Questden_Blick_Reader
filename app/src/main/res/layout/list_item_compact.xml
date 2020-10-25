@@ -43,8 +43,7 @@
         android:layout_marginBottom="5dp"
         android:contentDescription="@string/slist_img_descr"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/barrier2_comp
-"
+        app:layout_constraintEnd_toStartOf="@+id/barrier2_comp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
@@ -66,7 +65,7 @@
         android:id="@+id/tx_comp_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="20/08/21 17:05"
+        android:text="@string/example_date"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tx_comp_postID" />
 

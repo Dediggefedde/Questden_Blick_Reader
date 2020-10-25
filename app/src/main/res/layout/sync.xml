@@ -40,7 +40,7 @@
                 android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Name" />
+                android:text="@string/SyncName" />
 
             <EditText
                 android:id="@+id/editTextTextPersonName"
@@ -48,26 +48,30 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="textPersonName"
-                android:text="Name" />
+                android:text="@string/SyncName"
+                android:autofillHints=""
+                tools:ignore="LabelFor" />
 
             <TextView
                 android:id="@+id/textView3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Password" />
+                android:text="@string/SyncPW" />
 
             <EditText
                 android:id="@+id/editTextTextPassword"
                 android:layout_width="wrap_content"
                 android:layout_height="45dp"
                 android:ems="10"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:autofillHints=""
+                tools:ignore="LabelFor" />
 
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="status" />
+                android:text="@string/SyncStatus" />
 
             <Space
                 android:layout_width="match_parent"
@@ -77,8 +81,8 @@
                 android:id="@+id/button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="btn_click"
-                android:text="Login" />
+                android:onClick="btnClick"
+                android:text="@string/SyncLogin" />
 
             <Space
                 android:layout_width="match_parent"
@@ -88,14 +92,14 @@
                 android:id="@+id/button3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="btn_download"
-                android:text="download" />
+                android:onClick="btnDownload"
+                android:text="@string/SyncDownload" />
 
             <Button
                 android:id="@+id/button5"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Upload" />
+                android:text="@string/SyncUpload" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,11 +2,9 @@ package de.dediggefedde.questden_blick_reader
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.BasicNetwork
@@ -16,18 +14,16 @@ import com.android.volley.toolbox.StringRequest
 import kotlinx.android.synthetic.main.sync.*
 import java.net.CookieHandler
 import java.net.CookieManager
-import java.net.CookiePolicy
-import java.net.CookieStore
 
 
 class SyncActivity : AppCompatActivity() {
-    var user = ""
-    var pw = ""
-    var loggedIn=false
-    var watchResp=""
-    lateinit var cache:DiskBasedCache
-    lateinit var network:BasicNetwork
-    lateinit var requestQueue:RequestQueue
+    private var user = ""
+    private var pw = ""
+    private var loggedIn=false
+    private var watchResp=""
+    private lateinit var cache:DiskBasedCache
+    private lateinit var network:BasicNetwork
+    private lateinit var requestQueue:RequestQueue
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,18 +75,19 @@ class SyncActivity : AppCompatActivity() {
         finish()
     }
 
-    fun btn_download(view: View) {
+    fun btnDownload(view: View) {
         if(!loggedIn) {
-            textView.text = "Not logged in."
+            textView.text = getString(R.string.NotLoggedIn)
             return
         }
+        view.animate() //button click handler crashes without view in parameters. kotlin warns if parameter view not used.
 
         val params2 = HashMap<String, String>()
         params2["blobmode"] = "1" //0: layout userscript, 1: watchbar userscript
         params2["readacc"] = "''" //"readacc" and "writeacc"
         params2["blob"] = ""
 
-        postreq("https://phi.pf-control.de/tgchan/interface.php?settings",params2, Response.Listener<String> { response ->
+        postreq("https://phi.pf-control.de/tgchan/interface.php?settings",params2, Response.Listener { response ->
             textView.text=response
             val lis=response.split(7.toChar()) //("itemoptions","externlistspeicher","lastviews","watchids","version");//
             // watchids = new watchbar, char(11) split each thread
@@ -99,15 +96,17 @@ class SyncActivity : AppCompatActivity() {
         })
     }
 
-    fun btn_click(view: View) {
+    fun btnClick(view: View) {
         user = editTextTextPersonName.text.toString()
         pw = editTextTextPassword.text.toString()
+
+        view.animate()
 
         if (user == "") return
         login(user, pw)//async
     }
 
-    fun login(name: String, pw: String) {
+    private fun login(name: String, pw: String) {
         loggedIn = false
         val params2 = HashMap<String, String>()
         params2["uname"] = name
@@ -116,25 +115,25 @@ class SyncActivity : AppCompatActivity() {
 
         postreq("https://phi.pf-control.de/tgchan/interface.php?login",
             params2,
-            Response.Listener<String> { response ->
+            Response.Listener { response ->
                 when (response) {
                     "n:1" -> {
-                        textView.text = "Logged in!"
+                        textView.text = getString(R.string.LoggedIn)
                         loggedIn = true
                     }
-                    "n:2" -> textView.text = "Account not verified!"
-                    "n:0" -> textView.text = "Login-Error."
+                    "n:2" -> textView.text = getString(R.string.NotVerified)
+                    "n:0" -> textView.text = getString(R.string.LoginError)
                 }
             }
         )
     }
-    fun postreq(url: String, param: HashMap<String, String>, callback: Response.Listener<String>) {
+    private fun postreq(url: String, param: HashMap<String, String>, callback: Response.Listener<String>) {
 //        val queue = Volley.newRequestQueue (this)
         val stringRequest = object : StringRequest(
-            Request.Method.POST, url,
+            Method.POST, url,
             callback,
             Response.ErrorListener {
-                textView.text = "Error Reaching Server...\n${url}\n${param.map{(a,b)->"$a=$b"}.joinToString { "&" }}"
+                textView.text = getString(R.string.ErrorReachingServer,url,param.map{ (a,b)->"$a=$b"}.joinToString { "&" })
             }) {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()

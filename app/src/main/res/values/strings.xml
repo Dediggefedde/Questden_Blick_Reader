@@ -69,4 +69,22 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="NotLoggedIn">Not logged in.</string>
+    <string name="LoggedIn">Logged in!</string>
+    <string name="NotVerified">Account not verified!</string>
+    <string name="LoginError">Login-Error.</string>
+    <string name="ErrorReachingServer">Error Reaching Server...\n%s\n%s</string>
+    <string name="SyncName">Name</string>
+    <string name="SyncPW">Password</string>
+    <string name="SyncStatus">status</string>
+    <string name="SyncLogin">Login</string>
+    <string name="SyncDownload">download</string>
+    <string name="SyncUpload">Upload</string>
+    <string name="symb_OpenTools">👓</string>
+    <string name="main_position">1/100</string>
+    <string name="symb_Update">🔄</string>
+    <string name="main_btnOnlyPics_descr">Show Only Pictures</string>
+    <string name="symb_decFont">A-</string>
+    <string name="example_date">20/08/21 17:05</string>
+    <string name="example_text">asd asd asd asd asda dassadas asa dsadsa daas さよなら 私の手元にdasd asd\nasd 1li</string>
 </resources>

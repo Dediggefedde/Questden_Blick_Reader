@@ -96,7 +96,7 @@
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:onClick="btnOpenTools"
-                android:text="👓" />
+                android:text="@string/symb_OpenTools" />
 
             <Space
                 android:layout_width="wrap_content"
@@ -127,7 +127,7 @@
                 android:id="@+id/tx_position"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1/100" />
+                android:text="@string/main_position" />
 
             <Button
                 android:id="@+id/btn_next"
@@ -162,7 +162,7 @@
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:onClick="btnUpdateButton"
-                android:text="🔄" />
+                android:text="@string/symb_Update" />
 
         </LinearLayout>
 
@@ -172,7 +172,7 @@
             android:layout_height="0dp"
             android:background="#8DC64B"
             android:onClick="btnimgZoomPath"
-            android:text="TextView"
+            android:text=""
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -208,7 +208,8 @@
                 android:minHeight="0dp"
                 android:scaleType="fitCenter"
                 android:onClick="btnToggleOnlyPictures"
-                app:srcCompat="@drawable/ic_inclnonimg" />
+                app:srcCompat="@drawable/ic_inclnonimg"
+                android:contentDescription="@string/main_btnOnlyPics_descr" />
 
 
             <Button
@@ -229,7 +230,7 @@
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:onClick="btnDecFont"
-                android:text="A-" />
+                android:text="@string/symb_decFont" />
 
             <Button
                 android:id="@+id/btn_toggleSFW"
@@ -239,7 +240,7 @@
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:onClick="btnTglSFW"
-                android:text="SFW?" />
+                android:text="@string/SFWQuestion" />
 
         </LinearLayout>
 

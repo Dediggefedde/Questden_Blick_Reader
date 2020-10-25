@@ -54,7 +54,7 @@ fun parseJSoupToTgThread(it: Element): TgThread {
 }
 
 class ThreadRequest(
-    url: String, val viewSingle: Boolean, val lastReadId: String?,
+    url: String, private val viewSingle: Boolean, private val lastReadId: String?,
     private val headers: MutableMap<String, String>?,
     private val listener: Response.Listener<List<TgThread>>,
     errorListener: Response.ErrorListener
@@ -67,7 +67,7 @@ class ThreadRequest(
 
     override fun parseNetworkResponse(response: NetworkResponse?): Response<List<TgThread>> {
         return try {
-            var li = listOf<TgThread>()
+            var li: List<TgThread>
             if (response == null) {
                 Response.error<List<TgThread>>(VolleyError("Response empty"))
             } else {
@@ -77,7 +77,7 @@ class ThreadRequest(
                 if (viewSingle) { //single requests
                     if (lastReadId != null) { //check for new posts/images
                         //with lastreadid returns list of new entries with first cut off tag <td> of last read element
-                        var str = """id="reply$lastReadId"""
+                        val str = """id="reply$lastReadId"""
                         val ind = resp.indexOf(str)
                         if (ind > 0) resp = resp.substring(ind)
                         val doc = Jsoup.parse(resp)
@@ -144,8 +144,8 @@ class ThreadRequest(
 
 
 class MySingleton constructor(context: Context) {
-    lateinit var cache: DiskBasedCache
-    lateinit var network: BasicNetwork
+    private lateinit var cache: DiskBasedCache
+    private lateinit var network: BasicNetwork
 
     companion object {
         @Volatile
@@ -158,7 +158,7 @@ class MySingleton constructor(context: Context) {
             }
     }
 
-    val requestQueue: RequestQueue by lazy {
+    private val requestQueue: RequestQueue by lazy {
         // applicationContext is key, it keeps you from leaking the
         // Activity or BroadcastReceiver if someone passes one in.
         val manager = CookieManager()
