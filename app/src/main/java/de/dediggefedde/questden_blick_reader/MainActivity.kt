@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         //highlights changed
         listAdapt.notifyDataSetChanged()
 
-        updatePositionDisplay(pos)
+        updatePositionDisplay()
     }
 
     override fun onStop() {
@@ -339,9 +339,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             } else {
                 sets.curSingle = viewSingle
                 displayDataList = response
-                displayThreadList()
                 if(viewSingle)
                     sets.curThreadId= Regex("""(\d+).html""").find(murl)?.groupValues?.get(1)?:""
+                else
+                    sets.curThreadId=""
+                Log.d("lastread","set curthread of ${murl} to ${sets.curThreadId}")
+
+                displayThreadList()
 
                 if (isWatched(murl)) {
                     val w: Watch = getWatch(murl) //copy returned? then w.(...)=... will not do anything
@@ -506,9 +510,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     /**
      * updates scroll position display at bottom
      */
-    fun updatePositionDisplay(position: Int = -1) {
+    fun updatePositionDisplay(position: Int = -1) { //TODO does not update when navigating threads, maybe also not update curread
         var pos = position + 1
         if (sets.curSingle && listAdapt.items.size > pos) {
+            Log.d("lastread","Update single  ${sets.curSingle}, ${listAdapt.items.size}, $pos")
 
             if (position == -1){
                 pos =1 + (ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
@@ -526,6 +531,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 Log.d("lastread","Update lastread to ${listAdapt.items[pos].postID}")
             }
         }else if(!sets.curSingle){
+            Log.d("lastread","Update single  ${sets.curSingle}")
             totcnt=0
             curcnt=sets.boardPage
         }
