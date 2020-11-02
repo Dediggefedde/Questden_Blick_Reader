@@ -56,20 +56,20 @@ fun parseJSoupToTgThread(it: Element): TgThread {
 class ThreadRequest(
     url: String, private val viewSingle: Boolean, private val lastReadId: String?,
     private val headers: MutableMap<String, String>?,
-    private val listener: Response.Listener<List<TgThread>>,
+    private val listener: Response.Listener<MutableList<TgThread>>,
     errorListener: Response.ErrorListener
-) : Request<List<TgThread>>(Method.GET, url, errorListener) {
+) : Request<MutableList<TgThread>>(Method.GET, url, errorListener) {
 
     override fun getHeaders(): MutableMap<String, String> = headers ?: super.getHeaders()
 
-    override fun deliverResponse(response: List<TgThread>?) = listener.onResponse(response)
+    override fun deliverResponse(response: MutableList<TgThread>?) = listener.onResponse(response)
 
 
-    override fun parseNetworkResponse(response: NetworkResponse?): Response<List<TgThread>> {
+    override fun parseNetworkResponse(response: NetworkResponse?): Response<MutableList<TgThread>> {
         return try {
-            var li: List<TgThread>
+            var li: MutableList<TgThread>
             if (response == null) {
-                Response.error<List<TgThread>>(VolleyError("Response empty"))
+                Response.error<MutableList<TgThread>>(VolleyError("Response empty"))
             } else {
                 var resp = String(response.data, Charset.forName(HttpHeaderParser.parseCharset(response.headers)))
 
@@ -83,16 +83,16 @@ class ThreadRequest(
                         val doc = Jsoup.parse(resp)
                         li = doc.select("table").map {
                             parseJSoupToTgThread(it)
-                        }.filter { it.postID != "" }.toList()
+                        }.filter { it.postID != "" }.toMutableList()
                         if(li.isEmpty()){
-                            li= listOf(TgThread())
+                            li= mutableListOf(TgThread())
                         }
 
                     } else { //display thread
                         val doc = Jsoup.parse(resp)
                         li = doc.select("#delform,#delform>table").map {
                             parseJSoupToTgThread(it)
-                        }.filter { it.postID != "" }.toList()
+                        }.filter { it.postID != "" }.toMutableList()
                     }
                 } else { //board overview
                     val rexSec = Regex("<div id=\"thread.*?>(.*?)<blockquote>(.*?)</blockquote", RegexOption.DOT_MATCHES_ALL)
@@ -101,6 +101,7 @@ class ThreadRequest(
                     val rexImg = Regex("<img.*?src=\"(.*?)\"[^>]*class=\"thumb\"", RegexOption.DOT_MATCHES_ALL) // /kusaba/quest/thumb/159280999777s.png
                     val rexRef = Regex("class=\"reflink\".*?a href=\"(.*?(\\d+))\"", RegexOption.DOT_MATCHES_ALL)// /kusaba/quest/res/957117.html#957117
                     val rexSpoilerImg = Regex("firstChild.src='(.*?)'", RegexOption.DOT_MATCHES_ALL)
+                    val rexMaxPage=Regex("""<a href="/kusaba/.*?/(\d+)\.html">\d+</a>""", RegexOption.DOT_MATCHES_ALL)
 
                     val rexSecRes = rexSec.findAll(resp)
                     li = rexSecRes.map {
@@ -126,7 +127,9 @@ class ThreadRequest(
                         th.summary = it.groupValues[2]
                         th.isThread = true
                         th
-                    }.filter { el -> el.url != "" }.toList()
+                    }.filter { el -> el.url != "" }.toMutableList()
+                    val retn=rexMaxPage.findAll(resp).last().groupValues.last()
+                    li.add(TgThread("thread_info","","","",retn))
                 }
                 Response.success(
                     li,

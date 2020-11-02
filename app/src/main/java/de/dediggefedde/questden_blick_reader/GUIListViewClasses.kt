@@ -240,7 +240,7 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
                     //.apply(RequestOptions.overrideOf (imgwidth,Target.SIZE_ORIGINAL ))
                     .listener(object : RequestListener<Drawable> {
                         override fun onLoadFailed(p0: GlideException?, p1: Any?, target: Target<Drawable>?, p3: Boolean): Boolean {
-                            Log.d("TAG", "onLoadFailed")
+                           // Log.d("TAG", "onLoadFailed")
                             return false
                         }
 

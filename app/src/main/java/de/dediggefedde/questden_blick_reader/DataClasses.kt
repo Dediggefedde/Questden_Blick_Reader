@@ -73,9 +73,10 @@ data class Watch(
 data class Settings(
     var curpage: String = RequestValues.QUEST.url,
     var curThreadId:String="",
+    var curMaxPage:Int=0,
     var showOnlyPics: Boolean = false,
-    var curSingle: Boolean = false,
-    var boardPage:Int=0,
+    var curSingle: Boolean = false, //single thread or board/watchlist
+    var boardPage:Int=0, //pagination boards
     var sfw: SFWModes = SFWModes.SFW_QUESTION,
     var txsize: Float = 16f,
     var user: String = "",

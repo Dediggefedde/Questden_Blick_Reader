@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * also adds chronic event (LINK) and updates position display
      */
     fun scrollHighlight(pos: Int) {
-        if (listAdapt.items.size < pos || pos < 0) return
+        if (listAdapt.items.size < pos || pos < 0 || !sets.curSingle) return
 
         (ingredients_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0) //actuall scroll to position
 
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         //highlights changed
         listAdapt.notifyDataSetChanged()
 
-        updatePositionDisplay()
+        updatePositionDisplay(pos)
     }
 
     override fun onStop() {
@@ -222,6 +222,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
+        sets.boardPage=0
         when (menuItem.itemId) {
             R.id.menu_draw -> displayThread(RequestValues.DRAW.url, false)
             R.id.menu_general -> displayThread(RequestValues.MEEP.url, false)
@@ -297,22 +298,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fet = murl.indexOf("#")
         if (fet >= 0) murl = murl.substring(0, fet)
 
-        Log.d("displayThread", url)
 
         if (!onlyCheckWatch) sets.curpage = murl
 
         if (murl == RequestValues.WATCH.url) {
-            sets.curThreadId=""
+            sets.curSingle = false
+            sets.curThreadId = ""
             showWatches()
             storeData()
             return
         }
+        if (!sets.curSingle && sets.boardPage > 0) murl = "$murl${sets.boardPage}.html"
 
 
         if (onlyCheckWatch && !isWatched(murl)) {
             reqDone += 1
-            Log.d("wrong Request", murl)
-            Log.d("Watchlist", watchlist.joinToString(",") { it.thread.url })
             return
         }
         progressBar.visibility = View.VISIBLE
@@ -328,28 +328,29 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val tr = ThreadRequest("https://questden.org$murl", viewSingle, if (onlyCheckWatch) curW.lastReadId else null, null, Response.Listener { response ->
             reqDone += 1
             if (onlyCheckWatch) {
-                Log.d("newposts",response.size.toString())
                 val newPosts = response.filter { it.postID != "" }.size
                 val newImgs = response.filter { it.imgUrl != "" }.size
-                if(newPosts>0) {
+                if (newPosts > 0) {
                     //val newestId = response.last().postID
                     val newW = Watch(curW.thread, curW.lastReadId, newPosts, newImgs)
                     updateWatch(newW)
                 }
             } else {
                 sets.curSingle = viewSingle
+                if (viewSingle) {
+                    sets.curThreadId = Regex("""(\d+).html""").find(murl)?.groupValues?.get(1) ?: ""
+                } else {
+                    sets.curThreadId = ""
+                    val inf=response.last()
+                    response.remove(response.last())
+                    sets.curMaxPage=inf.summary.toInt()
+                }
                 displayDataList = response
-                if(viewSingle)
-                    sets.curThreadId= Regex("""(\d+).html""").find(murl)?.groupValues?.get(1)?:""
-                else
-                    sets.curThreadId=""
-                Log.d("lastread","set curthread of ${murl} to ${sets.curThreadId}")
-
                 displayThreadList()
 
                 if (isWatched(murl)) {
                     val w: Watch = getWatch(murl) //copy returned? then w.(...)=... will not do anything
-                   // if (w.curReadId == "") w.curReadId = w.lastReadId
+                    // if (w.curReadId == "") w.curReadId = w.lastReadId
                     //val scrollpos = listAdapt.items.indexOfFirst { it.postID == w.curReadId }
                     //scrollHighlight(scrollpos)
                     w.lastReadId = w.newestId
@@ -427,9 +428,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 displayThreadList(0)
             } else {
                 //val w = getWatch(displayDataList.first().url)
-               // val ind = displayDataList.indexOfFirst { w.curReadId == it.postID }
+                // val ind = displayDataList.indexOfFirst { w.curReadId == it.postID }
                 displayThreadList()
-               // scrollHighlight(ind)
+                // scrollHighlight(ind)
             }
         }
         showSetsInButtons()
@@ -477,7 +478,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun updateWatch(w: Watch) { //thread might only contain url
-
         val oldw: Watch? = watchlist.firstOrNull { it.thread.url == w.thread.url }
         if (oldw == null) {
             val compid = Regex("""(\d+).html""").find(w.thread.url)?.groupValues?.get(1)
@@ -510,34 +510,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     /**
      * updates scroll position display at bottom
      */
-    fun updatePositionDisplay(position: Int = -1) { //TODO does not update when navigating threads, maybe also not update curread
-        var pos = position + 1
+    fun updatePositionDisplay(position: Int = -1) {
+        var pos = position
         if (sets.curSingle && listAdapt.items.size > pos) {
-            Log.d("lastread","Update single  ${sets.curSingle}, ${listAdapt.items.size}, $pos")
-
-            if (position == -1){
-                pos =1 + (ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            }//(ingredients_list.layoutManager as LinearLayoutManager).getPosition(ingredients_list)
-            if(listAdapt.items.size<pos)pos=0
+            if (position == -1) {
+                pos = 1 + (ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            }
+            if (listAdapt.items.size < pos) pos = 0
             totcnt = listAdapt.items.filter { it.imgUrl != "" }.size
             curcnt = listAdapt.items.take(pos).filter { it.imgUrl != "" }.size
-
-         //   val w = getWatch(listAdapt.items.first().url)
-          //  w.curReadId = listAdapt.items[pos].postID
-         //   setWatch(w)
-
-            if(sets.curThreadId!="") {
+            if (sets.curThreadId != "") {
                 sets.lastReadIDs[sets.curThreadId] = listAdapt.items[pos].postID
-                Log.d("lastread","Update lastread to ${listAdapt.items[pos].postID}")
             }
-        }else if(!sets.curSingle){
-            Log.d("lastread","Update single  ${sets.curSingle}")
-            totcnt=0
-            curcnt=sets.boardPage
+        } else if (!sets.curSingle) {
+            totcnt = sets.curMaxPage
+            curcnt = sets.boardPage
+            if(totcnt<curcnt)totcnt=curcnt //current page = maxpage, link missing
         }
 
         tx_position.text = getString(R.string.CurPos, curcnt, totcnt)
-        Log.d("lastread","Update position  ${curcnt}")
     }
 
     private fun showSetsInButtons() { //set text to current mode
@@ -582,7 +573,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         progressBar.max = 100
         progressBar.progress = 0
         for (w in watchlist) {
-            displayThread(w.thread.url, viewSingle = true,onlyCheckWatch =  true)
+            displayThread(w.thread.url, viewSingle = true, onlyCheckWatch = true)
         }
     }
 
@@ -675,6 +666,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         displayThreadList()
     }
 
+    private fun navigatePage(page: Int) {
+        if (sets.curpage == RequestValues.WATCH.url || page <0 || page > sets.curMaxPage) return
+        sets.boardPage = page
+        displayThread(sets.curpage)
+    }
+
     /**
      * next image button
      * jumps and highlight to target
@@ -685,13 +682,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             pos += 1 + listAdapt.items.takeLast(listAdapt.items.size - pos - 1).indexOfFirst { it.imgUrl != "" }
             scrollHighlight(pos)
         } else { //board
-            val curUrl = Regex("""(^.*/)(?:(\d+).html)?""").find(sets.curpage)?.groupValues
-            val baseUrl = curUrl?.get(1)
-            val basePageStr = (curUrl?.get(2) ?: "") //error or empty group
-            Log.d("nextButton", basePageStr)
-            val basePage = if (basePageStr == "") 0 else basePageStr.toInt()
-            sets.boardPage=basePage+1
-            displayThread(baseUrl + (basePage + 1).toString() + ".html", false)
+            navigatePage(sets.boardPage + 1)
         }
     }
 
@@ -704,19 +695,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             pos = listAdapt.items.take(pos).indexOfLast { it.imgUrl != "" }
             scrollHighlight(pos)
         } else { //board
-            val curUrl = Regex("""(^.*/)(?:(\d+).html)?""").find(sets.curpage)?.groupValues
-            val baseUrl = curUrl?.get(1)
-            val basePageStr = (curUrl?.get(2) ?: "") //error or empty group
-            Log.d("nextButton", basePageStr)
-            val basePage = if (basePageStr == "") 0 else basePageStr.toInt()
 
-            if (basePage > 1) {
-                sets.boardPage=basePage-1
-                displayThread(baseUrl + (basePage - 1).toString() + ".html", false)
-            }else if (basePage ==1) {
-                sets.boardPage=0
-                displayThread(baseUrl!!, false)
-            }
+            navigatePage(sets.boardPage - 1)
         }
     }
 
@@ -724,18 +704,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * first image button
      */
     fun btnFirstButton(@Suppress("UNUSED_PARAMETER") view: View) {
-        //var pos=(ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-        val pos = listAdapt.items.indexOfFirst { it.imgUrl != "" }
-        scrollHighlight(pos)
+        if (sets.curSingle) {
+            val pos = listAdapt.items.indexOfFirst { it.imgUrl != "" }
+            scrollHighlight(pos)
+        } else {
+            navigatePage(0)
+        }
     }
 
     /**
      * last image button
      */
     fun btnLastButton(@Suppress("UNUSED_PARAMETER") view: View) {
-        //var pos=(ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-        val pos = listAdapt.items.indexOfLast { it.imgUrl != "" }
-        scrollHighlight(pos)
+        if (sets.curSingle) {
+            val pos = listAdapt.items.indexOfLast { it.imgUrl != "" }
+            scrollHighlight(pos)
+        } else {
+            navigatePage(sets.curMaxPage)
+        }
     }
 
     private fun displayThreadList(pos: Int = -1) {
@@ -745,23 +731,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             listAdapt.items = displayDataList//.take(10)
         listAdapt.notifyDataSetChanged()
         if (pos >= 0) {
-            Log.d("lastread","scroll to ${pos} fixed")
             (ingredients_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
-        }else{
-            if(sets.curThreadId!="") {
+        } else {
+            if (sets.curThreadId != "") {
                 if (sets.lastReadIDs[sets.curThreadId] != null) {
                     scrollHighlight(listAdapt.items.indexOfFirst { it.postID == sets.lastReadIDs[sets.curThreadId] })
-                    Log.d("lastread","scroll to ${sets.lastReadIDs[sets.curThreadId]}")
                 } else {
                     sets.lastReadIDs[sets.curThreadId] = listAdapt.items.first().postID
-                    Log.d("lastread","scroll to 0, no map value")
                     scrollHighlight(0)
                 }
-            }else{
-                Log.d("lastread","noscroll curthreadid empty")
+                return
             }
         }
-        updatePositionDisplay()
+        updatePositionDisplay(pos)
     }
 
 }
