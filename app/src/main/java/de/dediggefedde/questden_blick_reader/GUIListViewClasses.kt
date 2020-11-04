@@ -315,7 +315,7 @@ class HTMLTagHandler(private var mContext: Context) : Html.TagHandler {
                 for (i in 0 until len)
                     attributes[data[i * 5 + 1]] = data[i * 5 + 4]
         } catch (e: java.lang.Exception) {
-            Log.d("TAG", "Exception: $e")
+           // Log.d("TAG", "Exception: $e")
         }
     }
 

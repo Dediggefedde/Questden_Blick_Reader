@@ -298,7 +298,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fet = murl.indexOf("#")
         if (fet >= 0) murl = murl.substring(0, fet)
 
-
         if (!onlyCheckWatch) sets.curpage = murl
 
         if (murl == RequestValues.WATCH.url) {
@@ -331,8 +330,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val newPosts = response.filter { it.postID != "" }.size
                 val newImgs = response.filter { it.imgUrl != "" }.size
                 if (newPosts > 0) {
-                    //val newestId = response.last().postID
-                    val newW = Watch(curW.thread, curW.lastReadId, newPosts, newImgs)
+                    val newestId = response.last().postID
+                    val newW = Watch(curW.thread,newestId, newPosts, newImgs, curW.lastReadId)
                     updateWatch(newW)
                 }
             } else {
@@ -519,7 +518,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (listAdapt.items.size < pos) pos = 0
             totcnt = listAdapt.items.filter { it.imgUrl != "" }.size
             curcnt = listAdapt.items.take(pos).filter { it.imgUrl != "" }.size
-            if (sets.curThreadId != "") {
+            if (sets.curThreadId != "" && listAdapt.items.size>pos) {
                 sets.lastReadIDs[sets.curThreadId] = listAdapt.items[pos].postID
             }
         } else if (!sets.curSingle) {
@@ -559,12 +558,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         reqCnt = 0
         reqDone = 0
 
-        displayDataList = watchlist.sortedWith(compareBy({ -it.newImg }, { -it.newPosts })).map {
-            it.thread.isThread = true
-            it.thread
-        }.toList()
-        listAdapt.notifyDataSetChanged()
-
+        if(sets.curpage==RequestValues.WATCH.url) { //update watchlist
+            displayDataList = watchlist.sortedWith(compareBy({ -it.newImg }, { -it.newPosts })).map {
+                it.thread.isThread = true
+                it.thread
+            }.toList()
+            displayThreadList(0)
+        }
+        //listAdapt.notifyDataSetChanged()
     }
 
     private fun updateWatchlist() {
