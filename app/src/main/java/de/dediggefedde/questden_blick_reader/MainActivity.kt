@@ -19,7 +19,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import com.android.volley.Response
+//import com.android.volley.Response
 import com.github.javiersantos.appupdater.AppUpdater
 import com.github.javiersantos.appupdater.enums.UpdateFrom
 import com.google.android.material.navigation.NavigationView
@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         loadData()
         setRecyclerViewScrollListener()
 
-        val appUpdater = AppUpdater(this)
+        AppUpdater(this)
             .setUpdateFrom(UpdateFrom.GITHUB)
             .setGitHubUserAndRepo("Dediggefedde", "Questden_Blick_Reader")
             .start()
@@ -339,7 +339,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val queue = MySingleton.getInstance(this.applicationContext)
         val curW: Watch = getWatch(murl)
 
-        val tr = ThreadRequest("https://questden.org$murl", viewSingle, if (onlyCheckWatch) curW.lastReadId else null, null, Response.Listener { response ->
+        val tr = ThreadRequest("https://questden.org$murl", viewSingle, if (onlyCheckWatch) curW.lastReadId else null, null, { response ->
             reqDone += 1
             if (onlyCheckWatch) {
                 val newPosts = response.filter { it.postID != "" }.size
@@ -382,7 +382,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             if ((reqDone == reqCnt && reqCnt > 0) || reqCnt == 0)
                 afterUpdateReq()
-        }, Response.ErrorListener {
+        }, {
             reqDone += 1
             if (reqCnt > 0)
                 progressBar.progress = reqDone * 100 / reqCnt
@@ -419,20 +419,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var jsonString = sharedPref.getString("tgchanItems", "")
         if (jsonString != "") {
             val itemType = object : TypeToken<List<TgThread>>() {}.type
-            displayDataList = gson.fromJson<List<TgThread>>(jsonString, itemType)
+            displayDataList = gson.fromJson(jsonString, itemType)
         } else {
             firstStart = true
         }
         jsonString = sharedPref.getString("watchItems", "")
         if (jsonString != "") {
             val itemType2 = object : TypeToken<MutableList<Watch>>() {}.type
-            watchlist = gson.fromJson<MutableList<Watch>>(jsonString, itemType2)
+            watchlist = gson.fromJson(jsonString, itemType2)
         }
 
         jsonString = sharedPref.getString("sets", "")
         if (jsonString != "") {
             val itemType3 = object : TypeToken<Settings>() {}.type
-            sets = gson.fromJson<Settings>(jsonString, itemType3)
+            sets = gson.fromJson(jsonString, itemType3)
         }
 
         if (firstStart) {
