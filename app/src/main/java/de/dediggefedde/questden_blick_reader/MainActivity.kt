@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.text.Html
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
@@ -21,10 +20,21 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.android.volley.Response
+import com.github.javiersantos.appupdater.AppUpdater
+import com.github.javiersantos.appupdater.enums.UpdateFrom
 import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
+//
+//import com.github.javiersantos.appupdater.enums.AppUpdaterError;
+//import com.github.javiersantos.appupdater.enums.Display;
+//import com.github.javiersantos.appupdater.enums.Duration;
+//import com.github.javiersantos.appupdater.enums.UpdateFrom;
+//import com.github.javiersantos.appupdater.interfaces.IAppUpdater;
+//import com.github.javiersantos.appupdater.objects.GitHub;
+//import com.github.javiersantos.appupdater.objects.Update;
+
 
 /* Idea
 * 1. get list of thread from frontpage (/quests/ at the moment
@@ -143,6 +153,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         //start doing things with data
         loadData()
         setRecyclerViewScrollListener()
+
+        val appUpdater = AppUpdater(this)
+            .setUpdateFrom(UpdateFrom.GITHUB)
+            .setGitHubUserAndRepo("Dediggefedde", "Questden_Blick_Reader")
+            .start()
     }
 
     private fun convertToCustomTags(str: String?): String {
