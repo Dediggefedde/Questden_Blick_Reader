@@ -157,7 +157,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         AppUpdater(this)
             .setUpdateFrom(UpdateFrom.JSON)
             // .setGitHubUserAndRepo("Dediggefedde", "Questden_Blick_Reader")
-            .setUpdateJSON("""https://github.com/Dediggefedde/Questden_Blick_Reader/blob/WIP/app/version.json""")
+            .setUpdateJSON("""https://raw.githubusercontent.com/Dediggefedde/Questden_Blick_Reader/WIP/app/version.json""") //TODO WIP to master
             .start()
     }
 
