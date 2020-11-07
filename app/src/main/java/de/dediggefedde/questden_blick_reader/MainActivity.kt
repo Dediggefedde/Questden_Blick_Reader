@@ -155,8 +155,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setRecyclerViewScrollListener()
 
         AppUpdater(this)
-            .setUpdateFrom(UpdateFrom.GITHUB)
-            .setGitHubUserAndRepo("Dediggefedde", "Questden_Blick_Reader")
+            .setUpdateFrom(UpdateFrom.JSON)
+            // .setGitHubUserAndRepo("Dediggefedde", "Questden_Blick_Reader")
+            .setUpdateJSON("""https://github.com/Dediggefedde/Questden_Blick_Reader/blob/WIP/app/version.json""")
             .start()
     }
 
