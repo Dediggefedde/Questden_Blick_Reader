@@ -3,6 +3,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
+    signingConfigs {
+        questden {
+            storeFile file('K:\\Dokumente und Einstellungen\\Sword\\Eigene Dateien\\keys\\android.jks')
+            storePassword '1ndr43d'
+            keyAlias 'questden'
+            keyPassword 'q52std2n'
+        }
+    }
     compileSdkVersion 30
     buildToolsVersion "30.0.1"
 
@@ -23,12 +31,13 @@ android {
             shrinkResources true
            // proguardFiles getDefaultProguardFile('proguard-android.txt')
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.questden
 
         }
         debug {
             debuggable true
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt')
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),'proguard-rules.pro'
 
         }
     }

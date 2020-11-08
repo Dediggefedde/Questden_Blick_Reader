@@ -1,6 +1,7 @@
 package de.dediggefedde.questden_blick_reader
 
 import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
 
 
 /**
@@ -22,9 +23,9 @@ enum class RequestValues(val url: String) {
  * auto show/hide mode for spoiler images and texts
  */
 enum class SFWModes {
-    SFW_REAL, //spoiler images stay hidden. Note: Never requested
-    SFW_QUESTION, //spoiler images reveal on click. Note: only request when clicked.
-    NSFW //spoiler images loaded on default. Note: Immediatelly requested
+    @SerializedName("SFWREAL") SFWREAL, //spoiler images stay hidden. Note: Never requested
+    @SerializedName("SFWQUESTION") SFWQUESTION, //spoiler images reveal on click. Note: only request when clicked.
+    @SerializedName("NSFW") NSFW //spoiler images loaded on default. Note: Immediatelly requested
 }
 
 /**
@@ -77,7 +78,7 @@ data class Settings(
     var showOnlyPics: Boolean = false,
     var curSingle: Boolean = false, //single thread or board/watchlist
     var boardPage:Int=0, //pagination boards
-    var sfw: SFWModes = SFWModes.SFW_QUESTION,
+    var sfw: SFWModes = SFWModes.SFWQUESTION,
     var txsize: Float = 16f,
     var user: String = "",
     var pw: String = "",

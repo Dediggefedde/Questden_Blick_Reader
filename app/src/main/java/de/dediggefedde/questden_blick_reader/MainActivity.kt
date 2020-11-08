@@ -548,10 +548,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun showSetsInButtons() { //set text to current mode
         when (sets.sfw) {
-            SFWModes.SFW_QUESTION -> {
+            SFWModes.SFWQUESTION -> {
                 btn_toggleSFW.text = getString(R.string.SFWQuestion)
             }
-            SFWModes.SFW_REAL -> {
+            SFWModes.SFWREAL -> {
                 btn_toggleSFW.text = getString(R.string.SFW)
             }
             SFWModes.NSFW -> {
@@ -618,14 +618,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     fun btnTglSFW(@Suppress("UNUSED_PARAMETER") view: View) {
         when (sets.sfw) {
-            SFWModes.SFW_QUESTION -> {
-                sets.sfw = SFWModes.SFW_REAL
+            SFWModes.SFWQUESTION -> {
+                sets.sfw = SFWModes.SFWREAL
             }
-            SFWModes.SFW_REAL -> {
+            SFWModes.SFWREAL -> {
                 sets.sfw = SFWModes.NSFW
             }
             SFWModes.NSFW -> {
-                sets.sfw = SFWModes.SFW_QUESTION
+                sets.sfw = SFWModes.SFWQUESTION
             }
             //for sake of using view, so git would ignore the warning
         }

@@ -12,7 +12,6 @@ import android.text.Html
 import android.text.Spannable
 import android.text.TextPaint
 import android.text.style.*
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -92,7 +91,7 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
                 mMain.imageZoom.visibility = View.VISIBLE
                 mMain.tx_img_path.visibility = View.VISIBLE
                 var str = "https://questden.org" + mtg.imgUrl.replace("thumb", "src").replace("s.", ".")
-                if (mtg.isSpoiler && mMain.sets.sfw == SFWModes.SFW_REAL) str = "https://questden.org/kusaba/spoiler.png"
+                if (mtg.isSpoiler && mMain.sets.sfw == SFWModes.SFWREAL) str = "https://questden.org/kusaba/spoiler.png"
 
                 Glide.with(mMain.imageZoom)
                     .load(str)
