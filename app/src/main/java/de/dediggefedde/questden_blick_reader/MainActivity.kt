@@ -26,6 +26,9 @@ import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.PrintWriter
+import java.io.StringWriter
+
 //
 //import com.github.javiersantos.appupdater.enums.AppUpdaterError;
 //import com.github.javiersantos.appupdater.enums.Display;
@@ -389,8 +392,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 progressBar.progress = reqDone * 100 / reqCnt
             afterUpdateReq()
 
+            val sw = StringWriter()
+            it.printStackTrace(PrintWriter(sw))
+            val exceptionAsString = sw.toString()
+
             listAdapt.items =
-                listOf(TgThread("There was an error loading the Thread\n${it}"))
+                listOf(TgThread("There was an error loading the Thread\n${it}\nStackTrace:\n$exceptionAsString"))
             listAdapt.notifyDataSetChanged()
         }
         )
@@ -457,7 +464,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun addToWatch(tg: TgThread) {
         if (isWatched(tg.url)) return
         watchlist.add(Watch(tg))
-        displayThread(watchlist.last().thread.url, viewSingle = false, onlyCheckWatch = true)
+        displayThread(watchlist.last().thread.url, viewSingle = true, onlyCheckWatch = true)
         storeData()
     }
 
