@@ -73,9 +73,10 @@ class ThreadRequest(
             } else {
                 var resp = String(response.data, Charset.forName(HttpHeaderParser.parseCharset(response.headers)))
 
-                Log.d("check", "$viewSingle, $lastReadId")
+                //Log.d("check", "$viewSingle, $lastReadId")
                 if (viewSingle) { //single requests
                     if (lastReadId != null) { //check for new posts/images
+//                        Log.d("loadCheck","single,lastread $url")
                         //with lastreadid returns list of new entries with first cut off tag <td> of last read element
                         val str = """id="reply$lastReadId"""
                         val ind = resp.indexOf(str)
@@ -89,12 +90,14 @@ class ThreadRequest(
                         }
 
                     } else { //display thread
+//                        Log.d("loadCheck","single,!lastread $url")
                         val doc = Jsoup.parse(resp)
                         li = doc.select("#delform,#delform>table").map {
                             parseJSoupToTgThread(it)
                         }.filter { it.postID != "" }.toMutableList()
                     }
                 } else { //board overview
+//                    Log.d("loadCheck","overview $url")
                     val rexSec = Regex("<div id=\"thread.*?>(.*?)<blockquote>(.*?)</blockquote", RegexOption.DOT_MATCHES_ALL)
                     val rexTitle = Regex("<span.*?class=\"filetitle\".*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
                     val rexAuthor = Regex("<span.*?class=\"postername\".*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
@@ -128,8 +131,10 @@ class ThreadRequest(
                         th.isThread = true
                         th
                     }.filter { el -> el.url != "" }.toMutableList()
-                    val retn=rexMaxPage.findAll(resp).last().groupValues.last()
-                    li.add(TgThread("thread_info","","","",retn))
+
+                    val retn=rexMaxPage.findAll(resp)
+                        if(retn.count()>0)
+                            li.add(TgThread("thread_info","","","",retn.last().groupValues.last()))
                 }
                 Response.success(
                     li,

@@ -20,11 +20,25 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import com.android.volley.Response
+//import com.android.volley.Response
+import com.github.javiersantos.appupdater.AppUpdater
+import com.github.javiersantos.appupdater.enums.UpdateFrom
 import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.PrintWriter
+import java.io.StringWriter
+
+//
+//import com.github.javiersantos.appupdater.enums.AppUpdaterError;
+//import com.github.javiersantos.appupdater.enums.Display;
+//import com.github.javiersantos.appupdater.enums.Duration;
+//import com.github.javiersantos.appupdater.enums.UpdateFrom;
+//import com.github.javiersantos.appupdater.interfaces.IAppUpdater;
+//import com.github.javiersantos.appupdater.objects.GitHub;
+//import com.github.javiersantos.appupdater.objects.Update;
+
 
 /* Idea
 * 1. get list of thread from frontpage (/quests/ at the moment
@@ -143,6 +157,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         //start doing things with data
         loadData()
         setRecyclerViewScrollListener()
+
+        AppUpdater(this)
+            .setUpdateFrom(UpdateFrom.JSON)
+            // .setGitHubUserAndRepo("Dediggefedde", "Questden_Blick_Reader")
+            .setUpdateJSON("""https://raw.githubusercontent.com/Dediggefedde/Questden_Blick_Reader/WIP/app/version.json""") //TODO WIP to master
+            .start()
     }
 
     private fun convertToCustomTags(str: String?): String {
@@ -298,20 +318,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fet = murl.indexOf("#")
         if (fet >= 0) murl = murl.substring(0, fet)
 
-
         if (!onlyCheckWatch) sets.curpage = murl
 
         if (murl == RequestValues.WATCH.url) {
+            sets.curTitle="Watch list"
             sets.curSingle = false
             sets.curThreadId = ""
             showWatches()
             storeData()
             return
         }
-        if (!sets.curSingle && sets.boardPage > 0) murl = "$murl${sets.boardPage}.html"
+        if (!sets.curSingle && sets.boardPage > 0 && !onlyCheckWatch) murl = "$murl${sets.boardPage}.html"
 
 
         if (onlyCheckWatch && !isWatched(murl)) {
+//            Log.d("loadCheck","onlycheck + not watched $murl")
             reqDone += 1
             return
         }
@@ -325,28 +346,36 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val queue = MySingleton.getInstance(this.applicationContext)
         val curW: Watch = getWatch(murl)
 
-        val tr = ThreadRequest("https://questden.org$murl", viewSingle, if (onlyCheckWatch) curW.lastReadId else null, null, Response.Listener { response ->
+        val tr = ThreadRequest("https://questden.org$murl", viewSingle, if (onlyCheckWatch) curW.lastReadId else null, null, { response ->
             reqDone += 1
+//            Log.d("loadCheck","displaythread reps")
             if (onlyCheckWatch) {
                 val newPosts = response.filter { it.postID != "" }.size
                 val newImgs = response.filter { it.imgUrl != "" }.size
                 if (newPosts > 0) {
-                    //val newestId = response.last().postID
-                    val newW = Watch(curW.thread, curW.lastReadId, newPosts, newImgs)
+                    val newestId = response.last().postID
+                    val newW = Watch(curW.thread,newestId, newPosts, newImgs, curW.lastReadId)
                     updateWatch(newW)
                 }
             } else {
                 sets.curSingle = viewSingle
                 if (viewSingle) {
+                    sets.curTitle=response.first().title
                     sets.curThreadId = Regex("""(\d+).html""").find(murl)?.groupValues?.get(1) ?: ""
+                    displayDataList = response
+                    displayThreadList()
+//                    Log.d("loadcheck","pos store")
                 } else {
+                    sets.curTitle=sets.curpage
                     sets.curThreadId = ""
                     val inf=response.last()
                     response.remove(response.last())
                     sets.curMaxPage=inf.summary.toInt()
+                    displayDataList = response
+                    displayThreadList(0)
+//                    Log.d("loadcheck","pos 0")
                 }
-                displayDataList = response
-                displayThreadList()
+
 
                 if (isWatched(murl)) {
                     val w: Watch = getWatch(murl) //copy returned? then w.(...)=... will not do anything
@@ -358,6 +387,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     w.newPosts = 0
                     setWatch(w)
                 }
+
             }
             storeData()
             var perc = 0
@@ -368,14 +398,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             if ((reqDone == reqCnt && reqCnt > 0) || reqCnt == 0)
                 afterUpdateReq()
-        }, Response.ErrorListener {
+        }, {
             reqDone += 1
             if (reqCnt > 0)
                 progressBar.progress = reqDone * 100 / reqCnt
             afterUpdateReq()
 
+            val sw = StringWriter()
+            it.printStackTrace(PrintWriter(sw))
+            val exceptionAsString = sw.toString()
+
             listAdapt.items =
-                listOf(TgThread("There was an error loading the Thread\n${it}"))
+                listOf(TgThread("There was an error loading the Thread\n${it}\nStackTrace:\n$exceptionAsString"))
             listAdapt.notifyDataSetChanged()
         }
         )
@@ -405,20 +439,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var jsonString = sharedPref.getString("tgchanItems", "")
         if (jsonString != "") {
             val itemType = object : TypeToken<List<TgThread>>() {}.type
-            displayDataList = gson.fromJson<List<TgThread>>(jsonString, itemType)
+            displayDataList = gson.fromJson(jsonString, itemType)
         } else {
             firstStart = true
         }
         jsonString = sharedPref.getString("watchItems", "")
         if (jsonString != "") {
             val itemType2 = object : TypeToken<MutableList<Watch>>() {}.type
-            watchlist = gson.fromJson<MutableList<Watch>>(jsonString, itemType2)
+            watchlist = gson.fromJson(jsonString, itemType2)
         }
 
         jsonString = sharedPref.getString("sets", "")
         if (jsonString != "") {
             val itemType3 = object : TypeToken<Settings>() {}.type
-            sets = gson.fromJson<Settings>(jsonString, itemType3)
+            sets = gson.fromJson(jsonString, itemType3)
         }
 
         if (firstStart) {
@@ -440,9 +474,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * adds thread to watchlist, updates counts and saves data
      */
     fun addToWatch(tg: TgThread) {
+//        Log.d("loadCheck","addWatch ${isWatched(tg.url)} last ${watchlist.last().thread.url}")
         if (isWatched(tg.url)) return
         watchlist.add(Watch(tg))
-        displayThread(watchlist.last().thread.url, viewSingle = false, onlyCheckWatch = true)
+        displayThread(watchlist.last().thread.url, viewSingle = true, onlyCheckWatch = true)
         storeData()
     }
 
@@ -519,7 +554,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (listAdapt.items.size < pos) pos = 0
             totcnt = listAdapt.items.filter { it.imgUrl != "" }.size
             curcnt = listAdapt.items.take(pos).filter { it.imgUrl != "" }.size
-            if (sets.curThreadId != "") {
+            if (sets.curThreadId != "" && listAdapt.items.size>pos) {
                 sets.lastReadIDs[sets.curThreadId] = listAdapt.items[pos].postID
             }
         } else if (!sets.curSingle) {
@@ -533,10 +568,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun showSetsInButtons() { //set text to current mode
         when (sets.sfw) {
-            SFWModes.SFW_QUESTION -> {
+            SFWModes.SFWQUESTION -> {
                 btn_toggleSFW.text = getString(R.string.SFWQuestion)
             }
-            SFWModes.SFW_REAL -> {
+            SFWModes.SFWREAL -> {
                 btn_toggleSFW.text = getString(R.string.SFW)
             }
             SFWModes.NSFW -> {
@@ -559,12 +594,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         reqCnt = 0
         reqDone = 0
 
-        displayDataList = watchlist.sortedWith(compareBy({ -it.newImg }, { -it.newPosts })).map {
-            it.thread.isThread = true
-            it.thread
-        }.toList()
-        listAdapt.notifyDataSetChanged()
-
+        if(sets.curpage==RequestValues.WATCH.url) { //update watchlist
+            displayDataList = watchlist.sortedWith(compareBy({ -it.newImg }, { -it.newPosts })).map {
+                it.thread.isThread = true
+                it.thread
+            }.toList()
+            displayThreadList(0)
+//            Log.d("loadcheck","pos0 watch")
+        }
+        //listAdapt.notifyDataSetChanged()
     }
 
     private fun updateWatchlist() {
@@ -601,14 +639,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     fun btnTglSFW(@Suppress("UNUSED_PARAMETER") view: View) {
         when (sets.sfw) {
-            SFWModes.SFW_QUESTION -> {
-                sets.sfw = SFWModes.SFW_REAL
+            SFWModes.SFWQUESTION -> {
+                sets.sfw = SFWModes.SFWREAL
             }
-            SFWModes.SFW_REAL -> {
+            SFWModes.SFWREAL -> {
                 sets.sfw = SFWModes.NSFW
             }
             SFWModes.NSFW -> {
-                sets.sfw = SFWModes.SFW_QUESTION
+                sets.sfw = SFWModes.SFWQUESTION
             }
             //for sake of using view, so git would ignore the warning
         }
@@ -669,7 +707,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun navigatePage(page: Int) {
         if (sets.curpage == RequestValues.WATCH.url || page <0 || page > sets.curMaxPage) return
         sets.boardPage = page
-        displayThread(sets.curpage)
+        displayThread(sets.curpage,viewSingle = false,onlyCheckWatch = false )
     }
 
     /**
@@ -725,6 +763,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun displayThreadList(pos: Int = -1) {
+        toolbar.title=sets.curTitle
         if (sets.showOnlyPics)
             listAdapt.items = displayDataList.filter { it.imgUrl != "" }
         else
