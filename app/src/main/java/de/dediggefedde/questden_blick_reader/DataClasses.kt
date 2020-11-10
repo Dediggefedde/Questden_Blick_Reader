@@ -82,7 +82,8 @@ data class Settings(
     var txsize: Float = 16f,
     var user: String = "",
     var pw: String = "",
-    val lastReadIDs: MutableMap<String,String> = mutableMapOf() //thread ids → last read pos
+    val lastReadIDs: MutableMap<String,String> = mutableMapOf(), //thread ids → last read pos
+    var curTitle:String=""
 )
 
 /**

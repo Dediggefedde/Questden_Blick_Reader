@@ -76,7 +76,7 @@ class ThreadRequest(
                 //Log.d("check", "$viewSingle, $lastReadId")
                 if (viewSingle) { //single requests
                     if (lastReadId != null) { //check for new posts/images
-                        Log.d("loadCheck","single,lastread $url")
+//                        Log.d("loadCheck","single,lastread $url")
                         //with lastreadid returns list of new entries with first cut off tag <td> of last read element
                         val str = """id="reply$lastReadId"""
                         val ind = resp.indexOf(str)
@@ -90,14 +90,14 @@ class ThreadRequest(
                         }
 
                     } else { //display thread
-                        Log.d("loadCheck","single,!lastread $url")
+//                        Log.d("loadCheck","single,!lastread $url")
                         val doc = Jsoup.parse(resp)
                         li = doc.select("#delform,#delform>table").map {
                             parseJSoupToTgThread(it)
                         }.filter { it.postID != "" }.toMutableList()
                     }
                 } else { //board overview
-                    Log.d("loadCheck","overview $url")
+//                    Log.d("loadCheck","overview $url")
                     val rexSec = Regex("<div id=\"thread.*?>(.*?)<blockquote>(.*?)</blockquote", RegexOption.DOT_MATCHES_ALL)
                     val rexTitle = Regex("<span.*?class=\"filetitle\".*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
                     val rexAuthor = Regex("<span.*?class=\"postername\".*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)

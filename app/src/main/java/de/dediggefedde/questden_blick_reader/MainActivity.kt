@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.text.Html
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
@@ -320,16 +321,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (!onlyCheckWatch) sets.curpage = murl
 
         if (murl == RequestValues.WATCH.url) {
+            sets.curTitle="Watch list"
             sets.curSingle = false
             sets.curThreadId = ""
             showWatches()
             storeData()
             return
         }
-        if (!sets.curSingle && sets.boardPage > 0) murl = "$murl${sets.boardPage}.html"
+        if (!sets.curSingle && sets.boardPage > 0 && !onlyCheckWatch) murl = "$murl${sets.boardPage}.html"
 
 
         if (onlyCheckWatch && !isWatched(murl)) {
+//            Log.d("loadCheck","onlycheck + not watched $murl")
             reqDone += 1
             return
         }
@@ -345,6 +348,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val tr = ThreadRequest("https://questden.org$murl", viewSingle, if (onlyCheckWatch) curW.lastReadId else null, null, { response ->
             reqDone += 1
+//            Log.d("loadCheck","displaythread reps")
             if (onlyCheckWatch) {
                 val newPosts = response.filter { it.postID != "" }.size
                 val newImgs = response.filter { it.imgUrl != "" }.size
@@ -356,15 +360,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             } else {
                 sets.curSingle = viewSingle
                 if (viewSingle) {
+                    sets.curTitle=response.first().title
                     sets.curThreadId = Regex("""(\d+).html""").find(murl)?.groupValues?.get(1) ?: ""
+                    displayDataList = response
+                    displayThreadList()
+//                    Log.d("loadcheck","pos store")
                 } else {
+                    sets.curTitle=sets.curpage
                     sets.curThreadId = ""
                     val inf=response.last()
                     response.remove(response.last())
                     sets.curMaxPage=inf.summary.toInt()
+                    displayDataList = response
+                    displayThreadList(0)
+//                    Log.d("loadcheck","pos 0")
                 }
-                displayDataList = response
-                displayThreadList()
+
 
                 if (isWatched(murl)) {
                     val w: Watch = getWatch(murl) //copy returned? then w.(...)=... will not do anything
@@ -376,6 +387,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     w.newPosts = 0
                     setWatch(w)
                 }
+
             }
             storeData()
             var perc = 0
@@ -462,6 +474,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * adds thread to watchlist, updates counts and saves data
      */
     fun addToWatch(tg: TgThread) {
+//        Log.d("loadCheck","addWatch ${isWatched(tg.url)} last ${watchlist.last().thread.url}")
         if (isWatched(tg.url)) return
         watchlist.add(Watch(tg))
         displayThread(watchlist.last().thread.url, viewSingle = true, onlyCheckWatch = true)
@@ -587,6 +600,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 it.thread
             }.toList()
             displayThreadList(0)
+//            Log.d("loadcheck","pos0 watch")
         }
         //listAdapt.notifyDataSetChanged()
     }
@@ -693,7 +707,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun navigatePage(page: Int) {
         if (sets.curpage == RequestValues.WATCH.url || page <0 || page > sets.curMaxPage) return
         sets.boardPage = page
-        displayThread(sets.curpage)
+        displayThread(sets.curpage,viewSingle = false,onlyCheckWatch = false )
     }
 
     /**
@@ -749,6 +763,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun displayThreadList(pos: Int = -1) {
+        toolbar.title=sets.curTitle
         if (sets.showOnlyPics)
             listAdapt.items = displayDataList.filter { it.imgUrl != "" }
         else
