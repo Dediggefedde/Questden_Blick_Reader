@@ -2,7 +2,7 @@
 
 Reader app for questden.org
 
-This app aims for making reading quests and threads on questden.org enjoyable for the reader.
+This app aims for making reading quests and threads on questden.org enjoyable for smartphone-users.
 
 ## Screenshots
 
