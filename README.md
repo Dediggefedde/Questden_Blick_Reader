@@ -49,8 +49,10 @@ Compatibility support Android version >17.
 
 ## How to Install
 
-Download the App bundle [/app/release/app-release.aab](/app/release/app-release.aab?raw=true)<br/>
+**Currently in beta-phase (WIP branch)**</br>
+Download the apk https://github.com/Dediggefedde/Questden_Blick_Reader/blob/WIP/app/release/app-release.apk?raw=true<br/>
 You might need to allow installing apps outside the playstore.
+Since I'm unknown on playstore, "play protect" will warn you once. 
 
 ## How to use
 
