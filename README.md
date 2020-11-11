@@ -1,8 +1,9 @@
 ## About
 
-Reader app for questden.org
-
+**Currently in beta-phase**</br>
+Reader app for questden.org<br/>
 This app aims for making reading quests and threads on questden.org enjoyable for smartphone-users.
+[Download the apk](https://github.com/Dediggefedde/Questden_Blick_Reader/raw/release/app/release/app-release.apk)<br/>
 
 ## Screenshots
 
@@ -49,10 +50,11 @@ Compatibility support Android version >17.
 
 ## How to Install
 
-**Currently in beta-phase (WIP branch)**</br>
 [Download the apk](https://github.com/Dediggefedde/Questden_Blick_Reader/raw/release/app/release/app-release.apk)<br/>
-You might need to allow installing apps outside the playstore.
+You might need to allow installing apps from unknown sources.
+Open the file via browser or file-explorer and you will be prompted to install
 Since I'm unknown on playstore, "play protect" will warn you once. 
+I there is an update, the app will prompt you to download the latest apk from this website (same link as above).
 
 ## How to use
 
@@ -76,9 +78,10 @@ Since I'm unknown on playstore, "play protect" will warn you once.
 # Security and Privacy
 
 The app does not collect or store any data about your behavior. It only requests questden.org when the user requests a page. 
-It only stores app-specific settings, like last-read positions, your watch-list.
+It only stores app-specific settings, like last-read positions, your watch-list.<br>
+To check for updates, the start will make a request to github once per start for a file <1kb.
 
-Syncing with questden_BLICK requires a useraccount at https://phi.pf-control.de/tgchan/interface.php?login. 
+Syncing with questden_BLICK requires a user-account at https://phi.pf-control.de/tgchan/interface.php?login.<br>
 Requesting a sync will send and receive only necessary data from only that server. EU Privacy Policy is explained on the website.
 
 The script uses bare volley https-requests qith only minimal data sent to questden.org.
