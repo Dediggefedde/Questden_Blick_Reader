@@ -50,7 +50,7 @@ Compatibility support Android version >17.
 ## How to Install
 
 **Currently in beta-phase (WIP branch)**</br>
-Download the apk https://github.com/Dediggefedde/Questden_Blick_Reader/blob/WIP/app/release/app-release.apk?raw=true<br/>
+[Download the apk](https://github.com/Dediggefedde/Questden_Blick_Reader/raw/release/app/release/app-release.apk)<br/>
 You might need to allow installing apps outside the playstore.
 Since I'm unknown on playstore, "play protect" will warn you once. 
 
