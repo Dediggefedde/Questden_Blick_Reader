@@ -56,17 +56,20 @@ Since I'm unknown on playstore, "play protect" will warn you once.
 
 ## How to use
 
-* Use the side-navigation to go to a board or your watchlist
-* Tap on a thread-title to go to the quest
-* Tap on images to see them fullscreen
-* Tap on thread-IDs to open that link in your browser
-* The thread-overview has shortened thread-texts. Tap to extent them.
-* Tap a thread-text to hide/show top/button navigation (fullscreen mode)
-* Tap the "watch" button to add/remove a thread to your watchlist
-* Use the bottom navigation to browse between images and board-pages
-* Tap the sunglass for customisation (only-images-mode, font-size, SFW-mode)
-* tap the refresh button to update the current page
-  + When you see the watchlist, press the refresh-button to check for updates
++ **Navigation**
+  * Use the side-navigation to go to a board or your watchlist
+  * Tap on a thread-title to go to the quest
+  * Tap on thread-IDs to open that Post in your browser
+  * Tap a message's text to toggle between navigation and fullscreen mode
+  * Use the bottom navigation arrows to browse between images or board-pages
++ **Features**
+  * Tap the sunglass for customisation (only-images-mode, font-size, SFW-mode)
+  * Tap the "watch" button to add/remove a thread to your watchlist
+  * The board-overview has shortened thread-texts. Tap to extent them.
+  * Tap on images to see them fullscreen
+    - The img-url will appear at the bottom. Tap to open in your browser
+  * Tap the refresh button to update the current page
+    - Watchlist: press the refresh-button to check for updates
 
 ---
 
