@@ -41,6 +41,7 @@ import java.io.StringWriter
 
 
 /* Idea
+* testchange
 * 1. get list of thread from frontpage (/quests/ at the moment
 *   - call front, parse data using regex, save title,author,url,thumb and summary.
 * 2. mark interesting quests via "watch" button.
