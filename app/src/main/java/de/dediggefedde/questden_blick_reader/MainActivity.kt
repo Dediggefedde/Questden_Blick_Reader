@@ -252,10 +252,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.menu_watch_open -> displayThread(RequestValues.WATCH.url, false)
             R.id.menu_reader_sync -> {
                 val inte = Intent(this, SyncActivity::class.java)
-                inte.putExtra("user", sets.user)
-                inte.putExtra("pw", sets.pw)
+                inte.putExtra("sets",sets)
+                inte.putParcelableArrayListExtra("watchlist",ArrayList(watchlist))
                 // If an instance of this Activity already exists, then it will be moved to the front. If an instance does NOT exist, a new instance will be created
-                startActivityForResult(inte, 123)
+                startActivityForResult(inte, 1)
             }
         }
 
@@ -265,29 +265,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK && requestCode == 123) {
+        if (resultCode == Activity.RESULT_OK && requestCode == 1) {
             val watchResp = data?.getStringExtra("response")
-            sets.user = data?.getStringExtra("user") ?: sets.user
-            sets.pw = data?.getStringExtra("pw") ?: sets.pw
-
-            // watchids = new watchbar, char(11) split each thread
-            // thread information char(12) split: board, id, title, author
-            if (watchResp != "") {
-                val lis = watchResp?.split(11.toChar())?.map {
-                    val tg = TgThread()
-                    val inf = it.split(12.toChar())
-                    val url = "/kusaba/${inf[0]}/res/${inf[1]}.html"
-                    //tg.postID=inf[1]
-                    tg.url = url
-                    val w = Watch(tg)
-                    w
-                }
-                if (lis != null) {
-                    watchlist = lis.toMutableList()
-                }
-                updateWatchlist() //fill missing thread and watch information
-            }
-
+            sets = data?.extras?.get("sets") as Settings
+            watchlist = data.getParcelableArrayListExtra("watchlist")!!
+            updateWatchlist()
             storeData()
         }
     }

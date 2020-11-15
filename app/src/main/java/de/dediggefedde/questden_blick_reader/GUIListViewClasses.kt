@@ -15,6 +15,7 @@ import android.text.style.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -419,5 +420,50 @@ class Clickabl(
             ds.color = Color.BLUE
             ds.bgColor = Color.TRANSPARENT
         }
+    }
+}
+
+//TODO: perhaps differnt structure: list of 2 thread?, already aligned
+class SyncCompareListAdapter(var items_local: List<TgThread>, var items_remote: List<TgThread>, var mContext: Context) :
+    RecyclerView.Adapter<SyncCompareListAdapter.ViewHolder>() {
+
+    private var mLocalTitle: TextView? = null
+    private var mRemoteTitle: TextView? = null
+    private var mDirButton: ImageButton? = null
+    private var mTransferState: Int=1 //3 state: 0 download, 1 ignore, 2 upload
+    /**
+     * custom viewholder
+     */
+    inner class FullViewHolder(itemView: View) : ViewHolder(itemView) {
+//        init {
+//        }
+    }
+
+    abstract inner class ViewHolder(itemView: View) :
+        RecyclerView.ViewHolder(itemView) {
+        init {
+            mLocalTitle=itemView.findViewById(R.id.sync_comp_local_title)
+            mRemoteTitle=itemView.findViewById(R.id.sync_comp_remote_title)
+            mDirButton=itemView.findViewById(R.id.sync_comp_img)
+        }
+        fun bind(tg_local: TgThread?,tg_remote: TgThread?) {
+            mLocalTitle?.text=tg_local?.title?:""
+            mRemoteTitle?.text=tg_remote?.title?:""
+        }
+
+    }
+    fun alignedItemPos(localPos:Int):Int{ //TODO: align items
+        return 0
+    }
+
+    override fun getItemCount(): Int = items_local.size //todo remote inside
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val comView = inflater.inflate(R.layout.sync_compare_item, parent, false)
+        return FullViewHolder(comView)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(items_local[position],items_local[position]) //TODO second to remote
     }
 }

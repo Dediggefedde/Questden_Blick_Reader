@@ -1,7 +1,12 @@
 package de.dediggefedde.questden_blick_reader
 
+import android.content.Context
+import android.os.Parcel
 import android.os.Parcelable
+import com.android.volley.toolbox.BasicNetwork
+import com.android.volley.toolbox.DiskBasedCache
 import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.Parcelize
 
 
 /**
@@ -38,6 +43,7 @@ enum class SFWModes {
  * @property url used as unique identifier to thread (first post is also thread-url)
  * @property postID also unique identifier to single post
  */
+@Parcelize
 data class TgThread(
     var title: String = "",
     var imgUrl: String = "",
@@ -49,7 +55,7 @@ data class TgThread(
     var isThread: Boolean = false,
     var isHighlight: Boolean = false,
     var isSpoiler: Boolean = false
-)
+):Parcelable
 
 /**
  * watchlist processing data
@@ -58,19 +64,22 @@ data class TgThread(
  *  alternative minimalizing: thread-ID/url instead of tgThread
  *  but: display watches would require scanning pages, while direct ID scans are already done
  */
+@Parcelize
 data class Watch(
     var thread: TgThread = TgThread(),
     var newestId: String = "",
     var newPosts: Int = 0,
     var newImg: Int = 0,
     var lastReadId: String = ""
-)
+):Parcelable
 
 /**
  * settings object for later
  *  default sorting, default pages, sync-options
  *  loaded at start, saved on change
  */
+//
+@Parcelize
 data class Settings(
     var curpage: String = RequestValues.QUEST.url,
     var curThreadId:String="",
@@ -82,10 +91,9 @@ data class Settings(
     var txsize: Float = 16f,
     var user: String = "",
     var pw: String = "",
-    val lastReadIDs: MutableMap<String,String> = mutableMapOf(), //thread ids → last read pos
+    val lastReadIDs: MutableMap<String, String> = mutableMapOf(), //thread ids → last read pos
     var curTitle:String=""
-)
-
+):Parcelable
 /**
  * enum for navigation object
  * page for quest/tg etc switch, link for quote-clicked, thread for thread opened

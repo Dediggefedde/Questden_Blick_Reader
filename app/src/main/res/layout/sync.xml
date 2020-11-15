@@ -73,10 +73,6 @@
                 android:layout_height="wrap_content"
                 android:text="@string/SyncStatus" />
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="56dp" />
-
             <Button
                 android:id="@+id/button"
                 android:layout_width="match_parent"
@@ -93,13 +89,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="btnDownload"
-                android:text="@string/SyncDownload" />
+                android:text="Synchronize"
+                tools:visibility="invisible" />
 
-            <Button
-                android:id="@+id/button5"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/SyncUpload" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
