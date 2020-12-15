@@ -20,13 +20,13 @@ class SyncCompareActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
-
         syncList.layoutManager = LinearLayoutManager(this)
         syncList.adapter = listAdapt
 
         watchlist= intent.getParcelableArrayListExtra("watchlist")
         newWatchlist= intent.getParcelableArrayListExtra("newwatchlist")
-
+        var w:Watch
+//        w.thread.date ?
         listAdapt.items_remote= newWatchlist?.map{it.thread} ?: emptyList()
         listAdapt.items_local=watchlist?.map{it.thread} ?: emptyList()
     }

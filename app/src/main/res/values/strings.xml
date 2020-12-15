@@ -88,4 +88,6 @@
     <string name="example_date">20/08/21 17:05</string>
     <string name="example_text">asd asd asd asd asda dassadas asa dsadsa daas さよなら 私の手元にdasd asd\nasd 1li</string>
     <string name="LogOut">Log Out</string>
+    <string name="title_activity_syncCompare">Sync Overview</string>
+    <string name="localRmoteCompare">Local: %s items\nRemote: %s items</string>
 </resources>

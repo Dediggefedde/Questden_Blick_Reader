@@ -64,7 +64,7 @@ class ThreadRequest(
 
     override fun deliverResponse(response: MutableList<TgThread>?) = listener.onResponse(response)
 
-
+//TODO request to update title/author, perhaps transmit first item as last like header
     override fun parseNetworkResponse(response: NetworkResponse?): Response<MutableList<TgThread>> {
         return try {
             var li: MutableList<TgThread>

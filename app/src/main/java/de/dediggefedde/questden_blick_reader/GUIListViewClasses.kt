@@ -430,6 +430,7 @@ class SyncCompareListAdapter(var items_local: List<TgThread>, var items_remote: 
     private var mLocalTitle: TextView? = null
     private var mRemoteTitle: TextView? = null
     private var mDirButton: ImageButton? = null
+    private var mTitle:TextView?=null
     private var mTransferState: Int=1 //3 state: 0 download, 1 ignore, 2 upload
     /**
      * custom viewholder
@@ -442,13 +443,18 @@ class SyncCompareListAdapter(var items_local: List<TgThread>, var items_remote: 
     abstract inner class ViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
         init {
+            mTitle=itemView.findViewById(R.id.sync_comp_title)
             mLocalTitle=itemView.findViewById(R.id.sync_comp_local_title)
             mRemoteTitle=itemView.findViewById(R.id.sync_comp_remote_title)
             mDirButton=itemView.findViewById(R.id.sync_comp_img)
         }
         fun bind(tg_local: TgThread?,tg_remote: TgThread?) {
-            mLocalTitle?.text=tg_local?.title?:""
-            mRemoteTitle?.text=tg_remote?.title?:""
+            var titl=tg_local?.title?:""
+            if(titl=="")titl=tg_remote?.title?:""
+
+            mTitle?.text=titl
+            mLocalTitle?.text="local"
+            mRemoteTitle?.text="remote"
         }
 
     }

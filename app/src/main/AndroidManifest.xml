@@ -22,6 +22,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+        <activity
+            android:name=".SyncCompareActivity"
+            android:label="@string/title_activity_syncCompare"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".SyncActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SyncActivity" />
+        </activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

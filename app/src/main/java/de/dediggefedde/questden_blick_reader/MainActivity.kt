@@ -266,9 +266,27 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && requestCode == 1) {
-            val watchResp = data?.getStringExtra("response")
+            //val watchResp = data?.getStringExtra("response")
             sets = data?.extras?.get("sets") as Settings
-            watchlist = data.getParcelableArrayListExtra("watchlist")!!
+
+            watchlist.clear()
+            val remWatchUrl=data.getStringArrayListExtra("watchlistUrl")
+            val remWatchPos=data.getStringArrayListExtra("watchlistPos")
+
+            for (i in 1..remWatchUrl!!.size) {
+                val w=Watch(TgThread())
+                w.thread.url=remWatchUrl[i]
+                w.newestId= remWatchPos?.get(i) ?: ""
+                watchlist.add(w )
+            }
+
+//            watchlist=data.getParcelableArrayListExtra("watchlist") as MutableList<Watch>
+
+//            watchlist.clear()
+//            val wlist=data.getParcelableArrayListExtra("watchlist") as MutableList<Watch>
+//            wlist.forEach{
+//                addToWatch(it.thread.url)
+//            }
             updateWatchlist()
             storeData()
         }
