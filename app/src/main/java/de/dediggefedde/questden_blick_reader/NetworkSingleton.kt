@@ -71,7 +71,8 @@ class ThreadRequest(
             if (response == null) {
                 Response.error<MutableList<TgThread>>(VolleyError("Response empty"))
             } else {
-                var resp = String(response.data, Charset.forName(HttpHeaderParser.parseCharset(response.headers)))
+                val resp = String(response.data, Charset.forName(HttpHeaderParser.parseCharset(response.headers)))
+                val rexMaxPage=Regex("""<a href="/kusaba/.*?/(\d+)\.html">\d+</a>""", RegexOption.DOT_MATCHES_ALL)
 
                 //Log.d("check", "$viewSingle, $lastReadId")
                 if (viewSingle) { //single requests
@@ -80,14 +81,24 @@ class ThreadRequest(
                         //with lastreadid returns list of new entries with first cut off tag <td> of last read element
                         val str = """id="reply$lastReadId"""
                         val ind = resp.indexOf(str)
-                        if (ind > 0) resp = resp.substring(ind)
-                        val doc = Jsoup.parse(resp)
+                        var resptrim=resp
+                        if (ind > 0) resptrim = resp.substring(ind)
+                        var doc = Jsoup.parse(resptrim)
                         li = doc.select("table").map {
                             parseJSoupToTgThread(it)
                         }.filter { it.postID != "" }.toMutableList()
                         if(li.isEmpty()){
                             li= mutableListOf(TgThread())
                         }
+
+                        resptrim=resp.substring(resp.indexOf("<form id=\"delform\""))
+                        resptrim=resptrim.substring(0,resptrim.indexOf("</blockquote")+20)
+                        doc = Jsoup.parse(resptrim)
+
+                        val inf= doc.select("form").map {
+                            parseJSoupToTgThread(it)
+                        }.filter { it.postID != "" }
+                        li.add( inf.first())
 
                     } else { //display thread
 //                        Log.d("loadCheck","single,!lastread $url")
@@ -104,7 +115,6 @@ class ThreadRequest(
                     val rexImg = Regex("<img.*?src=\"(.*?)\"[^>]*class=\"thumb\"", RegexOption.DOT_MATCHES_ALL) // /kusaba/quest/thumb/159280999777s.png
                     val rexRef = Regex("class=\"reflink\".*?a href=\"(.*?(\\d+))\"", RegexOption.DOT_MATCHES_ALL)// /kusaba/quest/res/957117.html#957117
                     val rexSpoilerImg = Regex("firstChild.src='(.*?)'", RegexOption.DOT_MATCHES_ALL)
-                    val rexMaxPage=Regex("""<a href="/kusaba/.*?/(\d+)\.html">\d+</a>""", RegexOption.DOT_MATCHES_ALL)
 
                     val rexSecRes = rexSec.findAll(resp)
                     li = rexSecRes.map {

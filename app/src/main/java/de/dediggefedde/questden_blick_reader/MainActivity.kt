@@ -8,10 +8,11 @@ import android.os.Bundle
 import android.text.Html
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -20,24 +21,20 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-//import com.android.volley.Response
 import com.github.javiersantos.appupdater.AppUpdater
 import com.github.javiersantos.appupdater.enums.UpdateFrom
 import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.sync.*
+import java.io.BufferedReader
+import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
-
-//
-//import com.github.javiersantos.appupdater.enums.AppUpdaterError;
-//import com.github.javiersantos.appupdater.enums.Display;
-//import com.github.javiersantos.appupdater.enums.Duration;
-//import com.github.javiersantos.appupdater.enums.UpdateFrom;
-//import com.github.javiersantos.appupdater.interfaces.IAppUpdater;
-//import com.github.javiersantos.appupdater.objects.GitHub;
-//import com.github.javiersantos.appupdater.objects.Update;
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 /* Idea
@@ -241,6 +238,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         sets.boardPage=0
         when (menuItem.itemId) {
@@ -252,43 +250,137 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.menu_watch_open -> displayThread(RequestValues.WATCH.url, false)
             R.id.menu_reader_sync -> {
                 val inte = Intent(this, SyncActivity::class.java)
-                inte.putExtra("sets",sets)
-                inte.putParcelableArrayListExtra("watchlist",ArrayList(watchlist))
+                inte.putExtra("sets", sets)
+                inte.putParcelableArrayListExtra("watchlist", ArrayList(watchlist))
                 // If an instance of this Activity already exists, then it will be moved to the front. If an instance does NOT exist, a new instance will be created
                 startActivityForResult(inte, 1)
             }
+            R.id.menu_reader_backup -> {
+
+                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+                intent.addCategory(Intent.CATEGORY_OPENABLE)
+
+                val c: Calendar = Calendar.getInstance()
+                val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH)
+                val strDate: String = sdf.format(c.time)
+
+                intent.type = "text/json" //not needed, but maybe usefull
+                intent.putExtra(Intent.EXTRA_TITLE, "questden_backup_$strDate.json") //not needed, but maybe usefull
+
+                startActivityForResult(intent, 2)
+            }
+
+            R.id.menu_reader_restore -> {
+
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+                intent.addCategory(Intent.CATEGORY_OPENABLE)
+
+//                val c: Calendar = Calendar.getInstance()
+//                val sdf = SimpleDateFormat("yyyyMMdd_HHmmss",Locale.ENGLISH)
+//                val strDate: String = sdf.format(c.time)
+
+                intent.type = "text/json" //not needed, but maybe usefull
+//                intent.putExtra(Intent.EXTRA_TITLE, "questden_backup_$strDate.json") //not needed, but maybe usefull
+
+                startActivityForResult(intent, 3)
+            }
+
         }
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
 
+    private fun exportSH(sh_name: Uri?) {
+        try {
+
+            val gson = Gson()
+            val li = listOf(displayDataList, watchlist, sets)
+            val cont= gson.toJson(li)
+
+            val out= sh_name?.let { contentResolver.openOutputStream(it) }
+            out?.write(cont.toByteArray())
+
+            Toast.makeText(this, "Done", Toast.LENGTH_SHORT).show()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show()
+        }
+    }
+    private fun importSH(sh_name: Uri?) {
+        try {
+
+//            val li = listOf(displayDataList, watchlist, sets)
+//            val cont= gson.toJson(li)
+
+            val inf= sh_name?.let { contentResolver.openInputStream(it) }
+            val content = inf!!.bufferedReader().use(BufferedReader::readText)
+
+            val gson = Gson()
+
+            val itemType = object : TypeToken<List<Any>>() {}.type
+            val li:List<Any>
+            li= gson.fromJson(content, itemType)
+
+            if(li.size<3){
+                Toast.makeText(this, "Wrong format", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            var zwi=gson.toJson(li[0])
+            displayDataList =gson.fromJson(zwi, object : TypeToken<List<TgThread>>() {}.type)
+            zwi=gson.toJson(li[1])
+            watchlist = gson.fromJson(zwi, object : TypeToken<MutableList<Watch>>() {}.type)
+            zwi=gson.toJson(li[2])
+            sets= gson.fromJson(zwi, object : TypeToken<Settings>() {}.type)
+
+
+            Toast.makeText(this, "Done", Toast.LENGTH_SHORT).show()
+
+            displayThread(sets.curpage, sets.curSingle)
+           // btnUpdateButton(btn_update)
+
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show()
+        }
+    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && requestCode == 1) {
             //val watchResp = data?.getStringExtra("response")
             sets = data?.extras?.get("sets") as Settings
 
-            watchlist.clear()
             val remWatchUrl=data.getStringArrayListExtra("watchlistUrl")
             val remWatchPos=data.getStringArrayListExtra("watchlistPos")
 
-            for (i in 1..remWatchUrl!!.size) {
-                val w=Watch(TgThread())
-                w.thread.url=remWatchUrl[i]
-                w.newestId= remWatchPos?.get(i) ?: ""
-                watchlist.add(w )
+            if(remWatchUrl!=null && remWatchUrl.size  >0) {//download
+                watchlist.clear()
+
+                for (i in 1..remWatchUrl.size) {
+                    val td = TgThread()
+                    td.url = remWatchUrl[i - 1]
+                    addToWatch(td)
+                    watchlist.last().newestId = remWatchPos?.get(i - 1) ?: ""
+                }
+
+                updateWatchlist()
+                storeData()
             }
-
-//            watchlist=data.getParcelableArrayListExtra("watchlist") as MutableList<Watch>
-
-//            watchlist.clear()
-//            val wlist=data.getParcelableArrayListExtra("watchlist") as MutableList<Watch>
-//            wlist.forEach{
-//                addToWatch(it.thread.url)
-//            }
-            updateWatchlist()
-            storeData()
+        }else if(resultCode == Activity.RESULT_OK && requestCode == 2){
+            //save backup file dialog choose file return
+            try {
+                exportSH(data?.data)
+            } catch (e: IOException) {
+                Toast.makeText(this.applicationContext, "Error", Toast.LENGTH_SHORT).show()
+            }
+        }else if(resultCode == Activity.RESULT_OK && requestCode ==3)  {
+            //load backup file dialog choose file return
+            try {
+                importSH(data?.data)
+            } catch (e: IOException) {
+                Toast.makeText(this.applicationContext, "Error", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -346,31 +438,35 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val queue = MySingleton.getInstance(this.applicationContext)
         val curW: Watch = getWatch(murl)
 
-        val tr = ThreadRequest("https://questden.org$murl", viewSingle, if (onlyCheckWatch) curW.lastReadId else null, null, { response ->
+        val tr = ThreadRequest("https://questden.org$murl", viewSingle, if (onlyCheckWatch) curW.newestId else null, null, { response ->
             reqDone += 1
 //            Log.d("loadCheck","displaythread reps")
             if (onlyCheckWatch) {
+                val inf = response.removeLast()
                 val newPosts = response.filter { it.postID != "" }.size
                 val newImgs = response.filter { it.imgUrl != "" }.size
+                if (curW.thread.title == "") {
+                    curW.thread = inf
+                }
                 if (newPosts > 0) {
                     val newestId = response.last().postID
-                    val newW = Watch(curW.thread,newestId, newPosts, newImgs, curW.lastReadId)
+                    val newW = Watch(curW.thread, newestId, newPosts, newImgs, curW.lastReadId)
                     updateWatch(newW)
                 }
             } else {
                 sets.curSingle = viewSingle
                 if (viewSingle) {
-                    sets.curTitle=response.first().title
+                    sets.curTitle = response.first().title
                     sets.curThreadId = Regex("""(\d+).html""").find(murl)?.groupValues?.get(1) ?: ""
                     displayDataList = response
                     displayThreadList()
 //                    Log.d("loadcheck","pos store")
                 } else {
-                    sets.curTitle=sets.curpage
+                    sets.curTitle = sets.curpage
                     sets.curThreadId = ""
-                    val inf=response.last()
+                    val inf = response.last()
                     response.remove(response.last())
-                    sets.curMaxPage=inf.summary.toInt()
+                    sets.curMaxPage = inf.summary.toInt()
                     displayDataList = response
                     displayThreadList(0)
 //                    Log.d("loadcheck","pos 0")
@@ -422,6 +518,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val jsonstring = gson.toJson(displayDataList)
         val jsonstring2 = gson.toJson(watchlist)
         val jsonstring3 = gson.toJson(sets)
+
         with(sharedPref.edit()) {
             putString("tgchanItems", jsonstring)
             putString("watchItems", jsonstring2)
@@ -707,7 +804,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun navigatePage(page: Int) {
         if (sets.curpage == RequestValues.WATCH.url || page <0 || page > sets.curMaxPage) return
         sets.boardPage = page
-        displayThread(sets.curpage,viewSingle = false,onlyCheckWatch = false )
+        displayThread(sets.curpage, viewSingle = false, onlyCheckWatch = false)
     }
 
     /**

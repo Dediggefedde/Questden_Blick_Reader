@@ -63,6 +63,8 @@ data class TgThread(
  *  listOf in mainActivity, stable source of data for features
  *  alternative minimalizing: thread-ID/url instead of tgThread
  *  but: display watches would require scanning pages, while direct ID scans are already done
+ *  lastread: last reading position
+ *  newestId: position after which posts are "new"
  */
 @Parcelize
 data class Watch(

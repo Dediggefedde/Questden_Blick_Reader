@@ -32,6 +32,12 @@
             <item
                 android:id="@+id/menu_reader_sync"
                 android:title="@string/menu_reader_sync"/>
+            <item
+                android:id="@+id/menu_reader_backup"
+                android:title="@string/backup"/>
+            <item
+                android:id="@+id/menu_reader_restore"
+                android:title="@string/restore"/>
         </menu>
     </item>
 </menu>

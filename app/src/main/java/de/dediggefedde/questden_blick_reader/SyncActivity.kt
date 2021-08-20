@@ -58,9 +58,9 @@ class SyncActivity : AppCompatActivity() {
     private fun returnVals(){
         val data = Intent()
         data.putExtra("sets", sets)
-        data.putParcelableArrayListExtra("watchlist",ArrayList(watchlist!!))
-        data.putStringArrayListExtra("watchlistUrl",ArrayList(newWatchUrl!!))
-        data.putStringArrayListExtra("watchlistPos",ArrayList(newWatchPos!!))
+        data.putParcelableArrayListExtra("watchlist",ArrayList(watchlist?: emptyList()))
+        data.putStringArrayListExtra("watchlistUrl",ArrayList(newWatchUrl?: emptyList()))
+        data.putStringArrayListExtra("watchlistPos",ArrayList(newWatchPos?: emptyList()))
         setResult(RESULT_OK, data)
         finish()
     }

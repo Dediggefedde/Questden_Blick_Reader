@@ -90,4 +90,6 @@
     <string name="LogOut">Log Out</string>
     <string name="title_activity_syncCompare">Sync Overview</string>
     <string name="localRmoteCompare">Local: %s items\nRemote: %s items</string>
+    <string name="backup">Save Backup</string>
+    <string name="restore">Load Backup</string>
 </resources>
