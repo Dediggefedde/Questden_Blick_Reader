@@ -21,7 +21,7 @@ import java.net.CookieManager
 class SyncActivity : AppCompatActivity() {
     private var sets:Settings? = null
     private var loggedIn=false
-//    private var watchResp=""
+//    private var watchResp="" commit test for new token
     private var watchlist: MutableList<Watch>? = null
     private var newWatchlist: MutableList<Watch>? = null
     private var newWatchUrl:MutableList<String>?=null
