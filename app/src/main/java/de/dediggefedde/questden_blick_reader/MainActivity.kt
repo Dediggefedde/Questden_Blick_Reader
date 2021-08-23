@@ -27,11 +27,11 @@ import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.sync.*
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -357,15 +357,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if(remWatchUrl!=null && remWatchUrl.size  >0) {//download
                 watchlist.clear()
 
-                for (i in 1..remWatchUrl.size) {
-                    val td = TgThread()
-                    td.url = remWatchUrl[i - 1]
-                    addToWatch(td)
-                    watchlist.last().newestId = remWatchPos?.get(i - 1) ?: ""
-                }
+                try {
+                    for (i in 1..remWatchUrl.size) {
+                        val td = TgThread()
+                        td.url = remWatchUrl[i - 1]
+                        addToWatch(td)
+                        watchlist.last().newestId = remWatchPos?.get(i - 1) ?: ""
+                    }
+                    Toast.makeText(this.applicationContext, "Download finished", Toast.LENGTH_SHORT).show()
 
-                updateWatchlist()
-                storeData()
+                    updateWatchlist()
+                    storeData()
+                    Toast.makeText(this.applicationContext, "Import Complete", Toast.LENGTH_SHORT).show()
+                }catch(e:Exception){
+                    Toast.makeText(this.applicationContext, "Error", Toast.LENGTH_SHORT).show()
+                }
+            }else{//upload complete
+                Toast.makeText(this.applicationContext, "Upload complete", Toast.LENGTH_SHORT).show()
             }
         }else if(resultCode == Activity.RESULT_OK && requestCode == 2){
             //save backup file dialog choose file return
@@ -436,7 +444,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             chronic.add(Navis(NavOperation.PAGE, murl))
 
         val queue = MySingleton.getInstance(this.applicationContext)
-        val curW: Watch = getWatch(murl)
+        val curW: Watch = getWatchByUrl(murl)
 
         val tr = ThreadRequest("https://questden.org$murl", viewSingle, if (onlyCheckWatch) curW.newestId else null, null, { response ->
             reqDone += 1
@@ -448,11 +456,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 if (curW.thread.title == "") {
                     curW.thread = inf
                 }
-                if (newPosts > 0) {
-                    val newestId = response.last().postID
-                    val newW = Watch(curW.thread, newestId, newPosts, newImgs, curW.lastReadId)
+               // if (newPosts > 0) {
+                  //  val newestId = response.last().postID
+                    val newW = Watch(curW.thread, curW.newestId, newPosts, newImgs, curW.lastReadId)
                     updateWatch(newW)
-                }
+           //     }
             } else {
                 sets.curSingle = viewSingle
                 if (viewSingle) {
@@ -474,11 +482,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
                 if (isWatched(murl)) {
-                    val w: Watch = getWatch(murl) //copy returned? then w.(...)=... will not do anything
+                    val w: Watch = getWatchByUrl(murl) //copy returned? then w.(...)=... will not do anything
                     // if (w.curReadId == "") w.curReadId = w.lastReadId
                     //val scrollpos = listAdapt.items.indexOfFirst { it.postID == w.curReadId }
                     //scrollHighlight(scrollpos)
-                    w.lastReadId = w.newestId
+                    w.newestId = response.last().postID
+                    //w.lastReadId = w.newestId
                     w.newImg = 0
                     w.newPosts = 0
                     setWatch(w)
@@ -589,9 +598,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     /**
      * get watch object (copy) by url
      */
-    fun getWatch(url: String): Watch {
+    fun getWatchByUrl(url: String): Watch {
         return watchlist.firstOrNull { it.thread.url == url } ?: return Watch()
     }
+    /**
+     * get watch object (copy) by url
+     */
+    fun getWatchById(id: String): Watch {
+        return watchlist.firstOrNull { it.thread.postID == id } ?: return Watch()
+    }
+
 
     /**
      * set watch object (copy) by url
@@ -654,6 +670,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (sets.curThreadId != "" && listAdapt.items.size>pos) {
                 sets.lastReadIDs[sets.curThreadId] = listAdapt.items[pos].postID
             }
+            val w=getWatchById(sets.curThreadId)
+            w.lastReadId=listAdapt.items[pos].postID
+            updateWatch(w)
+
         } else if (!sets.curSingle) {
             totcnt = sets.curMaxPage
             curcnt = sets.boardPage

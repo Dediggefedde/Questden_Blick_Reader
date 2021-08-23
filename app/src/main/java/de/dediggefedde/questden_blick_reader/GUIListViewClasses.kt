@@ -164,7 +164,7 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
          */
         open fun updateWatchState() {
             if (mMain.isWatched(mtg.url)) {
-                val w: Watch = mMain.getWatch(mtg.url)
+                val w: Watch = mMain.getWatchByUrl(mtg.url)
 
                 mWatchBut?.setTextColor(Color.parseColor("#FF37A523"))
                 mWatchBut?.text = mContext.getString(R.string.wBut_watched)
@@ -423,7 +423,6 @@ class Clickabl(
     }
 }
 
-//TODO: perhaps differnt structure: list of 2 thread?, already aligned
 class SyncCompareListAdapter(var items_local: List<TgThread>, var items_remote: List<TgThread>, var mContext: Context) :
     RecyclerView.Adapter<SyncCompareListAdapter.ViewHolder>() {
 
@@ -458,11 +457,11 @@ class SyncCompareListAdapter(var items_local: List<TgThread>, var items_remote: 
         }
 
     }
-    fun alignedItemPos(localPos:Int):Int{ //TODO: align items
+    fun alignedItemPos(localPos:Int):Int{
         return 0
     }
 
-    override fun getItemCount(): Int = items_local.size //todo remote inside
+    override fun getItemCount(): Int = items_local.size
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val comView = inflater.inflate(R.layout.sync_compare_item, parent, false)
@@ -470,6 +469,6 @@ class SyncCompareListAdapter(var items_local: List<TgThread>, var items_remote: 
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(items_local[position],items_local[position]) //TODO second to remote
+        holder.bind(items_local[position],items_local[position])
     }
 }

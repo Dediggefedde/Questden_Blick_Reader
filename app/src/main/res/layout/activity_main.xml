@@ -257,6 +257,7 @@
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/drawer_menu"
+        android:theme="@style/NavigationTheme"
         tools:visibility="gone" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

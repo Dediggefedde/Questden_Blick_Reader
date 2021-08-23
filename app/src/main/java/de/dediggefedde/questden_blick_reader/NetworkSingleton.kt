@@ -54,7 +54,7 @@ fun parseJSoupToTgThread(it: Element): TgThread {
 }
 
 class ThreadRequest(
-    url: String, private val viewSingle: Boolean, private val lastReadId: String?,
+    url: String, private val viewSingle: Boolean, private val newestId: String?,
     private val headers: MutableMap<String, String>?,
     private val listener: Response.Listener<MutableList<TgThread>>,
     errorListener: Response.ErrorListener
@@ -74,12 +74,12 @@ class ThreadRequest(
                 val resp = String(response.data, Charset.forName(HttpHeaderParser.parseCharset(response.headers)))
                 val rexMaxPage=Regex("""<a href="/kusaba/.*?/(\d+)\.html">\d+</a>""", RegexOption.DOT_MATCHES_ALL)
 
-                //Log.d("check", "$viewSingle, $lastReadId")
+                //Log.d("check", "$viewSingle, newestId")
                 if (viewSingle) { //single requests
-                    if (lastReadId != null) { //check for new posts/images
+                    if (newestId != null) { //check for new posts/images
 //                        Log.d("loadCheck","single,lastread $url")
-                        //with lastreadid returns list of new entries with first cut off tag <td> of last read element
-                        val str = """id="reply$lastReadId"""
+                        //with newestId returns list of new entries with first cut off tag <td> of last read element
+                        val str = """id="reply$newestId"""
                         val ind = resp.indexOf(str)
                         var resptrim=resp
                         if (ind > 0) resptrim = resp.substring(ind)

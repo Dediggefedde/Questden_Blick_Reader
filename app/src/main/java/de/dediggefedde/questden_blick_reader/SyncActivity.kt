@@ -1,10 +1,11 @@
 package de.dediggefedde.questden_blick_reader
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.RequestQueue
 import com.android.volley.Response
@@ -16,12 +17,9 @@ import kotlinx.android.synthetic.main.sync.*
 import java.net.CookieHandler
 import java.net.CookieManager
 
-
-
 class SyncActivity : AppCompatActivity() {
     private var sets:Settings? = null
     private var loggedIn=false
-//    private var watchResp="" commit test for new token
     private var watchlist: MutableList<Watch>? = null
     private var newWatchlist: MutableList<Watch>? = null
     private var newWatchUrl:MutableList<String>?=null
@@ -30,6 +28,11 @@ class SyncActivity : AppCompatActivity() {
     private lateinit var cache:DiskBasedCache
     private lateinit var network:BasicNetwork
     private lateinit var requestQueue:RequestQueue
+
+    private fun View.hideKeyboard() {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(windowToken, 0)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,7 +82,7 @@ class SyncActivity : AppCompatActivity() {
         super.onBackPressed()
         returnVals()
     }
-    fun downloadRemote(){
+    private fun downloadRemote(){
         if(!loggedIn) {
             textView.text = getString(R.string.NotLoggedIn)
             return
@@ -110,8 +113,8 @@ class SyncActivity : AppCompatActivity() {
                 newWatchlist = lis2.toMutableList()
 
                 //get lastview
-                lis[2].split(12.toChar()).forEach{
-                    val inf = it.split(11.toChar())
+                lis[2].split(12.toChar()).forEach{ el ->
+                    val inf = el.split(11.toChar())
                     val urlp=inf[0].split("_")
                     val url = "/kusaba/${urlp[0]}/res/${urlp[1]}.html"
                     newWatchlist?.firstOrNull { it.thread.url == url }?.newestId=inf[1]
@@ -160,14 +163,14 @@ class SyncActivity : AppCompatActivity() {
     // }
 
     // watchids=(await GM.getValue("watchids","")).split(String.fromCharCode(11));
-    fun uploadRemote(){
+    private fun uploadRemote(){
 
         if(!loggedIn) {
             textView.text = getString(R.string.NotLoggedIn)
             return
         }
         if( remoteData.isEmpty()){
-            textView.text = "Please create an entry first using the userscript"
+            textView.text = getString(R.string.firstCreateEntry)
             return
         }
 
@@ -179,7 +182,7 @@ class SyncActivity : AppCompatActivity() {
         // watchids = new watchbar, char(11) split each thread
         // thread information char(12) split: board, id, title, author
         //lastview: thread+"_"+id+chr(11)+ref+chr(11)+count , count >50?1:0, join by ch(12)
-       var watchids=""//remoteData[3]
+      // var watchids=""//remoteData[3]
         remoteData[3]= watchlist?.joinToString(separator = 11.toChar().toString())  {
             //board, id, title, author
             val urlinf=Regex("""kusaba/(.*?)/res/(\d+).html""",RegexOption.DOT_MATCHES_ALL).find(it.thread.url)?.groupValues
@@ -236,10 +239,14 @@ class SyncActivity : AppCompatActivity() {
 
             if (sets?.user == "") return
             login(sets!!.user, sets!!.pw)
+            view.hideKeyboard()
         }else{
             loggedIn=false
             sets?.pw=""
+            textView.text = getString(R.string.Loggedout)
+            button.text = getString(R.string.SyncLogin)
             button3.visibility=View.INVISIBLE
+            btnUpload.visibility=View.INVISIBLE
         }
     }
 
@@ -259,6 +266,7 @@ class SyncActivity : AppCompatActivity() {
                     textView.text = getString(R.string.LoggedIn)
                     button.text = getString(R.string.LogOut)
                     button3.visibility=View.VISIBLE
+                    btnUpload.visibility=View.VISIBLE
                     loggedIn = true
                     downloadRemote()
                 }

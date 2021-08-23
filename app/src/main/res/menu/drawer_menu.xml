@@ -5,6 +5,9 @@
     <item android:title="@string/nav_pages_title">
         <menu>
             <item
+                android:id="@+id/menu_watch_open"
+                android:title="@string/nav_watchlist_open"/>
+            <item
                 android:id="@+id/menu_draw"
                 android:title="@string/nav_pages_draw"/>
             <item
@@ -23,9 +26,6 @@
     </item>
     <item android:title="@string/nav_special_title" android:id="@+id/menu_reader">
         <menu>
-            <item
-                android:id="@+id/menu_watch_open"
-                android:title="@string/nav_watchlist_open"/>
 <!--            <item-->
 <!--                android:id="@+id/menu_reader_settings"-->
 <!--                android:title="@string/nav_reader_settings"/>-->
