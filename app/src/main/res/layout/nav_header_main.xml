@@ -4,7 +4,7 @@
     android:id="@+id/nav_header"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#070"
+    android:background="@color/color_header_bg"
     android:clickable="true"
     android:focusable="true"
     android:orientation="vertical"
@@ -16,10 +16,10 @@
         android:layout_width="43dp"
         android:layout_height="33dp"
         android:layout_marginTop="4dp"
-        app:srcCompat="@drawable/ic_questden"
+        android:contentDescription="@string/nav_header_img_desc"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="@string/nav_header_img_desc" />
+        app:srcCompat="@drawable/ic_questden" />
 
     <TextView
         android:id="@+id/nav_header_textView"
@@ -27,6 +27,7 @@
         android:layout_height="wrap_content"
         android:text="@string/nav_header_title"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="@+id/nav_header_imageView"
         app:layout_constraintStart_toEndOf="@+id/nav_header_imageView"
         app:layout_constraintTop_toTopOf="@+id/nav_header_imageView" />

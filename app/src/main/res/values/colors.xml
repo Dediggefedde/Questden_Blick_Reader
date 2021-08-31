@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#03DAC5</color>
+    <color name="colorPrimary">#8DC64B</color><!-- text bg color -->
+    <color name="colorPrimaryDark">#000</color><!-- smartphone icon bars-->
+    <color name="colorAccent">#000</color> <!-- text color -->
+    <color name="color_list_date">#1B6FA6</color>
+    <color name="color_list_bg">#F0E0D6</color>
+    <color name="color_list_title">#B60D02</color>
+    <color name="color_list_text">#600000</color>
+    <color name="color_list_author">#074025</color>
+    <color name="color_list_watch_bg">#20E91E63</color>
+    <color name="color_list_watch_text">#A52B23</color>
+    <color name="color_list_postID">#1B6FA6</color>
+    <color name="color_imgPath_bg">#8DC64B</color>
+    <color name="color_navigation_bg">#FCBD7E</color>
+    <color name="color_progress_frame">#000</color>
+    <color name="color_progress_center">#FCBD7E</color>
+    <color name="color_syncHeader_bg">#FCBD7E</color>
+    <color name="color_title_bg">#FCBD7E</color>
+    <color name="color_header_bg">#FCBD7E</color>
 </resources>

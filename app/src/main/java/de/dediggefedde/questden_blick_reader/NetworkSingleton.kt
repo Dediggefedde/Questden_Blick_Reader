@@ -1,7 +1,6 @@
 package de.dediggefedde.questden_blick_reader
 
 import android.content.Context
-import android.util.Log
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.DiskBasedCache
@@ -69,15 +68,13 @@ class ThreadRequest(
         return try {
             var li: MutableList<TgThread>
             if (response == null) {
-                Response.error<MutableList<TgThread>>(VolleyError("Response empty"))
+                Response.error(VolleyError("Response empty"))
             } else {
                 val resp = String(response.data, Charset.forName(HttpHeaderParser.parseCharset(response.headers)))
                 val rexMaxPage=Regex("""<a href="/kusaba/.*?/(\d+)\.html">\d+</a>""", RegexOption.DOT_MATCHES_ALL)
 
-                //Log.d("check", "$viewSingle, newestId")
                 if (viewSingle) { //single requests
                     if (newestId != null) { //check for new posts/images
-//                        Log.d("loadCheck","single,lastread $url")
                         //with newestId returns list of new entries with first cut off tag <td> of last read element
                         val str = """id="reply$newestId"""
                         val ind = resp.indexOf(str)
@@ -101,14 +98,12 @@ class ThreadRequest(
                         li.add( inf.first())
 
                     } else { //display thread
-//                        Log.d("loadCheck","single,!lastread $url")
                         val doc = Jsoup.parse(resp)
                         li = doc.select("#delform,#delform>table").map {
                             parseJSoupToTgThread(it)
                         }.filter { it.postID != "" }.toMutableList()
                     }
                 } else { //board overview
-//                    Log.d("loadCheck","overview $url")
                     val rexSec = Regex("<div id=\"thread.*?>(.*?)<blockquote>(.*?)</blockquote", RegexOption.DOT_MATCHES_ALL)
                     val rexTitle = Regex("<span.*?class=\"filetitle\".*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
                     val rexAuthor = Regex("<span.*?class=\"postername\".*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)

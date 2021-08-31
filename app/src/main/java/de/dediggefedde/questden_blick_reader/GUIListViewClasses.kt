@@ -12,15 +12,15 @@ import android.text.Html
 import android.text.Spannable
 import android.text.TextPaint
 import android.text.style.*
-//import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
-//import android.widget.ListAdapter
 import android.widget.TextView
-//import androidx.recyclerview.widget.DiffUtil
+import android.widget.Toast
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -34,13 +34,6 @@ import org.xml.sax.XMLReader
 import java.lang.reflect.Field
 
 
-//
-//private class DiffCallback : DiffUtil.ItemCallback<TgThread>() {
-//    override fun areItemsTheSame(oldItem: TgThread, newItem: TgThread) =
-//        oldItem.postID == newItem.postID
-//    override fun areContentsTheSame(oldItem: TgThread, newItem: TgThread) =
-//        oldItem == newItem
-//}
 /**
  * RecyclerView custom adapter to display tgthread correctly
  *  currently has copy of tgthread, perhaps index/reference to external list better
@@ -48,10 +41,10 @@ import java.lang.reflect.Field
  *  planned to have alternative compact layout
  *  need investigation for memory management
  */
-//class QuestDenListAdapter(val action: (items: MutableList<TgThread>, changed: TgThread, checked: Boolean) -> Unit) :
-//    RecyclerView.Adapter< QuestDenListAdapter.ViewHolder>(DiffCallback()){
-class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
-    RecyclerView.Adapter<QuestDenListAdapter.ViewHolder>() {
+class QuestDenListAdapter(val mContext: Context) :
+    ListAdapter<TgThread, QuestDenListAdapter.ViewHolder>(DiffCallback()){
+//class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
+//    RecyclerView.Adapter<QuestDenListAdapter.ViewHolder>() {
     /**
      * custom viewholder for one tgthread object
      */
@@ -59,18 +52,17 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
 //        init {
 //        }
     }
-//
-//    class TaskDiffCallBack : DiffUtil.ItemCallback<TgThread>() {
-//        override fun areItemsTheSame(oldItem: TgThread, newItem: TgThread): Boolean {
-//            Log.d("TAG",Thread.currentThread().name)
-//            return oldItem.postID == newItem.postID;
-//        }
-//
-//        override fun areContentsTheSame(oldItem: TgThread, newItem: TgThread): Boolean {
-//            Log.d("TAG",Thread.currentThread().name)
-//            return oldItem == newItem
-//        }
-//    }
+    private class DiffCallback : DiffUtil.ItemCallback<TgThread>() {
+
+        //2
+        override fun areItemsTheSame(oldItem: TgThread, newItem: TgThread) =
+            oldItem.postID == newItem.postID && oldItem.newImg == newItem.newImg && oldItem.newPosts==newItem.newPosts
+
+        //3
+        override fun areContentsTheSame(oldItem: TgThread, newItem: TgThread) =
+            oldItem == newItem
+    }
+
     /**
      * Viewholder item. made abstract to offer multiple layouts. currently only one used
      */
@@ -111,24 +103,25 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
             mTitleView?.setOnClickListener(evThreadTitleClick)
             mAuthorView?.setOnClickListener(evThreadTitleClick)
             mImgView?.setOnClickListener {
-                mMain.progressBar.visibility = View.VISIBLE
+                mMain.progressBarUndet.visibility = View.VISIBLE
                 mMain.imageZoom.visibility = View.VISIBLE
                 mMain.tx_img_path.visibility = View.VISIBLE
                 var str = "https://questden.org" + mtg.imgUrl.replace("thumb", "src").replace("s.", ".")
                 if (mtg.isSpoiler && mMain.sets.sfw == SFWModes.SFWREAL) str = "https://questden.org/kusaba/spoiler.png"
 
+
                 Glide.with(mMain.imageZoom)
                     .load(str)
                     .listener(object : RequestListener<Drawable> {
                         override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-                            mMain.progressBar.visibility = View.GONE
+                            mMain.progressBarUndet.visibility = View.GONE
                             return false
                         }
 
                         override fun onResourceReady(
                             resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean
                         ): Boolean {
-                            mMain.progressBar.visibility = View.GONE
+                            mMain.progressBarUndet.visibility = View.GONE
                             return false
                         }
                     })
@@ -189,6 +182,8 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
         open fun updateWatchState() {
             if (mMain.isWatched(mtg.url)) {
                 val w: Watch = mMain.getWatchByUrl(mtg.url)
+                mtg.newPosts=w.newPosts
+                mtg.newImg=w.newImg
 
                 mWatchBut?.setTextColor(Color.parseColor("#FF37A523"))
                 mWatchBut?.text = mContext.getString(R.string.wBut_watched)
@@ -212,7 +207,7 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
         @SuppressLint("Range")
         fun bind(tg: TgThread) {
             mtg = tg
-            if(mtg.url.indexOf("#")>0)mtg.url=mtg.url.substring(0,mtg.url.indexOf("#"))
+            if (mtg.url.indexOf("#") > 0) mtg.url = mtg.url.substring(0, mtg.url.indexOf("#"))
 
             if (mtg.isThread) {
                 mWatchBut?.visibility = View.VISIBLE
@@ -264,7 +259,6 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
                     //.apply(RequestOptions.overrideOf (imgwidth,Target.SIZE_ORIGINAL ))
                     .listener(object : RequestListener<Drawable> {
                         override fun onLoadFailed(p0: GlideException?, p1: Any?, target: Target<Drawable>?, p3: Boolean): Boolean {
-                           // Log.d("TAG", "onLoadFailed")
                             return false
                         }
 
@@ -278,10 +272,9 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
 
             }
         }
-
     }
 
-    override fun getItemCount(): Int = items.size
+    override fun getItemCount(): Int = currentList.size
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
 //        if (viewType == 0) {
@@ -294,7 +287,7 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(items[position])
+        holder.bind(currentList[position])
 //        val task = items[position]
 //        holder.tvDesc.text = task.body
 //        holder.tvTitle.text = task.title
@@ -342,6 +335,7 @@ class HTMLTagHandler(private var mContext: Context) : Html.TagHandler {
                 for (i in 0 until len)
                     attributes[data[i * 5 + 1]] = data[i * 5 + 4]
         } catch (e: java.lang.Exception) {
+            Toast.makeText(mContext, "There was an error parsing the Thread:\n${e.message}", Toast.LENGTH_SHORT).show()
            // Log.d("TAG", "Exception: $e")
         }
     }
@@ -416,22 +410,26 @@ class Clickabl(
 
         if (span != null && rexTag.matches(span!!.url)) {
             val main = mContext as MainActivity
-            val pos = main.listAdapt.items.indexOfFirst { it.postID == rexTag.find(span!!.url)?.groupValues?.get(1) ?: 0 }
+            val pos = main.listAdapt.currentList.indexOfFirst { it.postID == rexTag.find(span!!.url)?.groupValues?.get(1) ?: 0 }
 
-            if (main.listAdapt.items.size < pos || pos == -1) return
+            if (main.listAdapt.currentList.size < pos || pos == -1) return
 
             if (main.chronic.size > 0 && main.chronic[main.chronic.lastIndex].prop != pos.toString())
                 main.chronic.add(Navis(NavOperation.LINK, pos.toString(), main.ingredients_list.layoutManager?.onSaveInstanceState()))
 
             main.scrollHighlight(pos)
-            main.listAdapt.items.forEach { it.isHighlight = false }
-            main.listAdapt.items[pos].isHighlight = true
+            main.listAdapt.currentList.forEach { it.isHighlight = false }
+            main.listAdapt.currentList[pos].isHighlight = true
             main.chronic.add(Navis(NavOperation.LINK, pos.toString(), main.ingredients_list.layoutManager?.onSaveInstanceState()))
-//            main.listAdapt.notifyDataSetChanged()
-
+//            main.listAdapt.notifyDataSetChanged(
+        }else if(span!=null && !spoiler){
+            val openURL = Intent(Intent.ACTION_VIEW)
+            openURL.data = Uri.parse(span!!.url)
+            mContext.startActivity(openURL)
         }
-        if((mContext as MainActivity).sets.sfw == SFWModes.SFWQUESTION)
+        if(spoiler && (mContext as MainActivity).sets.sfw == SFWModes.SFWQUESTION)
             spoiled = !spoiled
+
         view.invalidate()
     }
 

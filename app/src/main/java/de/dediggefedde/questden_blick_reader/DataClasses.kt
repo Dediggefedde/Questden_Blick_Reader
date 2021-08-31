@@ -50,7 +50,9 @@ data class TgThread(
     var postID: String = "",
     var isThread: Boolean = false,
     var isHighlight: Boolean = false,
-    var isSpoiler: Boolean = false
+    var isSpoiler: Boolean = false,
+    var newPosts: Int = 0,
+    var newImg: Int = 0
 ):Parcelable
 
 /**

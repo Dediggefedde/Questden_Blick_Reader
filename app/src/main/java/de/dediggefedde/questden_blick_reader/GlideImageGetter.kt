@@ -8,7 +8,6 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.text.Html.ImageGetter
-import android.util.Log
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.Request
@@ -40,7 +39,6 @@ class GlideImageGetter(
 
     override fun getDrawable(source: String): Drawable {
 //        imagesHandler?.addImage(source)
-        //Log.d("imgsrc",source)
 
         val drawable = BitmapDrawablePlaceholder()
 

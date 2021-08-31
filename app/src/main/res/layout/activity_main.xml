@@ -28,9 +28,10 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
+            app:titleTextColor="@color/colorAccent"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="?attr/colorPrimary"
+            android:background="@color/color_title_bg"
             android:minHeight="?attr/actionBarSize"
             android:theme="?attr/actionBarTheme"
             app:layout_constraintEnd_toEndOf="parent"
@@ -67,12 +68,30 @@
             app:layout_constraintGuide_percent="0.9" />
 
         <ProgressBar
-            android:id="@+id/progressBar"
+            android:id="@+id/progressBarDet"
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:max="100"
+            android:progress="10"
+            android:progressDrawable="@drawable/circle"
+            android:rotation="-90"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/progressBarUndet"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:theme="@style/ProgressBarStyle"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             android:max="100"
             android:progress="50"
+            android:rotation="-90"
+
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -86,6 +105,7 @@
             android:orientation="horizontal"
             app:layout_constraintBottom_toTopOf="@+id/tool_dropout"
             app:layout_constraintEnd_toEndOf="parent"
+            android:background="@color/color_navigation_bg"
             app:layout_constraintStart_toStartOf="parent">
 
             <Button
@@ -108,7 +128,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minWidth="0dp"
+                android:minWidth="48dp"
                 android:minHeight="0dp"
                 android:onClick="btnFirstButton"
                 android:text="@string/Bot_Nav_first" />
@@ -118,7 +138,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minWidth="0dp"
+                android:minWidth="48dp"
                 android:minHeight="0dp"
                 android:onClick="btnPrevButton"
                 android:text="@string/Bot_Nav_prev" />
@@ -134,7 +154,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minWidth="0dp"
+                android:minWidth="48dp"
                 android:minHeight="0dp"
                 android:onClick="btnNextButton"
                 android:text="@string/Bot_Nav_next" />
@@ -144,7 +164,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minWidth="0dp"
+                android:minWidth="48dp"
                 android:minHeight="0dp"
                 android:onClick="btnLastButton"
                 android:text="@string/Bot_Nav_Last" />
@@ -170,7 +190,7 @@
             android:id="@+id/tx_img_path"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="#8DC64B"
+            android:background="@color/color_imgPath_bg"
             android:onClick="btnimgZoomPath"
             android:text=""
             app:layout_constraintBottom_toBottomOf="parent"
@@ -194,6 +214,7 @@
             android:gravity="start"
             android:orientation="horizontal"
             android:visibility="gone"
+            android:background="@color/color_navigation_bg"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">

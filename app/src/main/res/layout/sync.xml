@@ -19,7 +19,7 @@
                 android:id="@+id/synctoolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
+                android:background="@color/color_syncHeader_bg"
                 app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         </com.google.android.material.appbar.AppBarLayout>
@@ -85,14 +85,14 @@
                 android:id="@+id/syncRemStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Not logged in..." />
+                android:text="@string/NotLoggedIn" />
 
             <Button
                 android:id="@+id/button3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="btnDownload"
-                android:text="Download"
+                android:text="@string/SyncDownload"
                 tools:visibility="invisible" />
 
             <Button
@@ -100,7 +100,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="btnUpload"
-                android:text="Upload"
+                android:text="@string/SyncUpload"
                 tools:visibility="invisible" />
 
         </LinearLayout>
