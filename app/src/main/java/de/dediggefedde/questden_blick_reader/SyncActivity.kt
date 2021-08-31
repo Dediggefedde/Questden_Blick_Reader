@@ -294,7 +294,7 @@ class SyncActivity : AppCompatActivity() {
                 return "application/x-www-form-urlencoded"
             }
 
-            override fun getParams(): MutableMap<String, String>? {
+            override fun getParams(): MutableMap<String, String> {
                 return param
             }
 

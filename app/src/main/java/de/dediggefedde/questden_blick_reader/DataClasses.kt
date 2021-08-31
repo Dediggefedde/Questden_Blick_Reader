@@ -1,10 +1,6 @@
 package de.dediggefedde.questden_blick_reader
 
-import android.content.Context
-import android.os.Parcel
 import android.os.Parcelable
-import com.android.volley.toolbox.BasicNetwork
-import com.android.volley.toolbox.DiskBasedCache
 import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
 

@@ -1,5 +1,6 @@
 package de.dediggefedde.questden_blick_reader
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -118,7 +119,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         chronic.add(Navis(NavOperation.LINK, pos.toString(), ingredients_list.layoutManager?.onSaveInstanceState()))
 
         //highlights changed
-        listAdapt.notifyDataSetChanged()
+        //listAdapt.notifyDataSetChanged()
 
         updatePositionDisplay(pos)
     }
@@ -319,8 +320,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val gson = Gson()
 
             val itemType = object : TypeToken<List<Any>>() {}.type
-            val li:List<Any>
-            li= gson.fromJson(content, itemType)
+            val li:List<Any> = gson.fromJson(content, itemType)
 
             if(li.size<3){
                 Toast.makeText(this, "Wrong format", Toast.LENGTH_SHORT).show()
@@ -347,7 +347,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK && requestCode == 1) {
+        if(resultCode != Activity.RESULT_OK)return
+
+        if (requestCode == 1) {
             //val watchResp = data?.getStringExtra("response")
             sets = data?.extras?.get("sets") as Settings
 
@@ -375,14 +377,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }else{//upload complete
                 Toast.makeText(this.applicationContext, "Upload complete", Toast.LENGTH_SHORT).show()
             }
-        }else if(resultCode == Activity.RESULT_OK && requestCode == 2){
+        }else if(requestCode == 2){
             //save backup file dialog choose file return
             try {
                 exportSH(data?.data)
             } catch (e: IOException) {
                 Toast.makeText(this.applicationContext, "Error", Toast.LENGTH_SHORT).show()
             }
-        }else if(resultCode == Activity.RESULT_OK && requestCode ==3)  {
+        }else if(requestCode ==3)  {
             //load backup file dialog choose file return
             try {
                 importSH(data?.data)
@@ -413,6 +415,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * complex method since none of these parts is repeated somewhere else.
      */
 
+    @SuppressLint("NotifyDataSetChanged")
     fun displayThread(url: String, viewSingle: Boolean = false, onlyCheckWatch: Boolean = false) {
         var murl = url
         val fet = murl.indexOf("#")
@@ -458,8 +461,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
                // if (newPosts > 0) {
                   //  val newestId = response.last().postID
-                    val newW = Watch(curW.thread, curW.newestId, newPosts, newImgs, curW.lastReadId)
-                    updateWatch(newW)
+//                   val newW = Watch(curW.thread, curW.newestId, newPosts, newImgs, curW.lastReadId)
+
+                   val oldw: Watch? = watchlist.firstOrNull { it.thread.url == curW.thread.url }
+                    if (oldw != null) {
+                        oldw.newImg =newImgs
+                        oldw.newPosts = newPosts
+                    }
            //     }
             } else {
                 sets.curSingle = viewSingle
@@ -511,11 +519,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             val sw = StringWriter()
             it.printStackTrace(PrintWriter(sw))
-            val exceptionAsString = sw.toString()
+//            val exceptionAsString = sw.toString()
+//
+//            listAdapt.items =
+//                listOf(TgThread("There was an error loading the Thread:<br/>${it.message}<br/><br/>StackTrace:<br/>$exceptionAsString"))
+//            listAdapt.notifyDataSetChanged()
+            //listAdapt.notifyItemRemoved(0)
 
-            listAdapt.items =
-                listOf(TgThread("There was an error loading the Thread\n${it}\nStackTrace:\n$exceptionAsString"))
-            listAdapt.notifyDataSetChanged()
+            Toast.makeText(this, "There was an error loading the Thread:\n${it.message}", Toast.LENGTH_SHORT).show()
         }
         )
         queue.addToRequestQueue(tr)
@@ -604,9 +615,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     /**
      * get watch object (copy) by url
      */
-    fun getWatchById(id: String): Watch {
-        return watchlist.firstOrNull { it.thread.postID == id } ?: return Watch()
-    }
+//    fun getWatchById(id: String): Watch {
+//        return watchlist.firstOrNull { it.thread.postID == id } ?: return Watch()
+//    }
 
 
     /**
@@ -625,35 +636,35 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return watchlist.any { it.thread.url == url }
     }
 
-    private fun updateWatch(w: Watch) { //thread might only contain url
-        val oldw: Watch? = watchlist.firstOrNull { it.thread.url == w.thread.url }
-        if (oldw == null) {
-            val compid = Regex("""(\d+).html""").find(w.thread.url)?.groupValues?.get(1)
-            val renWatch = watchlist.firstOrNull {
-                compid == Regex("""(\d+).html""").find(it.thread.url)?.groupValues?.get(1)
-            }
-            if (renWatch == null) {
-                addToWatch(w.thread)
-            } else {
-                w.thread.url = renWatch.thread.url
-                updateWatch(w)
-            }
-            return
-        }
-        if (w.lastReadId != "") oldw.lastReadId = w.lastReadId
-        oldw.newImg = w.newImg
-        oldw.newPosts = w.newPosts
-        if (w.newestId != "") oldw.newestId = w.newestId
+//    private fun updateWatch(w: Watch) { //thread might only contain url
+//        val oldw: Watch? = watchlist.firstOrNull { it.thread.url == w.thread.url }
+//        if (oldw == null) {
+//            val compid = Regex("""(\d+).html""").find(w.thread.url)?.groupValues?.get(1)
+//            val renWatch = watchlist.firstOrNull {
+//                compid == Regex("""(\d+).html""").find(it.thread.url)?.groupValues?.get(1)
+//            }
+//            if (renWatch == null) {
+//                addToWatch(w.thread)
+//            } else {
+//                w.thread.url = renWatch.thread.url
+//                updateWatch(w)
+//            }
+//            return
+//        }
+//        if (w.lastReadId != "") oldw.lastReadId = w.lastReadId
+//        oldw.newImg = w.newImg
+//        oldw.newPosts = w.newPosts
+//        if (w.newestId != "") oldw.newestId = w.newestId
+//
+//        if (oldw.thread.postID == "") {
+//            oldw.thread = w.thread
+//        }
 
-        if (oldw.thread.postID == "") {
-            oldw.thread = w.thread
-        }
+//        watchlist.sortedWith(compareBy({ -it.newImg }, { -it.newPosts }))
 
-        watchlist.sortedWith(compareBy({ -it.newImg }, { -it.newPosts }))
-
-        listAdapt.notifyDataSetChanged()
-        storeData()
-    }
+//        listAdapt.notifyDataSetChanged()
+//        storeData()
+//    }
 
     /**
      * updates scroll position display at bottom
@@ -670,9 +681,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (sets.curThreadId != "" && listAdapt.items.size>pos) {
                 sets.lastReadIDs[sets.curThreadId] = listAdapt.items[pos].postID
             }
-            val w=getWatchById(sets.curThreadId)
-            w.lastReadId=listAdapt.items[pos].postID
-            updateWatch(w)
+//            val w=getWatchById(sets.curThreadId)
+//            w.lastReadId=listAdapt.items[pos].postID
+//            updateWatch(w)
+
+
+            //TODO: inefficient!
+            //idea to update
+            //get active watch reference object
+            //only update member
+            //if still inefficient: update state on exit or by timer
+
 
         } else if (!sets.curSingle) {
             totcnt = sets.curMaxPage
@@ -719,6 +738,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             displayThreadList(0)
 //            Log.d("loadcheck","pos0 watch")
         }
+        Toast.makeText(this, "Updating Done", Toast.LENGTH_SHORT).show()
         //listAdapt.notifyDataSetChanged()
     }
 
@@ -768,7 +788,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             //for sake of using view, so git would ignore the warning
         }
         showSetsInButtons()
-        listAdapt.notifyDataSetChanged()
+        //listAdapt.notifyDataSetChanged()
+        ingredients_list.requestLayout()
+
+        Toast.makeText(this, "SFW mode set to ${sets.sfw}", Toast.LENGTH_SHORT).show()
+//        updateVisible()
+
 
     }
 
@@ -789,6 +814,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     /**
      * button event for change font size
      */
+    @SuppressLint("NotifyDataSetChanged")
     fun btnIncFont(@Suppress("UNUSED_PARAMETER") view: View) {
         sets.txsize = sets.txsize + 1f
         listAdapt.notifyDataSetChanged()
@@ -798,6 +824,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     /**
      * button event for change font size
      */
+    @SuppressLint("NotifyDataSetChanged")
     fun btnDecFont(@Suppress("UNUSED_PARAMETER") view: View) {
         sets.txsize = sets.txsize - 1f
         listAdapt.notifyDataSetChanged()
@@ -819,6 +846,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         sets.showOnlyPics = !sets.showOnlyPics
         showSetsInButtons()
         displayThreadList()
+        if( sets.showOnlyPics)
+            Toast.makeText(this, "Only Posts with images", Toast.LENGTH_SHORT).show()
+        else
+            Toast.makeText(this, "Showing all Posts", Toast.LENGTH_SHORT).show()
     }
 
     private fun navigatePage(page: Int) {
@@ -878,7 +909,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             navigatePage(sets.curMaxPage)
         }
     }
+//    private fun updateVisible(){
+//
+//        val man=(ingredients_list.layoutManager as LinearLayoutManager)
+//        val first=man.findFirstVisibleItemPosition()
+//        val last=man.findLastVisibleItemPosition()
+//        listAdapt.notifyItemRangeChanged(first,last-first)
+//    }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun displayThreadList(pos: Int = -1) {
         toolbar.title=sets.curTitle
         if (sets.showOnlyPics)

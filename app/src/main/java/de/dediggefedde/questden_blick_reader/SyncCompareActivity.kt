@@ -9,7 +9,7 @@ import kotlinx.android.synthetic.main.sync_compare.*
 
 
 class SyncCompareActivity : AppCompatActivity() {
-    private val listAdapt = SyncCompareListAdapter(emptyList(),emptyList(), this)
+    private val listAdapt = SyncCompareListAdapter(emptyList(),emptyList())
     private var watchlist: MutableList<Watch>? = null
     private var newWatchlist: MutableList<Watch>? = null
 
@@ -25,7 +25,7 @@ class SyncCompareActivity : AppCompatActivity() {
 
         watchlist= intent.getParcelableArrayListExtra("watchlist")
         newWatchlist= intent.getParcelableArrayListExtra("newwatchlist")
-        var w:Watch
+//        var w:Watch
 //        w.thread.date ?
         listAdapt.items_remote= newWatchlist?.map{it.thread} ?: emptyList()
         listAdapt.items_local=watchlist?.map{it.thread} ?: emptyList()

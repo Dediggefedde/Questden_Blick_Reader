@@ -12,12 +12,15 @@ import android.text.Html
 import android.text.Spannable
 import android.text.TextPaint
 import android.text.style.*
+//import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+//import android.widget.ListAdapter
 import android.widget.TextView
+//import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -31,6 +34,13 @@ import org.xml.sax.XMLReader
 import java.lang.reflect.Field
 
 
+//
+//private class DiffCallback : DiffUtil.ItemCallback<TgThread>() {
+//    override fun areItemsTheSame(oldItem: TgThread, newItem: TgThread) =
+//        oldItem.postID == newItem.postID
+//    override fun areContentsTheSame(oldItem: TgThread, newItem: TgThread) =
+//        oldItem == newItem
+//}
 /**
  * RecyclerView custom adapter to display tgthread correctly
  *  currently has copy of tgthread, perhaps index/reference to external list better
@@ -38,6 +48,8 @@ import java.lang.reflect.Field
  *  planned to have alternative compact layout
  *  need investigation for memory management
  */
+//class QuestDenListAdapter(val action: (items: MutableList<TgThread>, changed: TgThread, checked: Boolean) -> Unit) :
+//    RecyclerView.Adapter< QuestDenListAdapter.ViewHolder>(DiffCallback()){
 class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
     RecyclerView.Adapter<QuestDenListAdapter.ViewHolder>() {
     /**
@@ -47,7 +59,18 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
 //        init {
 //        }
     }
-
+//
+//    class TaskDiffCallBack : DiffUtil.ItemCallback<TgThread>() {
+//        override fun areItemsTheSame(oldItem: TgThread, newItem: TgThread): Boolean {
+//            Log.d("TAG",Thread.currentThread().name)
+//            return oldItem.postID == newItem.postID;
+//        }
+//
+//        override fun areContentsTheSame(oldItem: TgThread, newItem: TgThread): Boolean {
+//            Log.d("TAG",Thread.currentThread().name)
+//            return oldItem == newItem
+//        }
+//    }
     /**
      * Viewholder item. made abstract to offer multiple layouts. currently only one used
      */
@@ -121,7 +144,8 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
                     mMain.addToWatch(mtg)
                 }
                 updateWatchState()
-                notifyDataSetChanged()
+                it.invalidate()
+                //notifyDataSetChanged()
             }
             mNoView?.setOnClickListener {
                 val openURL = Intent(Intent.ACTION_VIEW)
@@ -271,6 +295,9 @@ class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(items[position])
+//        val task = items[position]
+//        holder.tvDesc.text = task.body
+//        holder.tvTitle.text = task.title
     }
 }
 
@@ -400,10 +427,11 @@ class Clickabl(
             main.listAdapt.items.forEach { it.isHighlight = false }
             main.listAdapt.items[pos].isHighlight = true
             main.chronic.add(Navis(NavOperation.LINK, pos.toString(), main.ingredients_list.layoutManager?.onSaveInstanceState()))
-            main.listAdapt.notifyDataSetChanged()
+//            main.listAdapt.notifyDataSetChanged()
 
         }
-        spoiled = !spoiled
+        if((mContext as MainActivity).sets.sfw == SFWModes.SFWQUESTION)
+            spoiled = !spoiled
         view.invalidate()
     }
 
@@ -423,14 +451,14 @@ class Clickabl(
     }
 }
 
-class SyncCompareListAdapter(var items_local: List<TgThread>, var items_remote: List<TgThread>, var mContext: Context) :
+class SyncCompareListAdapter(var items_local: List<TgThread>, var items_remote: List<TgThread>) :
     RecyclerView.Adapter<SyncCompareListAdapter.ViewHolder>() {
 
     private var mLocalTitle: TextView? = null
     private var mRemoteTitle: TextView? = null
     private var mDirButton: ImageButton? = null
     private var mTitle:TextView?=null
-    private var mTransferState: Int=1 //3 state: 0 download, 1 ignore, 2 upload
+//    private var mTransferState: Int=1 //3 state: 0 download, 1 ignore, 2 upload
     /**
      * custom viewholder
      */
@@ -452,14 +480,14 @@ class SyncCompareListAdapter(var items_local: List<TgThread>, var items_remote: 
             if(titl=="")titl=tg_remote?.title?:""
 
             mTitle?.text=titl
-            mLocalTitle?.text="local"
-            mRemoteTitle?.text="remote"
+//            mLocalTitle?.text="local"
+//            mRemoteTitle?.text="remote"
         }
 
     }
-    fun alignedItemPos(localPos:Int):Int{
-        return 0
-    }
+//    fun alignedItemPos(localPos:Int):Int{
+//        return 0
+//    }
 
     override fun getItemCount(): Int = items_local.size
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
