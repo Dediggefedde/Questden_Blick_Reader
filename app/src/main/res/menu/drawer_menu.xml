@@ -6,7 +6,7 @@
         <menu>
             <item
                 android:id="@+id/menu_watch_open"
-                android:title="@string/nav_watchlist_open"/>
+                android:title="@string/nav_watchlist_open" />
             <item
                 android:id="@+id/menu_draw"
                 android:title="@string/nav_pages_draw"/>

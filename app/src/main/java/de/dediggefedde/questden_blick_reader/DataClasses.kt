@@ -74,6 +74,12 @@ data class Watch(
 ):Parcelable
 
 /**
+ * Sorting behavior states
+ */
+enum class SORTING {
+    DATE,POSTS,IMAGES,NATIVE
+}
+/**
  * settings object for later
  *  default sorting, default pages, sync-options
  *  loaded at start, saved on change

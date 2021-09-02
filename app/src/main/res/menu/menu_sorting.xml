@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_sort_date"
-        android:title="@string/menu_sort_date" />
+        android:title="@string/menu_sort_date"
+        app:showAsAction="never" />
     <item
         android:id="@+id/menu_sort_posts"
-        android:title="@string/menu_sort_postCnt" />
+        android:title="@string/menu_sort_postCnt"
+        app:showAsAction="never" />
     <item
         android:id="@+id/menu_sort_img"
-        android:title="@string/menu_sort_ImgCnt" />
-    <item
-        android:id="@+id/menu_sort_jump"
-        android:title="@string/menu_sort_jump30" />
+        android:title="@string/menu_sort_ImgCnt"
+        app:showAsAction="never" />
 </menu>

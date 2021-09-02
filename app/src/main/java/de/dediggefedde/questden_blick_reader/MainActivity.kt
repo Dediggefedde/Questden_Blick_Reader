@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.text.Html
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
@@ -36,6 +38,8 @@ import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import android.os.Parcelable
+import androidx.recyclerview.widget.DiffUtil
 
 
 /* Idea
@@ -54,6 +58,12 @@ import kotlin.collections.ArrayList
 * fallback display html tags.
 * */
 
+/* Customizability
+* - Theme light/dark
+* - update channel beta/stable
+* -
+* */
+
 /**
  * Main activity
  * So far only activity
@@ -70,6 +80,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var reqDone = 0 //current position in progressbar
     private var curWatch: Watch? =null //currently opened thread if watched
     var chronic = mutableListOf<Navis>()
+    var sortingmode=SORTING.NATIVE
 
     private lateinit var scrollListener: RecyclerView.OnScrollListener
 
@@ -226,10 +237,38 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             text.movementMethod = LinkMovementMethod.getInstance()
         }
     }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu_sorting, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        return when (item.itemId) {
+            R.id.menu_sort_date -> {
+                sortingmode=SORTING.DATE
+                sortDisplay()
+                true
+            }
+            R.id.menu_sort_img -> {
+                sortingmode=SORTING.IMAGES
+                sortDisplay()
+                true
+            }
+            R.id.menu_sort_posts -> {
+                sortingmode=SORTING.POSTS
+                sortDisplay()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
     private fun navigationStuff() {
         navigationView.setNavigationItemSelectedListener(this)
         setSupportActionBar(toolbar)
+
         val menuDrawerToggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar,
             R.string.open_menu, R.string.closesMenu
@@ -403,16 +442,29 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
     }
-
+    private fun sortDisplay(){
+        when(sortingmode){
+            SORTING.POSTS->
+                displayDataList=displayDataList.sortedWith(compareBy({ -it.newPosts }, { -it.newImg }))
+            SORTING.IMAGES->
+                displayDataList=displayDataList.sortedWith(compareBy({ -it.newImg }, { -it.newPosts }))
+            SORTING.DATE->
+                displayDataList=displayDataList.sortedWith(compareBy({it.date},{ -it.newImg }, { -it.newPosts }))
+            else -> {}
+        }
+        listAdapt.submitList(displayDataList) { ingredients_list.scrollToPosition(0) }
+    }
     private fun showWatches() {
         sets.curpage = RequestValues.WATCH.url
-        displayDataList = watchlist.sortedWith(compareBy({ -it.newImg }, { -it.newPosts })).map {
+        displayDataList = watchlist.map {
             it.thread.isThread = true
             it.thread.newImg=it.newImg
             it.thread.newPosts=it.newPosts
             it.thread
         }.toList()
         displayThreadList(0)
+        sortingmode=SORTING.IMAGES
+        sortDisplay()
     }
 
     /**
@@ -430,6 +482,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fet = murl.indexOf("#")
         if (fet >= 0) murl = murl.substring(0, fet)
 
+
         if (!onlyCheckWatch) sets.curpage = murl
 
         if (murl == RequestValues.WATCH.url) {
@@ -439,6 +492,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             showWatches()
             storeData()
             return
+        }else{
+            sortingmode=SORTING.NATIVE
         }
         if (!sets.curSingle && sets.boardPage > 0 && !onlyCheckWatch) murl = "$murl${sets.boardPage}.html"
 
@@ -716,13 +771,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         reqDone = 0
 
         if(sets.curpage==RequestValues.WATCH.url) { //update watchlist
-            displayDataList = watchlist.sortedWith(compareBy({ -it.newImg }, { -it.newPosts })).map {
-                it.thread.isThread = true
-                it.thread.newImg=it.newImg
-                it.thread.newPosts=it.newPosts
-                it.thread
-            }.toList()
             displayThreadList(0)
+            sortingmode=SORTING.IMAGES
+            sortDisplay()
             //listAdapt.notifyDataSetChanged()
 
             ingredients_list.smoothScrollToPosition(0)
@@ -906,26 +957,29 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun displayThreadList(pos: Int = -1) {
         toolbar.title=sets.curTitle
-        if (sets.showOnlyPics)
-            listAdapt.submitList(displayDataList.filter { it.imgUrl != "" })//listAdapt.currentList = displayDataList.filter { it.imgUrl != "" }
-        else
-            listAdapt.submitList(displayDataList)//listAdapt.currentList = displayDataList//.take(10)
 
-        //listAdapt.notifyDataSetChanged()
-        if (pos >= 0) {
-            (ingredients_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
-        } else {
-            if (sets.curThreadId != "") {
-                if (sets.lastReadIDs[sets.curThreadId] != null) {
-                    scrollHighlight(displayDataList.indexOfFirst { it.postID == sets.lastReadIDs[sets.curThreadId] })
-                } else {
-                    sets.lastReadIDs[sets.curThreadId] = displayDataList.first().postID
-                    scrollHighlight(0)
-                }
-                return
+        val scrolling = {
+            if (pos >= 0) {
+                (ingredients_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
+                updatePositionDisplay(pos)
+            } else {
+                if (sets.curThreadId != "") {
+                    if (sets.lastReadIDs[sets.curThreadId] != null) {
+                        scrollHighlight(displayDataList.indexOfFirst { it.postID == sets.lastReadIDs[sets.curThreadId] })
+                    } else {
+                        sets.lastReadIDs[sets.curThreadId] = displayDataList.first().postID
+                        scrollHighlight(0)
+                    }
+                }else
+                    updatePositionDisplay(pos)
             }
         }
-        updatePositionDisplay(pos)
+
+        if (sets.showOnlyPics)
+            listAdapt.submitList(displayDataList.filter { it.imgUrl != "" },scrolling)//listAdapt.currentList = displayDataList.filter { it.imgUrl != "" }
+        else
+            listAdapt.submitList(displayDataList,scrolling)//listAdapt.currentList = displayDataList//.take(10)
+
     }
 
 }

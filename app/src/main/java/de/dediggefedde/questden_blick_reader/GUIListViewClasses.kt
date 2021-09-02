@@ -33,7 +33,6 @@ import org.jsoup.Jsoup
 import org.xml.sax.XMLReader
 import java.lang.reflect.Field
 
-
 /**
  * RecyclerView custom adapter to display tgthread correctly
  *  currently has copy of tgthread, perhaps index/reference to external list better
@@ -48,21 +47,16 @@ class QuestDenListAdapter(val mContext: Context) :
     /**
      * custom viewholder for one tgthread object
      */
-    inner class FullViewHolder(itemView: View) : ViewHolder(itemView) {
-//        init {
-//        }
-    }
+    inner class FullViewHolder(itemView: View) : ViewHolder(itemView)
     private class DiffCallback : DiffUtil.ItemCallback<TgThread>() {
 
-        //2
         override fun areItemsTheSame(oldItem: TgThread, newItem: TgThread) =
             oldItem.postID == newItem.postID && oldItem.newImg == newItem.newImg && oldItem.newPosts==newItem.newPosts
 
-        //3
         override fun areContentsTheSame(oldItem: TgThread, newItem: TgThread) =
             oldItem == newItem
-    }
 
+    }
     /**
      * Viewholder item. made abstract to offer multiple layouts. currently only one used
      */
@@ -138,7 +132,6 @@ class QuestDenListAdapter(val mContext: Context) :
                 }
                 updateWatchState()
                 it.invalidate()
-                //notifyDataSetChanged()
             }
             mNoView?.setOnClickListener {
                 val openURL = Intent(Intent.ACTION_VIEW)
@@ -288,9 +281,6 @@ class QuestDenListAdapter(val mContext: Context) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(currentList[position])
-//        val task = items[position]
-//        holder.tvDesc.text = task.body
-//        holder.tvTitle.text = task.title
     }
 }
 
