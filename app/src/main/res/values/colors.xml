@@ -18,4 +18,6 @@
     <color name="color_syncHeader_bg">#FCBD7E</color>
     <color name="color_title_bg">#FCBD7E</color>
     <color name="color_header_bg">#FCBD7E</color>
+    <color name="tapBtn">#7f00</color>
+    <color name="defBtn">#3f00</color>
 </resources>

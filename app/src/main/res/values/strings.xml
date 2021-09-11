@@ -46,7 +46,7 @@
     <string name="nav_watchlist">Watch List</string>
     <string name="nav_watchlist_update">Update</string>
     <string name="menu_reader_sync">Sync with BLICK</string>
-    <string name="CurPos">%d/%d</string>
+    <string name="CurPos">%s %d/%d</string>
     <string name="increaseFont">A+</string>
     <string name="SFWQuestion">SFW?</string>
     <string name="SFW">SFW</string>

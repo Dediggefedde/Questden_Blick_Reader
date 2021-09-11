@@ -3,12 +3,16 @@ package de.dediggefedde.questden_blick_reader
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
+import android.text.Spannable
+import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
+import android.text.style.ForegroundColorSpan
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -26,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.github.javiersantos.appupdater.AppUpdater
 import com.github.javiersantos.appupdater.enums.UpdateFrom
+import com.google.android.material.internal.NavigationMenuItemView
 import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -38,8 +43,6 @@ import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import android.os.Parcelable
-import androidx.recyclerview.widget.DiffUtil
 
 
 /* Idea
@@ -80,7 +83,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var reqDone = 0 //current position in progressbar
     private var curWatch: Watch? =null //currently opened thread if watched
     var chronic = mutableListOf<Navis>()
-    var sortingmode=SORTING.NATIVE
+    private var sortingmode=SORTING.NATIVE
+    private var mainMenu:Menu?=null
+    private var scrollMode=ScrollMode.IMAGES
 
     private lateinit var scrollListener: RecyclerView.OnScrollListener
 
@@ -240,6 +245,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.menu_sorting, menu)
+        mainMenu = menu
         return true
     }
 
@@ -283,6 +289,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         menuDrawerToggle.toolbarNavigationClickListener = null
         menuDrawerToggle.syncState()
 
+
         navigationView.itemIconTintList = null
 
     }
@@ -290,13 +297,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         sets.boardPage=0
+
         when (menuItem.itemId) {
             R.id.menu_draw -> displayThread(RequestValues.DRAW.url, false)
             R.id.menu_general -> displayThread(RequestValues.MEEP.url, false)
             R.id.menu_quest -> displayThread(RequestValues.QUEST.url, false)
             R.id.menu_questdis -> displayThread(RequestValues.QUESTDIS.url, false)
             R.id.menu_tg -> displayThread(RequestValues.TG.url, false)
-            R.id.menu_watch_open -> displayThread(RequestValues.WATCH.url, false)
+            R.id.menu_watch_open -> {
+                displayThread(RequestValues.WATCH.url, false)
+//                var mit:MenuItem?=findViewById(R.id.menu_watch_open)
+//                val  spanString = SpannableString(mit?.title)
+//                spanString.setSpan(ForegroundColorSpan(Color.parseColor("#FF0000")),0,spanString.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+//                mit?.title = spanString
+            }
             R.id.menu_reader_sync -> {
                 val inte = Intent(this, SyncActivity::class.java)
                 inte.putExtra("sets", sets)
@@ -465,6 +479,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         displayThreadList(0)
         sortingmode=SORTING.IMAGES
         sortDisplay()
+        mainMenu?.setGroupVisible(0,true)
     }
 
     /**
@@ -476,7 +491,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      *
      * complex method since none of these parts is repeated somewhere else.
      */
-
     fun displayThread(url: String, viewSingle: Boolean = false, onlyCheckWatch: Boolean = false) {
         var murl = url
         val fet = murl.indexOf("#")
@@ -491,9 +505,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             sets.curThreadId = ""
             showWatches()
             storeData()
+            mainMenu?.setGroupVisible(0,true)
             return
         }else{
             sortingmode=SORTING.NATIVE
+            mainMenu?.setGroupVisible(0,false)
         }
         if (!sets.curSingle && sets.boardPage > 0 && !onlyCheckWatch) murl = "$murl${sets.boardPage}.html"
 
@@ -717,13 +733,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     fun updatePositionDisplay(position: Int = -1) {
         var pos = position
+        var posMod="Page: "
         if (sets.curSingle && displayDataList.size > pos) {
             if (position == -1) {
                 pos = 1 + (ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             }
             if (displayDataList.size < pos) pos = 0
-            totcnt = displayDataList.filter { it.imgUrl != "" }.size
-            curcnt = displayDataList.take(pos).filter { it.imgUrl != "" }.size
+            if(scrollMode==ScrollMode.IMAGES||sets.showOnlyPics) {
+                totcnt = displayDataList.filter { it.imgUrl != "" }.size
+                curcnt = displayDataList.take(pos).filter { it.imgUrl != "" }.size
+                posMod="Image: "
+            }else{
+                totcnt = displayDataList.size
+                curcnt = pos
+                posMod="Post: "
+            }
+
             if (sets.curThreadId != "" && displayDataList.size>pos) {
                 sets.lastReadIDs[sets.curThreadId] = displayDataList[pos].postID
             }
@@ -737,7 +762,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if(totcnt<curcnt)totcnt=curcnt //current page = maxpage, link missing
         }
 
-        tx_position.text = getString(R.string.CurPos, curcnt, totcnt)
+        tx_position.text = getString(R.string.CurPos, posMod,curcnt, totcnt)
     }
 
     private fun showSetsInButtons() { //set text to current mode
@@ -773,11 +798,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if(sets.curpage==RequestValues.WATCH.url) { //update watchlist
             displayThreadList(0)
             sortingmode=SORTING.IMAGES
-            sortDisplay()
-            //listAdapt.notifyDataSetChanged()
-
-            ingredients_list.smoothScrollToPosition(0)
-          //  (ingredients_list.layoutManager as LinearLayoutManager).scrollToPosition(0)
+            showWatches()
 
             Toast.makeText(this, "Updating Done", Toast.LENGTH_SHORT).show()
         }
@@ -809,6 +830,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val targeturl = (view as TextView).text
         openURL.data = Uri.parse(targeturl.toString())
         startActivity(openURL)
+    }
+    /**
+     * changes mode display and skip for next/prev
+     */
+
+    fun btnSkipModeChange(@Suppress("UNUSED_PARAMETER") view: View){
+        scrollMode = if (scrollMode==ScrollMode.ALL) ScrollMode.IMAGES else ScrollMode.ALL
+        updatePositionDisplay()
     }
 
     /**
@@ -903,7 +932,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun btnNextButton(@Suppress("UNUSED_PARAMETER") view: View) {
         if (sets.curSingle) {//single thread
             var pos = (ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            pos += 1 + displayDataList.takeLast(displayDataList.size - pos - 1).indexOfFirst { it.imgUrl != "" }
+
+            if(scrollMode==ScrollMode.IMAGES) {
+                pos += displayDataList.takeLast(displayDataList.size - pos - 1).indexOfFirst { it.imgUrl != "" }
+            }
+            pos +=1
+
             scrollHighlight(pos)
         } else { //board
             navigatePage(sets.boardPage + 1)
@@ -916,10 +950,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun btnPrevButton(@Suppress("UNUSED_PARAMETER") view: View) {
         if (sets.curSingle) {//single thread
             var pos = (ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            pos = displayDataList.take(pos).indexOfLast { it.imgUrl != "" }
+            pos =if(scrollMode==ScrollMode.IMAGES)  displayDataList.take(pos).indexOfLast { it.imgUrl != "" }else displayDataList.take(pos).lastIndex
+
             scrollHighlight(pos)
         } else { //board
-
             navigatePage(sets.boardPage - 1)
         }
     }
@@ -929,7 +963,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     fun btnFirstButton(@Suppress("UNUSED_PARAMETER") view: View) {
         if (sets.curSingle) {
-            val pos = displayDataList.indexOfFirst { it.imgUrl != "" }
+            val pos=if(scrollMode==ScrollMode.IMAGES) displayDataList.indexOfFirst { it.imgUrl != "" } else 0
             scrollHighlight(pos)
         } else {
             navigatePage(0)
@@ -941,7 +975,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     fun btnLastButton(@Suppress("UNUSED_PARAMETER") view: View) {
         if (sets.curSingle) {
-            val pos = displayDataList.indexOfLast { it.imgUrl != "" }
+            val pos =if(scrollMode==ScrollMode.IMAGES) displayDataList.indexOfLast { it.imgUrl != "" } else displayDataList.lastIndex
             scrollHighlight(pos)
         } else {
             navigatePage(sets.curMaxPage)

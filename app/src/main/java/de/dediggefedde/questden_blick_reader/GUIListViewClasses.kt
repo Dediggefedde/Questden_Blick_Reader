@@ -148,10 +148,12 @@ class QuestDenListAdapter(val mContext: Context) :
                         if (mMain.toolbar.visibility == View.GONE) {
                             mMain.toolbar.visibility = View.VISIBLE
                             mMain.bottom_navigation.visibility = View.VISIBLE
+                            mMain.groupNavBut.visibility=View.VISIBLE
                         } else {
                             mMain.toolbar.visibility = View.GONE
                             mMain.bottom_navigation.visibility = View.GONE
                             mMain.tool_dropout.visibility = View.GONE
+                            mMain.groupNavBut.visibility=View.GONE
                         }
                     }
                 }

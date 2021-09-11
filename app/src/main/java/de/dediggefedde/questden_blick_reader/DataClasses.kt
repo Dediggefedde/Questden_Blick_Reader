@@ -114,3 +114,10 @@ data class Navis(
     var prop: String,
     var navStat: Parcelable? = null
 )
+/**
+ *
+ */
+
+enum class ScrollMode{
+    ALL,IMAGES
+}
