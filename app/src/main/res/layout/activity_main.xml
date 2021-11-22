@@ -58,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.65" />
+            app:layout_constraintGuide_percent="0.1" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline3"
@@ -229,32 +229,29 @@
         <Button
             android:id="@+id/btn_prev"
             style="?android:attr/buttonBarButtonStyle"
-            android:background="@drawable/item_sel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/item_sel"
             android:minWidth="48dp"
             android:minHeight="100dp"
             android:onClick="btnPrevButton"
             android:text="@string/Bot_Nav_prev"
             app:layout_constraintBottom_toTopOf="@+id/button4"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/ingredients_list"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <Button
             android:id="@+id/btn_last"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:background="@drawable/item_sel"
             android:minWidth="48dp"
             android:minHeight="50dp"
             android:onClick="btnLastButton"
             android:text="@string/Bot_Nav_Last"
             app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/ingredients_list"
-            app:layout_constraintVertical_bias="0.634" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <Button
             android:id="@+id/btn_next"
@@ -268,7 +265,6 @@
             android:text="@string/Bot_Nav_next"
             app:layout_constraintBottom_toTopOf="@+id/btn_last"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar"
             app:layout_constraintVertical_bias="1.0" />
 
         <!--        </androidx.drawerlayout.widget.DrawerLayout>-->
@@ -278,15 +274,14 @@
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:background="@drawable/item_sel"
             android:minWidth="48dp"
             android:minHeight="50dp"
             android:onClick="btnFirstButton"
             android:text="@string/Bot_Nav_first"
             app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar"
-            app:layout_constraintVertical_bias="0.634" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.constraintlayout.widget.Group
             android:id="@+id/groupNavBut"

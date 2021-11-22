@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@color/tapBtn" android:state_pressed="true"/>
-    <item android:drawable="@color/defBtn"/>
+<!--    <item android:drawable="@color/tapBtn" android:state_pressed="true"/>-->
+<!--    <item android:drawable="@color/defBtn"/>-->
+
+    <item android:state_pressed="true" >
+        <shape android:shape="rectangle"  >
+            <corners android:radius="3dip" />
+            <stroke android:width="1dip" android:color="#796F5E" />
+            <gradient android:angle="-90" android:startColor="#aaB67426" android:endColor="#aa98350E"  />
+        </shape>
+    </item>
+    <item android:state_focused="true">
+        <shape android:shape="rectangle"  >
+            <corners android:radius="3dip" />
+            <stroke android:width="1dip" android:color="#796F5E" />
+            <solid android:color="#aa9E7E44"/>
+        </shape>
+    </item>
+    <item >
+        <shape android:shape="rectangle"  >
+            <corners android:radius="3dip" />
+            <stroke android:width="1dip" android:color="#796F5E" />
+            <gradient android:angle="-90" android:startColor="#aaD39E4F" android:endColor="#aaB8785B" />
+        </shape>
+    </item>
 </selector>
