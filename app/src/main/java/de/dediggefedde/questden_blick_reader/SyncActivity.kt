@@ -2,10 +2,12 @@ package de.dediggefedde.questden_blick_reader
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.RequestQueue
 import com.android.volley.Response
@@ -13,7 +15,7 @@ import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.DiskBasedCache
 import com.android.volley.toolbox.HurlStack
 import com.android.volley.toolbox.StringRequest
-import kotlinx.android.synthetic.main.sync.*
+import de.dediggefedde.questden_blick_reader.databinding.SyncBinding
 import java.net.CookieHandler
 import java.net.CookieManager
 
@@ -28,6 +30,7 @@ class SyncActivity : AppCompatActivity() {
     private lateinit var cache:DiskBasedCache
     private lateinit var network:BasicNetwork
     private lateinit var requestQueue:RequestQueue
+    private lateinit var syncBinding:SyncBinding
 
     private fun View.hideKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -36,17 +39,25 @@ class SyncActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.sync)
-        setSupportActionBar(findViewById(R.id.synctoolbar))
+        syncBinding = SyncBinding.inflate(layoutInflater)
+        setContentView(syncBinding.root)
+
+        setSupportActionBar(syncBinding.synctoolbar)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        watchlist= intent.getParcelableArrayListExtra("watchlist")
-        sets = intent.extras?.get("sets") as Settings?
+        @Suppress("DEPRECATION")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            watchlist= intent.getParcelableArrayListExtra("watchlist", Watch::class.java)?: arrayListOf()
+            sets = intent.getParcelableExtra("sets", Settings::class.java)?: Settings()
+        } else {
+            watchlist= intent.getParcelableArrayListExtra("watchlist")?: arrayListOf()
+            sets = intent.getParcelableExtra("sets")?: Settings()
+        }
 
-        editTextTextPersonName.setText(sets?.user)
-        editTextTextPassword.setText(sets?.pw)
+        syncBinding.editTextTextPersonName.setText(sets?.user)
+        syncBinding.editTextTextPassword.setText(sets?.pw)
 
         val manager = CookieManager()
         CookieHandler.setDefault(manager)
@@ -56,7 +67,12 @@ class SyncActivity : AppCompatActivity() {
         requestQueue = RequestQueue(cache, network).apply {
             start()
         }
-        button3.visibility=View.INVISIBLE
+        syncBinding.button3.visibility=View.INVISIBLE
+
+        onBackPressedDispatcher.addCallback(this){
+            returnVals()
+            finish()
+        }
     }
     private fun returnVals(){
         val data = Intent()
@@ -78,13 +94,14 @@ class SyncActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() { //not working...
         super.onBackPressed()
         returnVals()
     }
     private fun downloadRemote(){
         if(!loggedIn) {
-            textView.text = getString(R.string.NotLoggedIn)
+            syncBinding.textView.text = getString(R.string.NotLoggedIn)
             return
         }
 
@@ -119,7 +136,7 @@ class SyncActivity : AppCompatActivity() {
                     val url = "/kusaba/${urlp[0]}/res/${urlp[1]}.html"
                     newWatchlist?.firstOrNull { it.thread.url == url }?.newestId=inf[1]
                 }
-                syncRemStatus.text=getString(R.string.localRmoteCompare, watchlist?.size.toString(), newWatchlist?.size.toString())
+                syncBinding.syncRemStatus.text=getString(R.string.localRmoteCompare, watchlist?.size.toString(), newWatchlist?.size.toString())
 
 
                 /* val inte = Intent(this, SyncCompareActivity::class.java)
@@ -166,11 +183,11 @@ class SyncActivity : AppCompatActivity() {
     private fun uploadRemote(){
 
         if(!loggedIn) {
-            textView.text = getString(R.string.NotLoggedIn)
+            syncBinding.textView.text = getString(R.string.NotLoggedIn)
             return
         }
         if( remoteData.isEmpty()){
-            textView.text = getString(R.string.firstCreateEntry)
+            syncBinding.textView.text = getString(R.string.firstCreateEntry)
             return
         }
 
@@ -205,7 +222,7 @@ class SyncActivity : AppCompatActivity() {
         params2["blob"]=remoteData.joinToString(separator = 7.toChar().toString())
 
         postreq("https://phi.pf-control.de/tgchan/interface.php?settings",params2) { response ->
-            if(response=="no"){textView.text=("You disabled synchronizing the watchbar!")}
+            if(response=="no"){syncBinding.textView.text=(getString(R.string.sync_disabled_warning))}
             returnVals()
         }
     }
@@ -232,8 +249,8 @@ class SyncActivity : AppCompatActivity() {
 
     fun btnClick(view: View) {//login button
         if(!loggedIn) {
-            sets?.user = editTextTextPersonName.text.toString()
-            sets?.pw = editTextTextPassword.text.toString()
+            sets?.user = syncBinding.editTextTextPersonName.text.toString()
+            sets?.pw = syncBinding.editTextTextPassword.text.toString()
 
             view.animate()
 
@@ -243,16 +260,16 @@ class SyncActivity : AppCompatActivity() {
         }else{
             loggedIn=false
             sets?.pw=""
-            textView.text = getString(R.string.Loggedout)
-            button.text = getString(R.string.SyncLogin)
-            button3.visibility=View.INVISIBLE
-            btnUpload.visibility=View.INVISIBLE
+            syncBinding.textView.text = getString(R.string.Loggedout)
+            syncBinding.button.text = getString(R.string.SyncLogin)
+            syncBinding.button3.visibility=View.INVISIBLE
+            syncBinding.btnUpload.visibility=View.INVISIBLE
         }
     }
 
     private fun login(name: String, pw: String) {
         loggedIn = false
-        button3.visibility=View.INVISIBLE
+        syncBinding.button3.visibility=View.INVISIBLE
         val params2 = HashMap<String, String>()
         params2["uname"] = name
         params2["upass"] = pw
@@ -263,15 +280,15 @@ class SyncActivity : AppCompatActivity() {
         ) { response ->
             when (response) {
                 "n:1" -> {
-                    textView.text = getString(R.string.LoggedIn)
-                    button.text = getString(R.string.LogOut)
-                    button3.visibility=View.VISIBLE
-                    btnUpload.visibility=View.VISIBLE
+                    syncBinding.textView.text = getString(R.string.LoggedIn)
+                    syncBinding.button.text = getString(R.string.LogOut)
+                    syncBinding.button3.visibility=View.VISIBLE
+                    syncBinding.btnUpload.visibility=View.VISIBLE
                     loggedIn = true
                     downloadRemote()
                 }
-                "n:2" -> textView.text = getString(R.string.NotVerified)
-                "n:0" -> textView.text = getString(R.string.LoginError)
+                "n:2" -> syncBinding.textView.text = getString(R.string.NotVerified)
+                "n:0" -> syncBinding.textView.text = getString(R.string.LoginError)
             }
         }
     }
@@ -281,7 +298,7 @@ class SyncActivity : AppCompatActivity() {
             Method.POST, url,
             callback,
             Response.ErrorListener {
-                textView.text = getString(R.string.ErrorReachingServer,url,param.map{ (a,b)->"$a=$b"}.joinToString { "&" })
+                syncBinding.textView.text = getString(R.string.ErrorReachingServer,url,param.map{ (a,b)->"$a=$b"}.joinToString { "&" })
             }) {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()

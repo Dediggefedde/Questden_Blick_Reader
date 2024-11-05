@@ -138,8 +138,8 @@ class ThreadRequest(
                     }.filter { el -> el.url != "" }.toMutableList()
 
                     val retn=rexMaxPage.findAll(resp)
-                        if(retn.count()>0)
-                            li.add(TgThread("thread_info","","","",retn.last().groupValues.last()))
+                    if(retn.count()>0)
+                       li.add(TgThread("thread_info","","","",retn.last().groupValues.last()))
                 }
                 Response.success(
                     li,
@@ -156,7 +156,7 @@ class ThreadRequest(
 }
 
 
-class MySingleton constructor(context: Context) {
+class MySingleton (context: Context) {
     private lateinit var cache: DiskBasedCache
     private lateinit var network: BasicNetwork
 

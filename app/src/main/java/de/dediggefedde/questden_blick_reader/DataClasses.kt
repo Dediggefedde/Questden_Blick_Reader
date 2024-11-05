@@ -2,9 +2,7 @@ package de.dediggefedde.questden_blick_reader
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import kotlinx.android.parcel.Parcelize
-
-
+import kotlinx.parcelize.Parcelize
 /**
  * displayThread() special values
  * In principle any valid url with matching regexp page layout

@@ -1,34 +1,51 @@
 package de.dediggefedde.questden_blick_reader
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.sync_compare.*
+import de.dediggefedde.questden_blick_reader.databinding.SyncBinding
+import de.dediggefedde.questden_blick_reader.databinding.SyncCompareBinding
 
 
 class SyncCompareActivity : AppCompatActivity() {
     private val listAdapt = SyncCompareListAdapter(emptyList(),emptyList())
     private var watchlist: MutableList<Watch>? = null
     private var newWatchlist: MutableList<Watch>? = null
+    private lateinit var syncComBinding: SyncCompareBinding
+    private lateinit var syncBinding: SyncBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.sync_compare)
-        setSupportActionBar(findViewById(R.id.synctoolbar))
+        syncComBinding = SyncCompareBinding.inflate(layoutInflater)
+        syncBinding = SyncBinding.inflate(layoutInflater)
+
+        setContentView(syncComBinding.root)
+        setSupportActionBar(syncBinding.synctoolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        syncList.layoutManager = LinearLayoutManager(this)
-        syncList.adapter = listAdapt
+        syncComBinding.syncList.layoutManager = LinearLayoutManager(this)
+        syncComBinding.syncList.adapter = listAdapt
 
-        watchlist= intent.getParcelableArrayListExtra("watchlist")
-        newWatchlist= intent.getParcelableArrayListExtra("newwatchlist")
-//        var w:Watch
-//        w.thread.date ?
-        listAdapt.items_remote= newWatchlist?.map{it.thread} ?: emptyList()
-        listAdapt.items_local=watchlist?.map{it.thread} ?: emptyList()
+        @Suppress("DEPRECATION")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            watchlist= intent.getParcelableArrayListExtra("watchlist", Watch::class.java)?: arrayListOf()
+            newWatchlist = intent.getParcelableArrayListExtra("newwatchlist", Watch::class.java)?: arrayListOf()
+        } else {
+            watchlist= intent.getParcelableArrayListExtra("watchlist")?: arrayListOf()
+            newWatchlist = intent.getParcelableArrayListExtra("newwatchlist")?: arrayListOf()
+        }
+
+        listAdapt.itemsRemote= newWatchlist?.map{it.thread} ?: emptyList()
+        listAdapt.itemsLocal=watchlist?.map{it.thread} ?: emptyList()
+
+        onBackPressedDispatcher.addCallback(this){
+            returnVals()
+        }
     }
 
     private fun returnVals(){
@@ -48,6 +65,7 @@ class SyncCompareActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() { //not working...
         super.onBackPressed()
         returnVals()
