@@ -1,0 +1,766 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AndroidLayouts">
+    <shared>
+      <config>
+        <device id="pixel_3a_xl" />
+        <device id="pixel" />
+        <device id="2.7in QVGA" />
+        <device id="Nexus 6" />
+        <device id="pixel_3_xl" />
+        <device id="pixel_3a" />
+        <device id="pixel_xl" />
+        <device id="pixel_3" />
+        <device id="Nexus 5X" />
+        <device id="pixel_2" />
+      </config>
+    </shared>
+    <layouts>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
+        <config>
+          <theme>@style/AppTheme</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/list_item.xml">
+        <config>
+          <theme>@style/AppTheme</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/list_item_compact.xml">
+        <config>
+          <theme>@style/AppTheme</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/nav_header_main.xml">
+        <config>
+          <theme>@style/AppTheme</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/sync.xml">
+        <config>
+          <theme>@style/AppTheme.NoActionBar</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/sync_compare.xml">
+        <config>
+          <theme>@style/AppTheme</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/sync_compare_item.xml">
+        <config>
+          <theme>@style/AppTheme</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/menu/drawer_menu.xml">
+        <config>
+          <theme>@style/AppTheme</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/menu/menu_sorting.xml">
+        <config>
+          <theme>@style/AppTheme</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/navigation/nav_graph.xml">
+        <config>
+          <theme>@style/AppTheme</theme>
+        </config>
+      </layout>
+    </layouts>
+  </component>
+  <component name="AndroidLogFilters">
+    <option name="TOOL_WINDOW_CUSTOM_FILTER" value="/de.dediggefedde.questden_blick_reader D/" />
+    <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="No Filters" />
+    <option name="TOOL_WINDOW_REGEXP_FILTER" value="false" />
+  </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="switch to livebinding &#10;new android studio&#10;lost signature file (unpublished)&#10;added smooth scroller&#10;WIP: swipe to move next/prev.">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/proguard-rules.pro" beforeDir="false" afterPath="$PROJECT_DIR$/app/proguard-rules.pro" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/release/app-release.apk" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/release/output-metadata.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\Julian\.android\avd\Medium_Phone_API_30.avd)]" />
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$/app">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="My Application" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="My Application" type="f1a62948:ProjectNode" />
+                <item name="app" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="My Application" type="f1a62948:ProjectNode" />
+                <item name="app" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="My Application" type="f1a62948:ProjectNode" />
+                <item name="app" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="other" type="c8890929:TasksNode$1" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Class" />
+        <option value="Class" />
+        <option value="layoutResourceFile" />
+        <option value="Kotlin File" />
+        <option value="resourceFile" />
+      </list>
+    </option>
+  </component>
+  <component name="GenerateSignedApkSettings">
+    <option name="EXPORT_PRIVATE_KEY" value="false" />
+    <option name="KEY_STORE_PATH" value="K:\Dokumente und Einstellungen\Sword\Eigene Dateien\keys\android.jks" />
+    <option name="KEY_ALIAS" value="questden" />
+    <option name="REMEMBER_PASSWORDS" value="true" />
+    <option name="BUILD_TARGET_KEY" value="apk" />
+  </component>
+  <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="master" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
+    <favorite-branches>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="release" />
+              </list>
+            </value>
+          </entry>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/release" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </favorite-branches>
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="dediggefedde" />
+      </list>
+    </option>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="release" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Dediggefedde"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Dediggefedde/Questden_Blick_Reader.git",
+    "accountId": "7cac1f8d-22ca-48fc-ad64-957b6cae555f"
+  }
+}]]></component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="1fJtXZIbxzmJZBAi299IGfGGYsE" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Android App.app.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.Upgrade Gradle wrapper.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;com.google.services.firebase.aqiPopupShown&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;WIP&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;SDK Location&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;
+  }
+}</component>
+  <component name="PsdUISettings">
+    <option name="MODULE_TAB" value="Signing Configs" />
+    <option name="BUILD_VARIANTS_TAB" value="Build Types" />
+    <option name="LAST_EDITED_SIGNING_CONFIG" value="questden" />
+    <option name="LAST_EDITED_BUILD_TYPE" value="release" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Julian\AndroidStudioProjects\MyApplication2\app\src\main\res\layout" />
+    </key>
+    <key name="android.template.-1787063663">
+      <recent name="de.dediggefedde.questden_blick_reader" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="de.dediggefedde.questden_blick_reader" />
+    </key>
+  </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="curthread" />
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App">
+      <module name="My_Application.app.main" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="CLEAR_APP_STORAGE" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="RESTORE_ENABLED" value="false" />
+      <option name="RESTORE_FILE" value="" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Hybrid>
+      <Java>
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Java>
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Java/Kotlin Method Sample (legacy)" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="" />
+      <created>1595948063094</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1595948063094</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Tidy up&#10;rename package&#10;Fix: reopen will open last opened thread&#10;Fix: first open will go to /quest/">
+      <created>1596656011024</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1596656011024</updated>
+    </task>
+    <task id="LOCAL-00002" summary="* new: back-button for links (past position, once)&#10;* new: preparation for back-button back to quest overview.&#10;  * perhaps a deque would be nice for multiple back steps&#10;* fix: update work again with relative url  &#10;* refactor: watch-operation identify by url instead of thread&#10;* refactor: requestPage reacts on _special_ page &quot;watch&quot; instead of external function">
+      <created>1596844062930</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1596844062930</updated>
+    </task>
+    <task id="LOCAL-00003" summary="* prepare compact layout (still error on use)&#10;* replaced not-null assertion operator !! with safe call operators or added not-null conditionals&#10;* tried to find memory problem. large quests are out of memory (slissa), even if images are omitted.&#10;  - memory-management? function parameters always pass-by-value. listadapter copying list multiple times?&#10;  - test out limits of internal list storage. even if listadapter works, dynamic calls (new request for posts) might be needed&#10;    + More traffic, longer waits&#10;  - perhaps a data source might be usefull. Seems pretty complicated for this html get+parse, though.&#10;  - investigate a bit about questden APIs...">
+      <created>1597535340161</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1597535340161</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Used codacy once to improve code&#10;added basic KDOC (without most @param/@property)&#10;removed some unneded function parameters">
+      <created>1597703614693</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1597703614693</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Used codacy hook commit test">
+      <created>1597704954776</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1597704954776</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Used codacy hook commit test">
+      <created>1597737922499</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1597737922499</updated>
+    </task>
+    <task id="LOCAL-00007" summary="requestvalues description added&#10;codacity states code issue-free">
+      <created>1597748684946</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1597748684946</updated>
+    </task>
+    <task id="LOCAL-00008" summary="some cleanup with codeanalyze&#10;&#10;regexp has horrible memory consumption on html parse. 300kB website took 700MB Ram.&#10;tried scrate{it} I couldn't make it run&#10;use jsoup now. Needed Coroutines. only implemented partly for single-thread-view. almost no Ram effect. perhaps a warning für .get, but withcontext should help it. Read that intellisense does not always notice that, though, so possible false warning&#10;&#10;finishing single-thread and rewriting other html-requests pending.">
+      <created>1597877597805</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1597877597805</updated>
+    </task>
+    <task id="LOCAL-00009" summary="test with alternative view&#10;decided first to go with shortened text&#10;active for `isthread` overview and watchlist.&#10;clicking summary will expand it again.&#10; &#10; use volley now for request and jsoup for parsing&#10; volley is faster and returns text for text-operations&#10; unified request updates vs display &#10; dropped most of the intensive regexp part&#10; &#10; some more string recoursses&#10; bottom view is now linear-layout without outlines&#10; scroll faster now, aligns tops and highlights&#10; also added dates to the itemview&#10; &#10; open watch-menu now sorts by imgs and posts automatically&#10; sort-dialog still needed?&#10; clicking summary gives semi-fullscreen.&#10; &#10; fixed a bug for parsing when someone checks &quot;spoiler&quot; without uploading img.&#10; then spoiler.png is present, but img missing, so there was a crash&#10; &#10; needs some cleaning up and refaktoring.&#10; also plans for future: &#10;  * BLICK-userscript-dataserver integration&#10;  * slimmer overview&#10;  * fontsize adjustable&#10;  * navigation position display&#10;  * better place/behavior for updatebutton">
+      <created>1598140021191</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1598140021191</updated>
+    </task>
+    <task id="LOCAL-00010" summary="unified quest request functions&#10;actually use enum &#10;tidy unused functions&#10;further prepare for different views&#10;bottom-navigation redesign&#10;update-button redesign and updates current page. on WATCH: request watch-updates&#10;zoom img path display and open webbowser&#10;only-image button added.&#10;fixed: clicking on rev-link would hide/show navigations&#10;some attempt to simplify complexity level reported by codacity. disabled for future, though. too simple criteria imo.&#10;fix: added surrounding span for reflink for cases where end was not detected.&#10;current position (img/total img) dispalyed during scrolling&#10;fix: closing/reopening on watch  &#10;sorting menu removed for now. perhaps replacing with alternate-layout menu&#10;other ideas: bottom navigation could become crowded: bottom-&quot;drawer&quot; (2nd row) with tab-button (1st row) specific actions&#10;changed list-item layout a bit to adapt for missing/too long title/text, nothing would overlap the date. &#10;changed drawer menu a bit for features. should add questarch/graveyard. also second-page load thing. planned also up/down load Blick-Sync and Settings page">
+      <created>1598396786908</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1598396786908</updated>
+    </task>
+    <task id="LOCAL-00011" summary="readability guidelines for list_item&#10;tag support for all questden tags (color=native)&#10;br and double-br formatting&#10;image sizing of list_item&#10;&#10;some error-handling, checking for index-out-of-range&#10;position updating fixed&#10;last read-location stored and scrolled back to when revisited&#10;storing done on closing&#10;&#10;prepared multipage navigation for boards.&#10;plan to use &quot;endless-pagination&quot; wiht +50 setting&#10;&#10;cursingle to indicate currently single-thread or board or watchlist">
+      <created>1598911928027</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1598911928028</updated>
+    </task>
+    <task id="LOCAL-00012" summary="codacity complains about explaining private methods">
+      <created>1598912409482</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1598912409482</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Glide image width fix&#10;sfw modes&#10;small and dstance now relative size to text">
+      <created>1599175453024</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1599175453024</updated>
+    </task>
+    <task id="LOCAL-00014" summary="organized classes into files,&#10;fixed some minor issues &#10;reorganized displaythread&#10;put thread parsing in parallel thread&#10;tidied up code a bit">
+      <created>1601335212014</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1601335212014</updated>
+    </task>
+    <task id="LOCAL-00015" summary="some minor fixes, made lastread into sets, also supports nonwatches now&#10;more string literals as ressources, autosort after update watchlist&#10;&#10;still contains some log commands">
+      <created>1603646332714</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1603646332714</updated>
+    </task>
+    <task id="LOCAL-00016" summary="...">
+      <created>1603664399208</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1603664399208</updated>
+    </task>
+    <task id="LOCAL-00017" summary="settings hidden, no settings so far&#10;board pagination added, settings now have max-pagination for current board&#10;remove some logs&#10;position update fixed (give position if possible)&#10;curpage always 0 when navigating new board&#10;last thread in board overview requests is now always thread-informations, now with summary containing max pages. requires mutable-list in NetworkSingleton.kt">
+      <created>1604358297601</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1604358297601</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Release">
+      <created>1604360480986</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1604360480986</updated>
+    </task>
+    <task id="LOCAL-00019" summary="move screenshots, github file explorer is horrible...">
+      <created>1604362246083</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1604362246083</updated>
+    </task>
+    <task id="LOCAL-00020" summary="fix watchlist update counter reset when requesting update.&#10;fix crash scrolling to bottom when opening app when it was closed with a thread open&#10;fix sorting watchlist after updating it">
+      <created>1604533797403</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1604533797403</updated>
+    </task>
+    <task id="LOCAL-00021" summary="release build">
+      <created>1604534516927</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1604534516927</updated>
+    </task>
+    <task id="LOCAL-00022" summary="compiled apk with v2 signature">
+      <created>1604602574205</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1604602574205</updated>
+    </task>
+    <task id="LOCAL-00023" summary="added appupdater,&#10;androidstudio updated things and automatically did things to convert them... need to check downwards comatibility in future...">
+      <created>1604619050424</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1604619050424</updated>
+    </task>
+    <task id="LOCAL-00024" summary="compiled release again (some warnings solved, too)">
+      <created>1604619580138</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1604619580138</updated>
+    </task>
+    <task id="LOCAL-00025" summary="update test">
+      <created>1604707477120</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1604707477120</updated>
+    </task>
+    <task id="LOCAL-00026" summary="switch updater to json, create json version.json">
+      <created>1604708184982</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1604708184982</updated>
+    </task>
+    <task id="LOCAL-00027" summary="oder version format">
+      <created>1604708493076</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1604708493076</updated>
+    </task>
+    <task id="LOCAL-00028" summary="corrected update url for json.&#10;Test working!">
+      <created>1604708696238</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1604708696238</updated>
+    </task>
+    <task id="LOCAL-00029" summary="updating apk signed created">
+      <created>1604708776792</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1604708776792</updated>
+    </task>
+    <task id="LOCAL-00030" summary="fixed crashing app by proguard-rules.pro and enums on release builds...">
+      <created>1604871394177</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1604871394177</updated>
+    </task>
+    <task id="LOCAL-00031" summary="fixed error message when watching something new&#10;fix at checking target thread when adding to watchlist&#10;added stacktrace to volley errors&#10;new release signed apk">
+      <created>1604965691274</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1604965691274</updated>
+    </task>
+    <task id="LOCAL-00032" summary="version corrected">
+      <created>1604965845416</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1604965845416</updated>
+    </task>
+    <task id="LOCAL-00033" summary="features:&#10; * title display current thread&#10;bugfix:&#10; * check posts when added to watchlist when board page&gt;0&#10; * next/prev page scroll to 0&#10;new release apk same dev.">
+      <created>1605044716013</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1605044716013</updated>
+    </task>
+    <task id="LOCAL-00034" summary="release build&#10;local git/androidstudio did strange things yesterday...">
+      <created>1605198526163</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1605198526163</updated>
+    </task>
+    <task id="LOCAL-00035" summary="release build... again? not comitted for some reason">
+      <created>1605198555681</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1605198555681</updated>
+    </task>
+    <task id="LOCAL-00036" summary="WIP sync compare layout started to implement">
+      <created>1605460074956</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1605460074957</updated>
+    </task>
+    <task id="LOCAL-00037" summary="WIP&#10;cleaned up some synchronizing&#10;decided against single thread synchronize, only upload/download&#10;worked on sync, seems to work, but refetching thread info not working yet">
+      <created>1608050451995</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1608050451995</updated>
+    </task>
+    <task id="LOCAL-00038" summary="WIP&#10;cleaned up some synchronizing&#10;decided against single thread synchronize, only upload/download&#10;worked on sync, seems to work, but refetching thread info not working yet">
+      <created>1629559441076</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1629559441076</updated>
+    </task>
+    <task id="LOCAL-00039" summary="lastread is now last read entry (scroll position)&#10;newestID latest one last time accessed&#10;fixed import problems and update lastread on scroll&#10;reordered watchlist, item height smaller&#10;some minor restructures in stringlist">
+      <created>1629676853665</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1629676853673</updated>
+    </task>
+    <task id="LOCAL-00040" summary="new android studio IDE&#10;bytecdetargetlevel 11?&#10;some problems selecting JRE?&#10;&#10;cleaned a bit up&#10;more Toast&#10;checked notifiydatasetchange, but needed in most cases&#10;checked difftools for recyclerview, but somehow example-code not working&#10;spoiler text now not revealed in real SWF mode&#10;updatewatch moved inside displaythread, and made faster&#10;&#10;watchlist position update removed&#10;TODO: more efficient">
+      <created>1630368500875</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1630368500875</updated>
+    </task>
+    <task id="LOCAL-00041" summary="watchlist position update&#10;diffutils in recyclerview&#10;color changes and cleanup&#10;some theme adaptions&#10;progress bar rework&#10;url clickable again">
+      <created>1630424224376</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1630424224376</updated>
+    </task>
+    <task id="LOCAL-00042" summary="Sorting menu and modes (date, posts, images, native)&#10;also found out how to scroll after updating (callback unit)">
+      <created>1630625213515</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1630625213515</updated>
+    </task>
+    <task id="LOCAL-00043" summary="layout change (button at sides)&#10;scroll mode image/posts&#10;preparation navigation button watch different color">
+      <created>1631400821447</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1631400821447</updated>
+    </task>
+    <task id="LOCAL-00044" summary="layout change (button at sides)&#10;scroll mode image/posts&#10;preparation navigation button watch different color">
+      <created>1637616636225</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1637616636225</updated>
+    </task>
+    <task id="LOCAL-00045" summary="switch to livebinding &#10;new android studio&#10;lost signature file (unpublished)&#10;added smooth scroller&#10;WIP: swipe to move next/prev.">
+      <option name="closed" value="true" />
+      <created>1730821001480</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1730821001480</updated>
+    </task>
+    <option name="localTasksCounter" value="46" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="CHECK_NEW_TODO" value="false" />
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="move screenshots, github file explorer is horrible..." />
+    <MESSAGE value="fix watchlist update counter reset when requesting update.&#10;fix crash scrolling to bottom when opening app when it was closed with a thread open&#10;fix sorting watchlist after updating it" />
+    <MESSAGE value="release build" />
+    <MESSAGE value="compiled apk with v2 signature" />
+    <MESSAGE value="added appupdater,&#10;androidstudio updated things and automatically did things to convert them... need to check downwards comatibility in future..." />
+    <MESSAGE value="compiled release again (some warnings solved, too)" />
+    <MESSAGE value="update test" />
+    <MESSAGE value="switch updater to json, create json version.json" />
+    <MESSAGE value="oder version format" />
+    <MESSAGE value="corrected update url for json.&#10;Test working!" />
+    <MESSAGE value="updating apk signed created" />
+    <MESSAGE value="fixed crashing app by proguard-rules.pro and enums on release builds..." />
+    <MESSAGE value="fixed error message when watching something new&#10;fix at checking target thread when adding to watchlist&#10;added stacktrace to volley errors&#10;new release signed apk" />
+    <MESSAGE value="version corrected" />
+    <MESSAGE value="features:&#10; * title display current thread&#10;bugfix:&#10; * check posts when added to watchlist when board page&gt;0&#10; * next/prev page scroll to 0&#10;new release apk same dev." />
+    <MESSAGE value="release build&#10;local git/androidstudio did strange things yesterday..." />
+    <MESSAGE value="release build... again? not comitted for some reason" />
+    <MESSAGE value="WIP sync compare layout started to implement" />
+    <MESSAGE value="WIP&#10;cleaned up some synchronizing&#10;decided against single thread synchronize, only upload/download&#10;worked on sync, seems to work, but refetching thread info not working yet" />
+    <MESSAGE value="lastread is now last read entry (scroll position)&#10;newestID latest one last time accessed&#10;fixed import problems and update lastread on scroll&#10;reordered watchlist, item height smaller&#10;some minor restructures in stringlist" />
+    <MESSAGE value="new android studio IDE&#10;bytecdetargetlevel 11?&#10;some problems selecting JRE?&#10;&#10;cleaned a bit up&#10;more Toast&#10;checked notifiydatasetchange, but needed in most cases&#10;checked difftools for recyclerview, but somehow example-code not working&#10;spoiler text now not revealed in real SWF mode&#10;updatewatch moved inside displaythread, and made faster&#10;&#10;watchlist position update removed&#10;TODO: more efficient" />
+    <MESSAGE value="watchlist position update&#10;diffutils in recyclerview&#10;color changes and cleanup&#10;some theme adaptions&#10;progress bar rework&#10;url clickable again" />
+    <MESSAGE value="Sorting menu and modes (date, posts, images, native)&#10;also found out how to scroll after updating (callback unit)" />
+    <MESSAGE value="layout change (button at sides)&#10;scroll mode image/posts&#10;preparation navigation button watch different color" />
+    <MESSAGE value="switch to livebinding &#10;new android studio&#10;lost signature file (unpublished)&#10;added smooth scroller&#10;WIP: swipe to move next/prev." />
+    <option name="LAST_COMMIT_MESSAGE" value="switch to livebinding &#10;new android studio&#10;lost signature file (unpublished)&#10;added smooth scroller&#10;WIP: swipe to move next/prev." />
+  </component>
+  <component name="XDebuggerManager">
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo />
+      </pinned-members>
+    </pin-to-top-manager>
+    <watches-manager>
+      <configuration name="app">
+        <watch expression="((TreeMap)((NetworkResponse)response).headers).entrySet().toArray()[0]" custom="java.util.TreeMap,com.android.volley.NetworkResponse" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>

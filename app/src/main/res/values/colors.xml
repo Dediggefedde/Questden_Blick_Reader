@@ -13,6 +13,7 @@
     <color name="color_list_postID">#1B6FA6</color>
     <color name="color_imgPath_bg">#8DC64B</color>
     <color name="color_navigation_bg">#FCBD7E</color>
+    <color name="color_navigation_text">#000000</color>
     <color name="color_progress_frame">#000</color>
     <color name="color_progress_center">#FCBD7E</color>
     <color name="color_syncHeader_bg">#FCBD7E</color>

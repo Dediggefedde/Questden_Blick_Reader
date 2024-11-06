@@ -3,22 +3,21 @@ package de.dediggefedde.questden_blick_reader
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
-import android.text.Spannable
-import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
-import android.text.style.ForegroundColorSpan
+import android.view.GestureDetector
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -30,11 +29,10 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.github.javiersantos.appupdater.AppUpdater
 import com.github.javiersantos.appupdater.enums.UpdateFrom
-import com.google.android.material.internal.NavigationMenuItemView
 import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.android.synthetic.main.activity_main.*
+import de.dediggefedde.questden_blick_reader.databinding.ActivityMainBinding
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.PrintWriter
@@ -43,9 +41,12 @@ import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.abs
+import android.content.Context
+import android.util.AttributeSet
+import androidx.recyclerview.widget.LinearSmoothScroller
 
-
-/* Idea
+/* Behavior
 * 1. get list of thread from frontpage (/quests/ at the moment
 *   - call front, parse data using regex, save title,author,url,thumb and summary.
 * 2. mark interesting quests via "watch" button.
@@ -61,10 +62,9 @@ import kotlin.collections.ArrayList
 * fallback display html tags.
 * */
 
-/* Customizability
+/* TODO
 * - Theme light/dark
 * - update channel beta/stable
-* -
 * */
 
 /**
@@ -86,10 +86,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var sortingmode=SORTING.NATIVE
     private var mainMenu:Menu?=null
     private var scrollMode=ScrollMode.IMAGES
+    private lateinit var gestureDetector: GestureDetector
 
+    private lateinit var binding: ActivityMainBinding
     private lateinit var scrollListener: RecyclerView.OnScrollListener
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+       backpressed()
+    }
+    private fun backpressed(){
         if (chronic.size == 0) return
         chronic.removeAt(chronic.lastIndex)
         if (chronic.size == 0) return
@@ -98,7 +104,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when (nav.operation) {
             NavOperation.LINK -> {
                 if (nav.navStat != null)
-                    ingredients_list.layoutManager?.onRestoreInstanceState(nav.navStat)
+                    binding.ingredientsList.layoutManager?.onRestoreInstanceState(nav.navStat)
             }
             NavOperation.PAGE -> {
                 if (nav.prop != "" && sets.curpage != nav.prop)
@@ -116,9 +122,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 updatePositionDisplay()
             }
         }
-        ingredients_list.addOnScrollListener(scrollListener)
+        binding.ingredientsList.addOnScrollListener(scrollListener)
     }
 
+    /**
+     *
+     */
+    fun toggleToolbarVisibility(toShow:Boolean?=null) {
+        val show = toShow ?: (binding.toolbar.visibility == View.GONE)
+
+        if (show) {
+            binding.toolbar.visibility = View.VISIBLE
+            binding.bottomNavigation.visibility = View.VISIBLE
+            binding.groupNavBut.visibility = View.VISIBLE
+        } else {
+            binding.toolbar.visibility = View.GONE
+            binding.bottomNavigation.visibility = View.GONE
+            binding.toolDropout.visibility = View.GONE
+            binding.groupNavBut.visibility = View.GONE
+        }
+    }
     /**
      * scrolls to position, aligns top and sets isHighlight on thread-object
      * also remove isHighlight on others.
@@ -127,25 +150,30 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun scrollHighlight(pos: Int) {
         if (displayDataList.size < pos || pos < 0 || !sets.curSingle) return
 
-        displayDataList[pos].isHighlight = true //mark scrolled to
-        listAdapt.notifyItemChanged(pos)
-
-        (ingredients_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0) //actuall scroll to position
-
-
-        //back button
-        chronic.add(Navis(NavOperation.LINK, pos.toString(), ingredients_list.layoutManager?.onSaveInstanceState()))
-
-        updatePositionDisplay(pos+1)
-
-        displayDataList.forEachIndexed {index, el->
-            if(index!=pos) {
-                val oldHigh = el.isHighlight
+        // Unmark previous highlights
+        displayDataList.forEachIndexed { _, el ->
+            if (el.isHighlight) {
                 el.isHighlight = false
-                if (oldHigh)
-                    listAdapt.notifyItemChanged(index)
             }
-        } //unmark highlighted
+        }
+        // Mark the new highlight
+        displayDataList[pos].isHighlight = true
+        binding.ingredientsList.post {
+            // Hier kannst du die Logik für das Highlighting anpassen
+            listAdapt.notifyItemChanged(pos) // Notify only the highlighted item
+        }
+
+        val curPos=(binding.ingredientsList.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+        val smoothScroller = TopSnappingScroller(binding.ingredientsList.context)
+        smoothScroller.targetPosition = pos
+        if(abs(curPos-pos)<10)
+            (binding.ingredientsList.layoutManager as LinearLayoutManager).startSmoothScroll(smoothScroller)
+        else
+            (binding.ingredientsList.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos,0)
+
+        // Back button
+        chronic.add(Navis(NavOperation.LINK, pos.toString(), binding.ingredientsList.layoutManager?.onSaveInstanceState()))
+
     }
 
     override fun onStop() {
@@ -161,25 +189,44 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        gestureDetector = GestureDetector(this, SwipeGestureListener())
+
         //layout
-        setContentView(R.layout.activity_main)
         navigationStuff()
-        ingredients_list.layoutManager = LinearLayoutManager(this)
-        ingredients_list.adapter = listAdapt
-        progressBarDet.visibility = View.GONE
-        progressBarUndet.visibility = View.GONE
-        imageZoom.visibility = View.GONE
-        tx_img_path.visibility = View.GONE
+        binding.ingredientsList.layoutManager = LinearLayoutManager(this)
+        binding.ingredientsList.adapter = listAdapt
+        binding.progressBarDet.visibility = View.GONE
+        binding.progressBarUndet.visibility = View.GONE
+        binding.imageZoom.visibility = View.GONE
+        binding.txImgPath.visibility = View.GONE
 
         //event handlers
-        imageZoom.setOnClickListener {
-            imageZoom.visibility = View.GONE
-            tx_img_path.visibility = View.GONE
+        binding.imageZoom.setOnClickListener {
+            binding.imageZoom.visibility = View.GONE
+            binding.txImgPath.visibility = View.GONE
+        }
+        // Setze den OnTouchListener für das ScrollView
+        binding.ingredientsList.setOnTouchListener{view, event ->
+            val result = gestureDetector.onTouchEvent(event)
+
+            if (event.action == MotionEvent.ACTION_UP && !result) {
+                view.performClick()
+            }
+
+            //result
+            false
         }
 
         //start doing things with data
         loadData()
         setRecyclerViewScrollListener()
+
+
+        onBackPressedDispatcher.addCallback(this){
+            backpressed()
+        }
 
         AppUpdater(this)
             .setUpdateFrom(UpdateFrom.JSON)
@@ -233,7 +280,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun setTextViewHTML(text: TextView?, html: String?) {
         if (text == null) return
         val imgGet = GlideImageGetter(text)
-        val tagHandler = HTMLTagHandler(this)
+        val tagHandler = HTMLTagHandler(this, binding)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) { //75% of phones
             val sequence: CharSequence = Html.fromHtml(convertToCustomTags(html), Html.FROM_HTML_MODE_COMPACT, imgGet, tagHandler)
@@ -272,25 +319,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun navigationStuff() {
-        navigationView.setNavigationItemSelectedListener(this)
-        setSupportActionBar(toolbar)
+        binding.navigationView.setNavigationItemSelectedListener(this)
+        setSupportActionBar(binding.toolbar)
 
         val menuDrawerToggle = ActionBarDrawerToggle(
-            this, drawer_layout, toolbar,
+            this, binding.drawerLayout, binding.toolbar,
             R.string.open_menu, R.string.closesMenu
         ).apply {
-            drawer_layout.addDrawerListener(this)
+            binding.drawerLayout.addDrawerListener(this)
             this.syncState()
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+        binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
         menuDrawerToggle.isDrawerIndicatorEnabled = true
         menuDrawerToggle.toolbarNavigationClickListener = null
         menuDrawerToggle.syncState()
 
 
-        navigationView.itemIconTintList = null
+        binding.navigationView.itemIconTintList = null
 
     }
 
@@ -306,10 +353,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.menu_tg -> displayThread(RequestValues.TG.url, false)
             R.id.menu_watch_open -> {
                 displayThread(RequestValues.WATCH.url, false)
-//                var mit:MenuItem?=findViewById(R.id.menu_watch_open)
-//                val  spanString = SpannableString(mit?.title)
-//                spanString.setSpan(ForegroundColorSpan(Color.parseColor("#FF0000")),0,spanString.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-//                mit?.title = spanString
             }
             R.id.menu_reader_sync -> {
                 val inte = Intent(this, SyncActivity::class.java)
@@ -350,33 +393,32 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         }
 
-        drawer_layout.closeDrawer(GravityCompat.START)
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
 
-    private fun exportSH(sh_name: Uri?) {
+    private fun exportSH(shName: Uri?) {
         try {
-
             val gson = Gson()
             val li = listOf(displayDataList, watchlist, sets)
-            val cont= gson.toJson(li)
+            val cont = gson.toJson(li)
 
-            val out= sh_name?.let { contentResolver.openOutputStream(it) }
-            out?.write(cont.toByteArray())
-
+            shName?.let { uri ->
+                contentResolver.openOutputStream(uri)?.use { out ->
+                    out.write(cont.toByteArray())
+                }
+            }
             Toast.makeText(this, "Done", Toast.LENGTH_SHORT).show()
         } catch (e: IOException) {
             e.printStackTrace()
             Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show()
         }
     }
-    private fun importSH(sh_name: Uri?) {
+
+    private fun importSH(shName: Uri?) {
         try {
 
-//            val li = listOf(displayDataList, watchlist, sets)
-//            val cont= gson.toJson(li)
-
-            val inf= sh_name?.let { contentResolver.openInputStream(it) }
+            val inf= shName?.let { contentResolver.openInputStream(it) }
             val content = inf!!.bufferedReader().use(BufferedReader::readText)
 
             val gson = Gson()
@@ -412,11 +454,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if(resultCode != Activity.RESULT_OK)return
 
         if (requestCode == 1) {
-            //val watchResp = data?.getStringExtra("response")
-            sets = data?.extras?.get("sets") as Settings
 
-            val remWatchUrl=data.getStringArrayListExtra("watchlistUrl")
-            val remWatchPos=data.getStringArrayListExtra("watchlistPos")
+            @Suppress("DEPRECATION")
+
+            sets= if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra("sets", Settings::class.java)
+            }else{
+               data?.extras?.get("sets") as Settings
+            }?: Settings()
+
+            val remWatchUrl=data?.getStringArrayListExtra("watchlistUrl")
+            val remWatchPos=data?.getStringArrayListExtra("watchlistPos")
 
             if(remWatchUrl!=null && remWatchUrl.size  >0) {//download
                 watchlist.clear()
@@ -466,7 +514,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 displayDataList=displayDataList.sortedWith(compareBy({it.date},{ -it.newImg }, { -it.newPosts }))
             else -> {}
         }
-        listAdapt.submitList(displayDataList) { ingredients_list.scrollToPosition(0) }
+        listAdapt.submitList(displayDataList) { binding.ingredientsList.scrollToPosition(0) }
     }
     private fun showWatches() {
         sets.curpage = RequestValues.WATCH.url
@@ -518,7 +566,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             reqDone += 1
             return
         }
-        progressBarUndet.visibility = View.VISIBLE
+        binding.progressBarUndet.visibility = View.VISIBLE
 
         if (viewSingle)
             chronic.add(Navis(NavOperation.THREAD, murl))
@@ -533,7 +581,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val tr = ThreadRequest("https://questden.org$murl", viewSingle, if (onlyCheckWatch) curW.newestId else null, null, { response ->
             reqDone += 1
             if (onlyCheckWatch) {
-                val inf = response.removeLast()
+                if (response.isEmpty()) return@ThreadRequest
+                val inf = response.removeAt(response.lastIndex)
                 val newPosts = response.filter { it.postID != "" }.size
                 val newImgs = response.filter { it.imgUrl != "" }.size
                 if (curW.thread.title == "") {
@@ -590,18 +639,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             if (reqCnt > 0) {
                 perc = (reqDone * 100f / reqCnt).toInt()
-                progressBarUndet.visibility = View.GONE
-                progressBarDet.visibility = View.VISIBLE
+                binding.progressBarUndet.visibility = View.GONE
+                binding.progressBarDet.visibility = View.VISIBLE
             }
-            progressBarDet.progress = perc
+            binding.progressBarDet.progress = perc
 
             if ((reqDone == reqCnt && reqCnt > 0) || reqCnt == 0)
                 afterUpdateReq()
         }, {
             reqDone += 1
             if (reqCnt > 0) {
-                progressBarDet.progress = reqDone * 100 / reqCnt
-                progressBarUndet.progress = reqDone * 100 / reqCnt
+                binding.progressBarDet.progress = reqDone * 100 / reqCnt
+                binding.progressBarUndet.progress = reqDone * 100 / reqCnt
             }
             afterUpdateReq()
 
@@ -661,18 +710,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             sets = gson.fromJson(jsonString, itemType3)
         }
         listAdapt.notifyDataSetChanged()
-
+//        displayThread(RequestValues.QUEST.url, false)
+//        firstStart=true;
+        //TODO check prev version
         if (firstStart) {
             displayThread(RequestValues.QUEST.url, false)
         } else {
-//            if (!sets.curSingle) {
+            if (!sets.curSingle) {
                 displayThreadList(0)
-//            } else {
-//                //val w = getWatch(displayDataList.first().url)
-//                // val ind = displayDataList.indexOfFirst { w.curReadId == it.postID }
-//                displayThreadList()
-//                // scrollHighlight(ind)
-//            }
+            } else {
+                //val w = getWatch(displayDataList.first().url)
+                // val ind = displayDataList.indexOfFirst { w.curReadId == it.postID }
+                displayThreadList()
+                // scrollHighlight(ind)
+            }
         }
         showSetsInButtons()
     }
@@ -736,7 +787,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var posMod="Page: "
         if (sets.curSingle && displayDataList.size > pos) {
             if (position == -1) {
-                pos = 1 + (ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                pos = 1 + (binding.ingredientsList.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             }
             if (displayDataList.size < pos) pos = 0
             if(scrollMode==ScrollMode.IMAGES||sets.showOnlyPics) {
@@ -762,36 +813,36 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if(totcnt<curcnt)totcnt=curcnt //current page = maxpage, link missing
         }
 
-        tx_position.text = getString(R.string.CurPos, posMod,curcnt, totcnt)
+        binding.txPosition.text = getString(R.string.CurPos, posMod,curcnt, totcnt)
     }
 
     private fun showSetsInButtons() { //set text to current mode
         when (sets.sfw) {
             SFWModes.SFWQUESTION -> {
-                btn_toggleSFW.text = getString(R.string.SFWQuestion)
+                binding.btnToggleSFW.text = getString(R.string.SFWQuestion)
             }
             SFWModes.SFWREAL -> {
-                btn_toggleSFW.text = getString(R.string.SFW)
+                binding.btnToggleSFW.text = getString(R.string.SFW)
             }
             SFWModes.NSFW -> {
-                btn_toggleSFW.text = getString(R.string.NSFW)
+                binding.btnToggleSFW.text = getString(R.string.NSFW)
             }
         }
 
         val imgid = if (sets.showOnlyPics) R.drawable.ic_exclnonimg else R.drawable.ic_inclnonimg
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-            btn_only_pics.setImageDrawable(ContextCompat.getDrawable(this, imgid))
+            binding.btnOnlyPics.setImageDrawable(ContextCompat.getDrawable(this, imgid))
         } else {
-            btn_only_pics.setImageDrawable(VectorDrawableCompat.create(resources, imgid, theme))
+            binding.btnOnlyPics.setImageDrawable(VectorDrawableCompat.create(resources, imgid, theme))
         }
     }
 
     private fun afterUpdateReq() {
-        progressBarUndet.visibility = View.GONE
-        progressBarDet.visibility = View.GONE
-        progressBarUndet.progress = 0
-        progressBarDet.progress = 0
+        binding.progressBarUndet.visibility = View.GONE
+        binding.progressBarDet.visibility = View.GONE
+        binding.progressBarUndet.progress = 0
+        binding.progressBarDet.progress = 0
         reqCnt = 0
         reqDone = 0
 
@@ -807,9 +858,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun updateWatchlist() {
         reqCnt = watchlist.size
         reqDone = 0
-        progressBarDet.max = 100
-        progressBarDet.progress = 0
-        progressBarDet.visibility = View.VISIBLE
+        binding.progressBarDet.max = 100
+        binding.progressBarDet.progress = 0
+        binding.progressBarDet.visibility = View.VISIBLE
         for (w in watchlist) {
             displayThread(w.thread.url, viewSingle = true, onlyCheckWatch = true)
         }
@@ -824,7 +875,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     /**
      * path text of fullview-image. Opens image link in browser
      */
-    fun btnimgZoomPath(@Suppress("UNUSED_PARAMETER") view: View) {
+    fun btnimgZoomPath(view: View) {
         val openURL = Intent(Intent.ACTION_VIEW)
 
         val targeturl = (view as TextView).text
@@ -870,11 +921,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     fun btnOpenTools(@Suppress("UNUSED_PARAMETER") view: View) {
 //        if(tool_dropout.isDrawerOpen(GravityCompat.START)){
-        if (tool_dropout.visibility != View.GONE) {
-            tool_dropout.visibility = View.GONE
+        if (binding.toolDropout.visibility != View.GONE) {
+            binding.toolDropout.visibility = View.GONE
 //            tool_dropout.closeDrawer(GravityCompat.START)
         } else {
-            tool_dropout.visibility = View.VISIBLE
+            binding.toolDropout.visibility = View.VISIBLE
 //            tool_dropout.openDrawer(GravityCompat.START)
         }
     }
@@ -884,7 +935,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     @SuppressLint("NotifyDataSetChanged")
     fun btnIncFont(@Suppress("UNUSED_PARAMETER") view: View) {
-        sets.txsize = sets.txsize + 1f
+        sets.txsize += 1f
         listAdapt.notifyDataSetChanged()
     }
 
@@ -893,7 +944,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     @SuppressLint("NotifyDataSetChanged")
     fun btnDecFont(@Suppress("UNUSED_PARAMETER") view: View) {
-        sets.txsize = sets.txsize - 1f
+        sets.txsize -= 1f
         listAdapt.notifyDataSetChanged()
     }
 
@@ -929,9 +980,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * next image button
      * jumps and highlight to target
      */
-    fun btnNextButton(@Suppress("UNUSED_PARAMETER") view: View) {
+    fun btnNextButton(@Suppress("UNUSED_PARAMETER") view: View?) {
         if (sets.curSingle) {//single thread
-            var pos = (ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            var pos = (binding.ingredientsList.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
 
             if(scrollMode==ScrollMode.IMAGES) {
                 pos += displayDataList.takeLast(displayDataList.size - pos - 1).indexOfFirst { it.imgUrl != "" }
@@ -947,9 +998,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     /**
      * previous image button
      */
-    fun btnPrevButton(@Suppress("UNUSED_PARAMETER") view: View) {
+    fun btnPrevButton(@Suppress("UNUSED_PARAMETER") view: View?) {
         if (sets.curSingle) {//single thread
-            var pos = (ingredients_list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            var pos = (binding.ingredientsList.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             pos =if(scrollMode==ScrollMode.IMAGES)  displayDataList.take(pos).indexOfLast { it.imgUrl != "" }else displayDataList.take(pos).lastIndex
 
             scrollHighlight(pos)
@@ -983,18 +1034,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 //    private fun updateVisible(){
 //
-//        val man=(ingredients_list.layoutManager as LinearLayoutManager)
+//        val man=(ingredientsList.layoutManager as LinearLayoutManager)
 //        val first=man.findFirstVisibleItemPosition()
 //        val last=man.findLastVisibleItemPosition()
 //        listAdapt.notifyItemRangeChanged(first,last-first)
 //    }
 
     private fun displayThreadList(pos: Int = -1) {
-        toolbar.title=sets.curTitle
+        binding.toolbar.title=sets.curTitle
 
         val scrolling = {
             if (pos >= 0) {
-                (ingredients_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
+                (binding.ingredientsList.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
                 updatePositionDisplay(pos)
             } else {
                 if (sets.curThreadId != "") {
@@ -1016,4 +1067,56 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
 
+    inner class SwipeGestureListener : GestureDetector.SimpleOnGestureListener() {
+        private val swipeTreash = 100
+        private val swipeVel = 100
+
+        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+            // Implementiere die Logik für einen Tap hier
+            return true
+        }
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+            if (e1 == null) return false
+            val diffX = e2.x - e1.x
+            val diffY = e2.y - e1.y
+
+            return if (abs(diffX) > abs(diffY)) {
+                // Horizontaler Swipe erkannt
+                if (abs(diffX) > swipeTreash && abs(velocityX) > swipeVel) {
+                    if (diffX > 0) {
+                        btnPrevButton(null)
+                    } else {
+                        btnNextButton(null)
+                    }
+                    true
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        }
+    }
+    inner class TopSnappingScroller(context: Context) : LinearSmoothScroller(context) {
+        override fun getVerticalSnapPreference(): Int {
+            return SNAP_TO_START // Setze den Snap-Preference auf den oberen Rand
+        }
+        override fun calculateTimeForScrolling(dx: Int): Int {
+            val absDx = abs(dx)
+            val time = super.calculateTimeForScrolling(dx)
+            return time * 2 // Verdopple die Scrollzeit
+        }
+    }
+}
+
+class CustomRecyclerView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyle: Int = 0
+) : RecyclerView(context, attrs, defStyle) {
+
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
+    }
 }

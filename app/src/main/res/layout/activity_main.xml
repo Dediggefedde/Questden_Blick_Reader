@@ -14,17 +14,17 @@
         tools:context=".MainActivity">
 
 
-        <androidx.recyclerview.widget.RecyclerView
+        <de.dediggefedde.questden_blick_reader.CustomRecyclerView
             android:id="@+id/ingredients_list"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:scrollbars="vertical"
             app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="1.0" />
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -235,6 +235,7 @@
             android:minWidth="48dp"
             android:minHeight="100dp"
             android:onClick="btnPrevButton"
+            android:textColor="@color/color_navigation_text"
             android:text="@string/Bot_Nav_prev"
             app:layout_constraintBottom_toTopOf="@+id/button4"
             app:layout_constraintStart_toStartOf="parent" />
@@ -249,6 +250,7 @@
             android:minWidth="48dp"
             android:minHeight="50dp"
             android:onClick="btnLastButton"
+            android:textColor="@color/color_navigation_text"
             android:text="@string/Bot_Nav_Last"
             app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -262,6 +264,7 @@
             android:minWidth="48dp"
             android:minHeight="100dp"
             android:onClick="btnNextButton"
+            android:textColor="@color/color_navigation_text"
             android:text="@string/Bot_Nav_next"
             app:layout_constraintBottom_toTopOf="@+id/btn_last"
             app:layout_constraintEnd_toEndOf="parent"
@@ -279,6 +282,7 @@
             android:minWidth="48dp"
             android:minHeight="50dp"
             android:onClick="btnFirstButton"
+            android:textColor="@color/color_navigation_text"
             android:text="@string/Bot_Nav_first"
             app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
             app:layout_constraintStart_toStartOf="parent" />

@@ -15,9 +15,6 @@ import android.text.style.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -27,8 +24,9 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.list_item.view.*
+import de.dediggefedde.questden_blick_reader.databinding.ActivityMainBinding
+import de.dediggefedde.questden_blick_reader.databinding.ListItemBinding
+import de.dediggefedde.questden_blick_reader.databinding.SyncCompareItemBinding
 import org.jsoup.Jsoup
 import org.xml.sax.XMLReader
 import java.lang.reflect.Field
@@ -47,7 +45,9 @@ class QuestDenListAdapter(val mContext: Context) :
     /**
      * custom viewholder for one tgthread object
      */
+    private lateinit var binding: ActivityMainBinding
     inner class FullViewHolder(itemView: View) : ViewHolder(itemView)
+
     private class DiffCallback : DiffUtil.ItemCallback<TgThread>() {
 
         override fun areItemsTheSame(oldItem: TgThread, newItem: TgThread) =
@@ -62,68 +62,51 @@ class QuestDenListAdapter(val mContext: Context) :
      */
     abstract inner class ViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
-        private var mTitleView: TextView? = null
-        private var mSummaryView: TextView? = null
-        private var mAuthorView: TextView? = null
-        private var mImgView: ImageView? = null
-        private var mWatchBut: TextView? = null
-        private var mPostsNew: TextView? = null
-        private var mImgNew: TextView? = null
-        private var mNoView: TextView? = null
-        private var mDate: TextView? = null
+        private val iVBinding = ListItemBinding.bind(itemView) // Nutze das richtige Layout-Binding
+
         private val mMain: MainActivity = (mContext as MainActivity)
         private var mtg = TgThread()
 
         init {
-            //object access
-            mTitleView = itemView.findViewById(R.id.tx_title)
-            mSummaryView = itemView.findViewById(R.id.tx_Summary)
-            mAuthorView = itemView.findViewById(R.id.tx_author)
-            mImgView = itemView.findViewById(R.id.img_url)
-            mWatchBut = itemView.findViewById(R.id.tx_watch)
-            mPostsNew = itemView.findViewById(R.id.tx_newPosts)
-            mImgNew = itemView.findViewById(R.id.tx_newImg)
-            mNoView = itemView.findViewById(R.id.tx_postID)
-            mDate = itemView.findViewById(R.id.tx_date)
             setListener()
-            //event listeners
         }
 
+        @SuppressLint("ClickableViewAccessibility")
         private fun setListener() {
             val evThreadTitleClick = View.OnClickListener {
                 if (mtg.isThread)
                     mMain.displayThread(mtg.url, viewSingle = true,onlyCheckWatch = false)
             }
-            mTitleView?.setOnClickListener(evThreadTitleClick)
-            mAuthorView?.setOnClickListener(evThreadTitleClick)
-            mImgView?.setOnClickListener {
-                mMain.progressBarUndet.visibility = View.VISIBLE
-                mMain.imageZoom.visibility = View.VISIBLE
-                mMain.tx_img_path.visibility = View.VISIBLE
+            iVBinding.txTitle.setOnClickListener(evThreadTitleClick)
+            iVBinding.txAuthor.setOnClickListener(evThreadTitleClick)
+            iVBinding.imgUrl.setOnClickListener {
+                binding.progressBarUndet.visibility = View.VISIBLE
+                binding.imageZoom.visibility = View.VISIBLE
+                binding.txImgPath.visibility = View.VISIBLE
                 var str = "https://questden.org" + mtg.imgUrl.replace("thumb", "src").replace("s.", ".")
                 if (mtg.isSpoiler && mMain.sets.sfw == SFWModes.SFWREAL) str = "https://questden.org/kusaba/spoiler.png"
 
 
-                Glide.with(mMain.imageZoom)
+                Glide.with(binding.imageZoom)
                     .load(str)
                     .listener(object : RequestListener<Drawable> {
                         override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-                            mMain.progressBarUndet.visibility = View.GONE
+                            binding.progressBarUndet.visibility = View.GONE
                             return false
                         }
 
                         override fun onResourceReady(
                             resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean
                         ): Boolean {
-                            mMain.progressBarUndet.visibility = View.GONE
+                            binding.progressBarUndet.visibility = View.GONE
                             return false
                         }
                     })
-                    .into(mMain.imageZoom)
-                mMain.tx_img_path.text = str
+                    .into(binding.imageZoom)
+                binding.txImgPath.text = str
 
             }
-            mWatchBut?.setOnClickListener {
+            iVBinding.txWatch.setOnClickListener {
                 if(mtg.url.indexOf("#")>0)mtg.url=mtg.url.substring(0,mtg.url.indexOf("#"))
                 if (mMain.isWatched(mtg.url)) {
                     mMain.removeFromWatch(mtg.url)
@@ -133,28 +116,31 @@ class QuestDenListAdapter(val mContext: Context) :
                 updateWatchState()
                 it.invalidate()
             }
-            mNoView?.setOnClickListener {
+            iVBinding.txPostID.setOnClickListener {
                 val openURL = Intent(Intent.ACTION_VIEW)
                 val threadurl = mtg.url.replace(Regex("#\\d+"), "")
                 openURL.data = Uri.parse("https://questden.org$threadurl#${mtg.postID}")
                 it.context.startActivity(openURL)
             }
-            mSummaryView?.setOnClickListener {
-                if (mtg.isThread) mMain.setTextViewHTML(mSummaryView!!, mtg.summary)
+            iVBinding.txSummary.setOnTouchListener  {_,ev->false}
+
+            iVBinding.txSummary.setOnClickListener {
+                if (mtg.isThread) mMain.setTextViewHTML(iVBinding.txSummary, mtg.summary)
                 else {
                     if (it.tag == "clickableClick") {
                         it.tag = ""
                     } else {
-                        if (mMain.toolbar.visibility == View.GONE) {
-                            mMain.toolbar.visibility = View.VISIBLE
-                            mMain.bottom_navigation.visibility = View.VISIBLE
-                            mMain.groupNavBut.visibility=View.VISIBLE
-                        } else {
-                            mMain.toolbar.visibility = View.GONE
-                            mMain.bottom_navigation.visibility = View.GONE
-                            mMain.tool_dropout.visibility = View.GONE
-                            mMain.groupNavBut.visibility=View.GONE
-                        }
+                        mMain.toggleToolbarVisibility()
+//                        if (binding.toolbar.visibility == View.GONE) {
+//                            binding.toolbar.visibility = View.VISIBLE
+//                            binding.bottomNavigation.visibility = View.VISIBLE
+//                            binding.groupNavBut.visibility=View.VISIBLE
+//                        } else {
+//                            binding.toolbar.visibility = View.GONE
+//                            binding.bottomNavigation.visibility = View.GONE
+//                            binding.toolDropout.visibility = View.GONE
+//                            binding.groupNavBut.visibility=View.GONE
+//                        }
                     }
                 }
             }
@@ -180,17 +166,17 @@ class QuestDenListAdapter(val mContext: Context) :
                 mtg.newPosts=w.newPosts
                 mtg.newImg=w.newImg
 
-                mWatchBut?.setTextColor(Color.parseColor("#FF37A523"))
-                mWatchBut?.text = mContext.getString(R.string.wBut_watched)
-                mPostsNew?.visibility = View.VISIBLE
-                mImgNew?.visibility = View.VISIBLE
-                mPostsNew?.text = mContext.getString(R.string.NewPosts, w.newPosts)
-                mImgNew?.text = mContext.getString(R.string.NewImg, w.newImg)
+                iVBinding.txWatch.setTextColor(Color.parseColor("#FF37A523"))
+                iVBinding.txWatch.text = mContext.getString(R.string.wBut_watched)
+                iVBinding.txNewPosts.visibility = View.VISIBLE
+                iVBinding.txNewImg.visibility = View.VISIBLE
+                iVBinding.txNewPosts.text = mContext.getString(R.string.NewPosts, w.newPosts)
+                iVBinding.txNewImg.text = mContext.getString(R.string.NewImg, w.newImg)
             } else {
-                mWatchBut?.setTextColor(Color.parseColor("#A52B23"))
-                mWatchBut?.text = mContext.getString(R.string.wBut_watch)
-                mPostsNew?.visibility = View.GONE
-                mImgNew?.visibility = View.GONE
+                iVBinding.txWatch.setTextColor(Color.parseColor("#A52B23"))
+                iVBinding.txWatch.text = mContext.getString(R.string.wBut_watch)
+                iVBinding.txNewPosts.visibility = View.GONE
+                iVBinding.txNewImg.visibility = View.GONE
             }
         }
 
@@ -205,51 +191,51 @@ class QuestDenListAdapter(val mContext: Context) :
             if (mtg.url.indexOf("#") > 0) mtg.url = mtg.url.substring(0, mtg.url.indexOf("#"))
 
             if (mtg.isThread) {
-                mWatchBut?.visibility = View.VISIBLE
-                mPostsNew?.visibility = View.VISIBLE
-                mImgNew?.visibility = View.VISIBLE
+                iVBinding.txWatch.visibility = View.VISIBLE
+                iVBinding.txNewPosts.visibility = View.VISIBLE
+                iVBinding.txNewImg.visibility = View.VISIBLE
                 updateWatchState()
             } else {
-                mWatchBut?.visibility = View.GONE
-                mPostsNew?.visibility = View.GONE
-                mImgNew?.visibility = View.GONE
+                iVBinding.txWatch.visibility = View.GONE
+                iVBinding.txNewPosts.visibility = View.GONE
+                iVBinding.txNewImg.visibility = View.GONE
             }
 
-            mAuthorView?.visibility = if (mtg.author == "") View.GONE else View.VISIBLE
-            mTitleView?.visibility = if (mtg.title == "") View.GONE else View.VISIBLE
-            mImgView?.visibility = if (mtg.imgUrl == "") View.GONE else View.VISIBLE
+            iVBinding.txAuthor.visibility = if (mtg.author == "") View.GONE else View.VISIBLE
+            iVBinding.txTitle.visibility = if (mtg.title == "") View.GONE else View.VISIBLE
+            iVBinding.imgUrl.visibility = if (mtg.imgUrl == "") View.GONE else View.VISIBLE
 
-            mSummaryView?.textSize = mMain.sets.txsize
+            iVBinding.txSummary.textSize = mMain.sets.txsize
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) { //75% of phones
-                mTitleView?.text = Html.fromHtml(mtg.title, Html.FROM_HTML_MODE_COMPACT)
+                iVBinding.txTitle.text = Html.fromHtml(mtg.title, Html.FROM_HTML_MODE_COMPACT)
 
-                if (!mtg.isThread) mMain.setTextViewHTML(mSummaryView!!, mtg.summary)
-                else mSummaryView?.text = getHTMLtext(mtg.summary)
+                if (!mtg.isThread) mMain.setTextViewHTML(iVBinding.txSummary, mtg.summary)
+                else iVBinding.txSummary.text = getHTMLtext(mtg.summary)
 
-                mAuthorView?.text = Html.fromHtml(mtg.author, Html.FROM_HTML_MODE_COMPACT)
+                iVBinding.txAuthor.text = Html.fromHtml(mtg.author, Html.FROM_HTML_MODE_COMPACT)
             } else {
-                mTitleView?.text = mtg.title
-                mSummaryView?.text = mtg.summary
-                mAuthorView?.text = mtg.author
+                iVBinding.txTitle.text = mtg.title
+                iVBinding.txSummary.text = mtg.summary
+                iVBinding.txAuthor.text = mtg.author
             }
 
-            mDate?.text = tg.date
-            mNoView?.text = mtg.postID
+            iVBinding.txDate.text = tg.date
+            iVBinding.txPostID.text = mtg.postID
 
             if (!mtg.isHighlight) {
-                itemView.linearLayout?.setBackgroundColor(Color.parseColor("#F0E0D6"))
+                iVBinding.linearLayout.setBackgroundColor(Color.parseColor("#F0E0D6"))
             } else {
-                itemView.linearLayout?.setBackgroundColor(Color.parseColor("#F0C0B6"))
+                iVBinding.linearLayout.setBackgroundColor(Color.parseColor("#F0C0B6"))
             }
 
-            if (mtg.imgUrl != "" && mImgView != null) {
+            if (mtg.imgUrl != "" ) {
                 var imgUrl = "https://questden.org" + mtg.imgUrl
                 if (mtg.isSpoiler && mMain.sets.sfw != SFWModes.NSFW) imgUrl = "https://questden.org/kusaba/spoiler.png"
 
                 //val imgwidth=(80 * getSystem().displayMetrics.density).toInt()
 
-                Glide.with(mImgView)
+                Glide.with(iVBinding.imgUrl)
                     .load(imgUrl)
                     //.apply(RequestOptions.overrideOf (imgwidth,Target.SIZE_ORIGINAL ))
                     .listener(object : RequestListener<Drawable> {
@@ -259,11 +245,11 @@ class QuestDenListAdapter(val mContext: Context) :
 
                         override fun onResourceReady(p0: Drawable?, p1: Any?, target: Target<Drawable>?, p3: DataSource?, p4: Boolean): Boolean {
                             //do something when picture already loaded
-                            mImgView?.invalidate()
+                            iVBinding.imgUrl.invalidate()
                             return false
                         }
                     })
-                    .into(mImgView)
+                    .into(iVBinding.imgUrl)
 
             }
         }
@@ -272,6 +258,8 @@ class QuestDenListAdapter(val mContext: Context) :
     override fun getItemCount(): Int = currentList.size
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
+
+        binding = ActivityMainBinding.inflate(inflater)
 //        if (viewType == 0) {
         val comView = inflater.inflate(R.layout.list_item, parent, false)
         return FullViewHolder(comView)
@@ -295,7 +283,7 @@ class QuestDenListAdapter(val mContext: Context) :
  *   <span> with spoiler blackened until clicked
  *   redirect http-links to browser
  */
-class HTMLTagHandler(private var mContext: Context) : Html.TagHandler {
+class HTMLTagHandler(private var mContext: Context,private var binding: ActivityMainBinding) : Html.TagHandler {
     private var startQuote = 0
     private var startSpoil = 0
     private var startSmall = 0
@@ -366,7 +354,7 @@ class HTMLTagHandler(private var mContext: Context) : Html.TagHandler {
                 startSpoil = output.length
                 spoiled = true
             } else {
-                output.setSpan(Clickabl(URLSpan(""), true, Color.WHITE, mContext), startSpoil, output.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                output.setSpan(Clickabl(URLSpan(""), true, Color.WHITE, mContext, binding), startSpoil, output.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
                 spoiled = false
             }
         }
@@ -378,7 +366,7 @@ class HTMLTagHandler(private var mContext: Context) : Html.TagHandler {
             } else {
                 var endp = output.substring(startURL).indexOf("</CLink>")
                 if (endp == -1) endp = output.length - startURL
-                output.setSpan(Clickabl(URLSpan(curURL), spoiled, Color.BLUE, mContext), startURL, endp + startURL, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                output.setSpan(Clickabl(URLSpan(curURL), spoiled, Color.BLUE, mContext, binding), startURL, endp + startURL, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
         }
     }
@@ -393,26 +381,29 @@ class Clickabl(
     private var span: URLSpan?,
     private var spoiler: Boolean,
     private var colUnSpoil: Int,
-    private var mContext: Context
+    private var mContext: Context,
+    private var binding:ActivityMainBinding
 ) : ClickableSpan() {
     private var spoiled = false
+
+
     override fun onClick(view: View) {
         val rexTag = Regex(">>(\\d+)$")
         view.tag = "clickableClick"
 
         if (span != null && rexTag.matches(span!!.url)) {
             val main = mContext as MainActivity
-            val pos = main.listAdapt.currentList.indexOfFirst { it.postID == rexTag.find(span!!.url)?.groupValues?.get(1) ?: 0 }
+            val pos = main.listAdapt.currentList.indexOfFirst { it.postID == (rexTag.find(span!!.url)?.groupValues?.get(1) ?: 0) }
 
             if (main.listAdapt.currentList.size < pos || pos == -1) return
 
             if (main.chronic.size > 0 && main.chronic[main.chronic.lastIndex].prop != pos.toString())
-                main.chronic.add(Navis(NavOperation.LINK, pos.toString(), main.ingredients_list.layoutManager?.onSaveInstanceState()))
+                main.chronic.add(Navis(NavOperation.LINK, pos.toString(), binding.ingredientsList.layoutManager?.onSaveInstanceState()))
 
             main.scrollHighlight(pos)
             main.listAdapt.currentList.forEach { it.isHighlight = false }
             main.listAdapt.currentList[pos].isHighlight = true
-            main.chronic.add(Navis(NavOperation.LINK, pos.toString(), main.ingredients_list.layoutManager?.onSaveInstanceState()))
+            main.chronic.add(Navis(NavOperation.LINK, pos.toString(), binding.ingredientsList.layoutManager?.onSaveInstanceState()))
 //            main.listAdapt.notifyDataSetChanged(
         }else if(span!=null && !spoiler){
             val openURL = Intent(Intent.ACTION_VIEW)
@@ -441,14 +432,10 @@ class Clickabl(
     }
 }
 
-class SyncCompareListAdapter(var items_local: List<TgThread>, var items_remote: List<TgThread>) :
+class SyncCompareListAdapter(var itemsLocal: List<TgThread>, var itemsRemote: List<TgThread>) :
     RecyclerView.Adapter<SyncCompareListAdapter.ViewHolder>() {
+        private lateinit var syncComItemBinding:SyncCompareItemBinding
 
-    private var mLocalTitle: TextView? = null
-    private var mRemoteTitle: TextView? = null
-    private var mDirButton: ImageButton? = null
-    private var mTitle:TextView?=null
-//    private var mTransferState: Int=1 //3 state: 0 download, 1 ignore, 2 upload
     /**
      * custom viewholder
      */
@@ -459,34 +446,27 @@ class SyncCompareListAdapter(var items_local: List<TgThread>, var items_remote: 
 
     abstract inner class ViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
-        init {
-            mTitle=itemView.findViewById(R.id.sync_comp_title)
-            mLocalTitle=itemView.findViewById(R.id.sync_comp_local_title)
-            mRemoteTitle=itemView.findViewById(R.id.sync_comp_remote_title)
-            mDirButton=itemView.findViewById(R.id.sync_comp_img)
-        }
-        fun bind(tg_local: TgThread?,tg_remote: TgThread?) {
-            var titl=tg_local?.title?:""
-            if(titl=="")titl=tg_remote?.title?:""
 
-            mTitle?.text=titl
+        fun bind(tgLocal: TgThread?, tgRemote: TgThread?) {
+            var titl=tgLocal?.title?:""
+            if(titl=="")titl=tgRemote?.title?:""
+
+            syncComItemBinding.syncCompTitle.text=titl
 //            mLocalTitle?.text="local"
 //            mRemoteTitle?.text="remote"
         }
 
     }
-//    fun alignedItemPos(localPos:Int):Int{
-//        return 0
-//    }
 
-    override fun getItemCount(): Int = items_local.size
+    override fun getItemCount(): Int = itemsLocal.size
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
+        syncComItemBinding = SyncCompareItemBinding.inflate(inflater)
         val comView = inflater.inflate(R.layout.sync_compare_item, parent, false)
         return FullViewHolder(comView)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(items_local[position],items_local[position])
+        holder.bind(itemsLocal[position],itemsLocal[position])
     }
 }
