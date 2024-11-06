@@ -19,7 +19,7 @@ android {
     }
     signingConfigs {
         questden {
-            storeFile = file("keystore/keystore.jks")
+            storeFile file("keystore/keystore.jks")
             storePassword System.getenv("SIGNING_STOREPW")
             keyAlias System.getenv("SIGNING_STOREKEYALIAS")
             keyPassword System.getenv("SIGNING_STOREKEYPW")
