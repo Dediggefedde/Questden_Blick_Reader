@@ -12,6 +12,7 @@ import android.text.Html
 import android.text.Spannable
 import android.text.TextPaint
 import android.text.style.*
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,11 +41,6 @@ import java.lang.reflect.Field
  */
 class QuestDenListAdapter(val mContext: Context) :
     ListAdapter<TgThread, QuestDenListAdapter.ViewHolder>(DiffCallback()){
-//class QuestDenListAdapter(var items: List<TgThread>, var mContext: Context) :
-//    RecyclerView.Adapter<QuestDenListAdapter.ViewHolder>() {
-    /**
-     * custom viewholder for one tgthread object
-     */
     private lateinit var binding: ActivityMainBinding
     inner class FullViewHolder(itemView: View) : ViewHolder(itemView)
 
@@ -80,31 +76,7 @@ class QuestDenListAdapter(val mContext: Context) :
             iVBinding.txTitle.setOnClickListener(evThreadTitleClick)
             iVBinding.txAuthor.setOnClickListener(evThreadTitleClick)
             iVBinding.imgUrl.setOnClickListener {
-                binding.progressBarUndet.visibility = View.VISIBLE
-                binding.imageZoom.visibility = View.VISIBLE
-                binding.txImgPath.visibility = View.VISIBLE
-                var str = "https://questden.org" + mtg.imgUrl.replace("thumb", "src").replace("s.", ".")
-                if (mtg.isSpoiler && mMain.sets.sfw == SFWModes.SFWREAL) str = "https://questden.org/kusaba/spoiler.png"
-
-
-                Glide.with(binding.imageZoom)
-                    .load(str)
-                    .listener(object : RequestListener<Drawable> {
-                        override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-                            binding.progressBarUndet.visibility = View.GONE
-                            return false
-                        }
-
-                        override fun onResourceReady(
-                            resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean
-                        ): Boolean {
-                            binding.progressBarUndet.visibility = View.GONE
-                            return false
-                        }
-                    })
-                    .into(binding.imageZoom)
-                binding.txImgPath.text = str
-
+                mMain.viewImage(mtg)
             }
             iVBinding.txWatch.setOnClickListener {
                 if(mtg.url.indexOf("#")>0)mtg.url=mtg.url.substring(0,mtg.url.indexOf("#"))
@@ -122,7 +94,6 @@ class QuestDenListAdapter(val mContext: Context) :
                 openURL.data = Uri.parse("https://questden.org$threadurl#${mtg.postID}")
                 it.context.startActivity(openURL)
             }
-            iVBinding.txSummary.setOnTouchListener  {_,ev->false}
 
             iVBinding.txSummary.setOnClickListener {
                 if (mtg.isThread) mMain.setTextViewHTML(iVBinding.txSummary, mtg.summary)
@@ -259,7 +230,9 @@ class QuestDenListAdapter(val mContext: Context) :
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
 
-        binding = ActivityMainBinding.inflate(inflater)
+        //binding = ActivityMainBinding.inflate(inflater, parent, false)
+        //binding = ActivityMainBinding.inflate(inflater)
+
 //        if (viewType == 0) {
         val comView = inflater.inflate(R.layout.list_item, parent, false)
         return FullViewHolder(comView)

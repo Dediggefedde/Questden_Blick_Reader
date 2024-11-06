@@ -43,8 +43,15 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
+import android.util.Log
 import androidx.recyclerview.widget.LinearSmoothScroller
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 
 /* Behavior
 * 1. get list of thread from frontpage (/quests/ at the moment
@@ -73,7 +80,7 @@ import androidx.recyclerview.widget.LinearSmoothScroller
  * sets up all layouts, requests html, parses, fills data, manages back-click/menus etc.
  */
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    val listAdapt = QuestDenListAdapter(this)
+    val listAdapt:QuestDenListAdapter = QuestDenListAdapter(this)
     private var displayDataList = listOf<TgThread>()
     private var watchlist = mutableListOf<Watch>()
     var sets: Settings = Settings() //current app settings
@@ -186,6 +193,34 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onDestroy()
     }
 
+    fun viewImage(mtg:TgThread){
+        binding.progressBarUndet.visibility = View.VISIBLE
+        binding.imageZoom.visibility = View.VISIBLE
+        binding.txImgPath.visibility = View.VISIBLE
+        var str = "https://questden.org" + mtg.imgUrl.replace("thumb", "src").replace("s.", ".")
+        if (mtg.isSpoiler && sets.sfw == SFWModes.SFWREAL) str = "https://questden.org/kusaba/spoiler.png"
+
+        Glide.with(binding.imageZoom)
+            .asDrawable()
+            .load(str)
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                    binding.progressBarUndet.visibility = View.GONE
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean
+                ): Boolean {
+//                    binding.imageZoom.setImageDrawable(resource)
+                    // Manuell die Größe des ImageViews festlegen
+                    binding.progressBarUndet.visibility = View.GONE
+                    return false
+                }
+            })
+            .into(binding.imageZoom)
+        binding.txImgPath.text = str
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -1102,7 +1137,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             return SNAP_TO_START // Setze den Snap-Preference auf den oberen Rand
         }
         override fun calculateTimeForScrolling(dx: Int): Int {
-            val absDx = abs(dx)
             val time = super.calculateTimeForScrolling(dx)
             return time * 2 // Verdopple die Scrollzeit
         }
