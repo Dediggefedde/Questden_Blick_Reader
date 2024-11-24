@@ -6,7 +6,8 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:openDrawer="start">
+    >
+    <!--tools:openDrawer="left"-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -15,10 +16,11 @@
 
 
         <de.dediggefedde.questden_blick_reader.CustomRecyclerView
-            android:id="@+id/ingredients_list"
+            android:id="@+id/post_list_rec_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:scrollbars="vertical"
+            
             app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
@@ -44,13 +46,13 @@
             android:id="@+id/imageZoom"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@color/color_list_author"
+            android:background="#a000"
             android:contentDescription="@string/img_zoom_desc"
-            app:layout_constraintBottom_toTopOf="@+id/guideline3"
-            app:layout_constraintEnd_toEndOf="@+id/ingredients_list"
+            app:layout_constraintBottom_toBottomOf="@+id/tool_dropout"
+            app:layout_constraintEnd_toEndOf="@+id/post_list_rec_view"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/ingredients_list"
-            app:layout_constraintTop_toTopOf="@+id/guideline"
+            app:layout_constraintStart_toStartOf="@+id/post_list_rec_view"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0"
             app:srcCompat="@drawable/ic_questden" />
 
@@ -93,6 +95,7 @@
             android:rotation="-90"
             android:theme="@style/ProgressBarStyle"
 
+
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -109,15 +112,31 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <Button
-                android:id="@+id/button2"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
+
+            <ImageButton
+                android:id="@+id/btn_openFont"
+                style="@style/ImgButtonStyle"
+                android:contentDescription="@string/open_appearance_menu"
                 android:onClick="btnOpenTools"
-                android:text="@string/symb_OpenTools" />
+                app:srcCompat="@drawable/fontmenudrop"
+                />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btn_first"
+                style="@style/NavigationButtonStyle"
+                android:onClick="btnFirstButton"
+                android:text="@string/Bot_Nav_first" />
+
+            <Button
+                android:id="@+id/btn_prev"
+                style="@style/NavigationButtonStyle"
+                android:onClick="btnPrevButton"
+                android:text="@string/Bot_Nav_prev" />
 
             <Space
                 android:layout_width="wrap_content"
@@ -127,9 +146,11 @@
             <TextView
                 android:id="@+id/tx_position"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
                 android:onClick="btnSkipModeChange"
-                android:text="@string/main_position" />
+                android:text="@string/main_position"
+                android:textSize="15sp" />
 
             <Space
                 android:layout_width="wrap_content"
@@ -137,14 +158,30 @@
                 android:layout_weight="1" />
 
             <Button
-                android:id="@+id/btn_update"
-                style="?android:attr/buttonBarButtonStyle"
+                android:id="@+id/btn_next"
+                style="@style/NavigationButtonStyle"
+                android:onClick="btnNextButton"
+                android:text="@string/Bot_Nav_next" />
+
+            <Button
+                android:id="@+id/btn_last"
+                style="@style/NavigationButtonStyle"
+                android:onClick="btnLastButton"
+                android:text="@string/Bot_Nav_Last" />
+
+
+            <Space
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/btn_update"
+                style="@style/ImgButtonStyle"
+                android:contentDescription="@string/update_page"
                 android:onClick="btnUpdateButton"
-                android:text="@string/symb_Update" />
+                app:srcCompat="@drawable/refresh"
+                />
 
         </LinearLayout>
 
@@ -158,16 +195,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ingredients_list" />
+            app:layout_constraintTop_toBottomOf="@+id/post_list_rec_view"
+            tools:visibility="gone" />
 
-        <!--        <androidx.drawerlayout.widget.DrawerLayout-->
-        <!--            android:id="@+id/tool_dropout"-->
-        <!--            android:layout_width="0dp"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--            app:layout_constraintEnd_toEndOf="parent"-->
-        <!--            app:layout_constraintStart_toStartOf="parent"-->
-        <!--            tools:openDrawer="start">-->
 
         <LinearLayout
             android:id="@+id/tool_dropout"
@@ -179,121 +209,72 @@
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
+            app:layout_constraintStart_toStartOf="parent"
+            tools:visibility="visible"
+            >
 
             <ImageButton
                 android:id="@+id/btn_only_pics"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                style="@style/ImgButtonStyle"
                 android:contentDescription="@string/main_btnOnlyPics_descr"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
                 android:onClick="btnToggleOnlyPictures"
-                android:scaleType="fitCenter"
-                app:srcCompat="@drawable/ic_inclnonimg" />
+                app:srcCompat="@drawable/ic_inclnonimg"/>
 
-
-            <Button
+            <ImageButton
                 android:id="@+id/btn_incFont"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
+                style="@style/ImgButtonStyle"
+                android:contentDescription="@string/increase_font_size"
                 android:onClick="btnIncFont"
-                android:text="@string/increaseFont" />
+                app:srcCompat="@drawable/aplus"
+                />
 
-            <Button
+            <ImageButton
                 android:id="@+id/btn_decFont"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
+                style="@style/ImgButtonStyle"
+                android:contentDescription="@string/decrease_font_size"
                 android:onClick="btnDecFont"
-                android:text="@string/symb_decFont" />
+                app:srcCompat="@drawable/aminus"
+                />
 
             <Button
                 android:id="@+id/btn_toggleSFW"
-                style="?android:attr/buttonBarButtonStyle"
+                style="@style/ImgButtonStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
                 android:onClick="btnTglSFW"
                 android:text="@string/SFWQuestion" />
 
+            <ImageButton
+                android:id="@+id/btn_offline"
+                style="@style/ImgButtonStyle"
+                android:contentDescription="@string/offline_mode"
+                android:onClick="btnTglOffline"
+                app:srcCompat="@drawable/offline"
+                />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btn_prev"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/item_sel"
-            android:minWidth="48dp"
-            android:minHeight="100dp"
-            android:onClick="btnPrevButton"
-            android:textColor="@color/color_navigation_text"
-            android:text="@string/Bot_Nav_prev"
-            app:layout_constraintBottom_toTopOf="@+id/button4"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/btn_last"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/item_sel"
-            android:minWidth="48dp"
-            android:minHeight="50dp"
-            android:onClick="btnLastButton"
-            android:textColor="@color/color_navigation_text"
-            android:text="@string/Bot_Nav_Last"
-            app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <Button
-            android:id="@+id/btn_next"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/item_sel"
-            android:minWidth="48dp"
-            android:minHeight="100dp"
-            android:onClick="btnNextButton"
-            android:textColor="@color/color_navigation_text"
-            android:text="@string/Bot_Nav_next"
-            app:layout_constraintBottom_toTopOf="@+id/btn_last"
+            app:layout_constraintBottom_toBottomOf="@+id/post_list_rec_view"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
-
-        <!--        </androidx.drawerlayout.widget.DrawerLayout>-->
-
-        <Button
-            android:id="@+id/button4"
-            style="?android:attr/buttonBarButtonStyle"
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="gone"
+            tools:visibility="visible"
+            />
+        <TextView
+            android:id="@+id/progress_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/item_sel"
-            android:minWidth="48dp"
-            android:minHeight="50dp"
-            android:onClick="btnFirstButton"
-            android:textColor="@color/color_navigation_text"
-            android:text="@string/Bot_Nav_first"
-            app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <androidx.constraintlayout.widget.Group
-            android:id="@+id/groupNavBut"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:constraint_referenced_ids="btn_prev,button4,btn_next,btn_last" />
-
+            android:textSize="20sp"
+            android:onClick="btnimgZoomPath"
+            android:background="#cfff"
+            app:layout_constraintBottom_toTopOf="@+id/progressBar"
+            app:layout_constraintEnd_toEndOf="@+id/progressBar"
+            app:layout_constraintStart_toStartOf="@+id/progressBar"
+            android:visibility="gone"
+            tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.navigation.NavigationView
@@ -301,9 +282,10 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/drawer_menu"
         android:theme="@style/NavigationTheme"
-        tools:visibility="gone" />
+         />
 
 </androidx.drawerlayout.widget.DrawerLayout>

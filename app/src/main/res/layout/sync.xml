@@ -40,7 +40,7 @@
                 android:text="@string/SyncName" />
 
             <EditText
-                android:id="@+id/editTextTextPersonName"
+                android:id="@+id/edit_loginName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:autofillHints=""
@@ -56,25 +56,32 @@
                 android:text="@string/SyncPW" />
 
             <EditText
-                android:id="@+id/editTextTextPassword"
+                android:id="@+id/edit_loginPW"
                 android:layout_width="wrap_content"
                 android:layout_height="45dp"
                 android:autofillHints=""
                 android:ems="10"
+                android:text="Password"
                 android:inputType="textPassword"
                 tools:ignore="LabelFor" />
 
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/SyncStatus" />
-
-            <Button
-                android:id="@+id/button"
+            <CheckBox
+                android:id="@+id/cb_autologin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="btnClick"
+                android:text="@string/save_login_data"
+                android:textColor="#888"
+                />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="41dp" />
+
+            <Button
+                android:id="@+id/btn_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="loginClick"
                 android:text="@string/SyncLogin" />
 
             <Space
@@ -82,7 +89,7 @@
                 android:layout_height="41dp" />
 
             <TextView
-                android:id="@+id/syncRemStatus"
+                android:id="@+id/statusText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/NotLoggedIn" />
@@ -93,7 +100,7 @@
                 android:layout_height="wrap_content"
                 android:onClick="btnDownload"
                 android:text="@string/SyncDownload"
-                tools:visibility="invisible" />
+                tools:visibility="visible" />
 
             <Button
                 android:id="@+id/btnUpload"
@@ -101,7 +108,7 @@
                 android:layout_height="wrap_content"
                 android:onClick="btnUpload"
                 android:text="@string/SyncUpload"
-                tools:visibility="invisible" />
+                tools:visibility="visible" />
 
         </LinearLayout>
         </ScrollView>

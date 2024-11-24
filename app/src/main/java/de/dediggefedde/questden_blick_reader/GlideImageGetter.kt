@@ -3,6 +3,7 @@
  */
 package de.dediggefedde.questden_blick_reader
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
@@ -14,6 +15,7 @@ import com.bumptech.glide.request.Request
 import com.bumptech.glide.request.target.SizeReadyCallback
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
+import java.io.File
 import java.lang.ref.WeakReference
 
 /**
@@ -22,12 +24,14 @@ import java.lang.ref.WeakReference
  */
 class GlideImageGetter(
     textView: TextView,
+    mContext: Context,
+    private val sets:ModelSettings,
     private val matchParentWidth: Boolean = false,
-    densityAware: Boolean = false//,
-//    private val imagesHandler: HtmlImagesHandler? = null
+    densityAware: Boolean = false
 ) : ImageGetter {
     private val container: WeakReference<TextView> = WeakReference(textView)
     private var density = 2f
+    private val mMain: MainActivity = (mContext as MainActivity)
 
     init {
         if (densityAware) {
@@ -41,13 +45,19 @@ class GlideImageGetter(
 //        imagesHandler?.addImage(source)
 
         val drawable = BitmapDrawablePlaceholder()
+        var reqnam="https://questden.org$source"
+
+        val offImgPath =File(mMain.filesDir,"offline/${sets.curThreadId}_img")
+        val imgNam=source.substringAfterLast("/") //offline mode
+//        val imgfold= File(offImgPath,imgNam)
+        if(offImgPath.exists() && File(offImgPath,imgNam).exists())reqnam="${mMain.filesDir}/offline/${sets.curThreadId}_img/$imgNam"
 
         // Load Image to the Drawable
         container.get()?.apply {
             post {
                 Glide.with(context)
                     .asBitmap()
-                    .load("https://questden.org$source")
+                    .load(reqnam)
                     .into(drawable)
             }
         }

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="11.777153mm"
+   height="8.2561188mm"
+   viewBox="0 0 11.777153 8.2561188"
+   version="1.1"
+   id="svg200"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   sodipodi:docname="FontMenuDrop.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview202"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="13.455443"
+     inkscape:cx="30.285141"
+     inkscape:cy="18.133925"
+     inkscape:window-width="1786"
+     inkscape:window-height="1057"
+     inkscape:window-x="126"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs197" />
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-6.9645766,-3.7401808)">
+    <g
+       aria-label="A"
+       id="text375"
+       style="font-size:10.5833px;line-height:1;font-family:Corbel;-inkscape-font-specification:Corbel;fill:#d45500;stroke:#2b0000;stroke-width:0.714375;stroke-dasharray:none;paint-order:stroke fill markers;stop-color:#000000">
+      <path
+         d="M 7.4957497,11.011653 10.312106,4.0973683 h 0.728636 l 2.816356,6.9142847 h -0.91467 L 12.115608,8.9290994 H 9.2269047 L 8.4000844,11.011653 Z M 10.668673,5.1722347 Q 10.208754,6.4641414 9.7850084,7.5183372 L 9.526627,8.1694582 h 2.289259 L 11.557504,7.5183372 Q 11.133759,6.4434709 10.689343,5.1722347 Z"
+         id="path7082"
+         style="stroke-width:0.714375;stroke-dasharray:none" />
+    </g>
+    <g
+       aria-label="A"
+       id="text587"
+       style="font-size:5.29165px;line-height:1;font-family:Corbel;-inkscape-font-specification:Corbel;fill:#d45500;stroke:#2b0000;stroke-width:0.502708;stroke-dasharray:none;paint-order:stroke fill markers;stop-color:#000000">
+      <path
+         d="M 14.041327,7.7886434 15.449505,4.331501 h 0.364318 l 1.408178,3.4571424 h -0.457335 l -0.41341,-1.0412768 h -1.444352 l -0.41341,1.0412768 z m 1.586461,-2.9197092 q -0.229959,0.6459534 -0.441832,1.1730513 l -0.12919,0.3255605 h 1.144629 L 16.072204,6.0419855 Q 15.860331,5.5045523 15.638124,4.8689342 Z"
+         id="path7079"
+         style="stroke-width:0.502708;stroke-dasharray:none" />
+    </g>
+    <path
+       style="font-variation-settings:normal;opacity:1;fill:#d45500;fill-opacity:1;fill-rule:evenodd;stroke:#2b0000;stroke-width:0.244;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 15.101696,10.225104 h 3.22484 l -1.533764,1.533768 z"
+       id="path652" />
+  </g>
+</svg>

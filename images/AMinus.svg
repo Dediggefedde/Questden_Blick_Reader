@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="8.6176872mm"
+   height="7.6286597mm"
+   viewBox="0 0 8.6176872 7.6286597"
+   version="1.1"
+   id="svg16698"
+   sodipodi:docname="AMinus.svg"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview16700"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="4.7572176"
+     inkscape:cx="57.491589"
+     inkscape:cy="15.975725"
+     inkscape:window-width="1786"
+     inkscape:window-height="1057"
+     inkscape:window-x="126"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs16695" />
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-18.064994,-15.618962)">
+    <g
+       aria-label="A"
+       id="text375"
+       style="font-size:10.5833px;line-height:1;font-family:Corbel;-inkscape-font-specification:Corbel;fill:#d45500;stroke:#2b0000;stroke-width:0.714375;stroke-dasharray:none;paint-order:stroke fill markers;stop-color:#000000"
+       transform="translate(11.100417,11.878781)">
+      <path
+         d="M 7.4957497,11.011653 10.312106,4.0973683 h 0.728636 l 2.816356,6.9142847 h -0.91467 L 12.115608,8.9290994 H 9.2269047 L 8.4000844,11.011653 Z M 10.668673,5.1722347 Q 10.208754,6.4641414 9.7850084,7.5183372 L 9.526627,8.1694582 h 2.289259 L 11.557504,7.5183372 Q 11.133759,6.4434709 10.689343,5.1722347 Z"
+         id="path7082"
+         style="stroke-width:0.714375;stroke-dasharray:none" />
+    </g>
+    <g
+       aria-label="−"
+       id="text17253"
+       style="font-size:5.64444px;line-height:1;font-family:Corbel;-inkscape-font-specification:Corbel;opacity:1;vector-effect:none;fill:#d45500;stroke:#2b0000;stroke-width:0.714375;paint-order:stroke fill markers;stop-color:#000000;stop-opacity:1">
+      <path
+         d="m 24.065512,17.266528 v -0.363801 h 2.259981 v 0.363801 z"
+         style="vector-effect:none;stop-color:#000000;stop-opacity:1"
+         id="path18191" />
+    </g>
+  </g>
+</svg>

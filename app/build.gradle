@@ -84,4 +84,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     implementation 'com.github.javiersantos:AppUpdater:2.7'
     implementation "androidx.room:room-runtime:2.2.5"
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+//    implementation 'com.squareup.okhttp3:okhttp-urlconnection:4.11.0'
+//    implementation 'com.squareup.okhttp3:okhttp-brotli:4.11.0' /
 }

@@ -42,18 +42,40 @@
         android:textColor="@color/color_list_title"
         android:textSize="16sp"
         android:textStyle="bold"
+        android:background="@drawable/btn_bg_inv"
         app:layout_constraintEnd_toStartOf="@+id/barrier5"
         app:layout_constraintStart_toStartOf="@id/barrier2"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
-        android:id="@+id/tx_Summary"
+        android:id="@+id/tx_Summary_Top"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:layout_marginLeft="5dp"
-        android:layout_marginTop="14sp"
+        android:layout_marginTop="5sp"
+        android:fontFamily="sans-serif"
+        android:lineSpacingMultiplier="1.25"
+        android:text="@string/example_text"
+        android:textColor="@color/color_list_text"
+        android:textSize="16sp"
+        android:gravity="top|start"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/barrier2"
+        app:layout_constraintTop_toTopOf="@+id/barrier4"
+        app:layout_constraintVertical_bias="0.0" />
+
+<!--    app:layout_constraintBottom_toBottomOf="@+id/tx_newImg"-->
+
+    <TextView
+        android:id="@+id/tx_Summary_Bottom"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
         android:fontFamily="sans-serif"
         android:lineSpacingMultiplier="1.25"
         android:text="@string/example_text"
@@ -61,8 +83,9 @@
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/barrier2"
-        app:layout_constraintTop_toTopOf="@+id/barrier4"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barrier6"
         app:layout_constraintVertical_bias="0.0" />
 
     <ImageView
@@ -128,6 +151,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/list_placeholder_ID"
+        android:background="@drawable/btn_bg_inv"
         android:textColor="@color/color_list_postID"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -147,4 +171,10 @@
         android:layout_height="wrap_content"
         app:barrierDirection="left" />
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier6"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="tx_title,tx_author,tx_postID,tx_date,tx_Summary_Top,tx_newImg,tx_newPosts,tx_watch, tx_Summary_Top" />
 </androidx.constraintlayout.widget.ConstraintLayout>

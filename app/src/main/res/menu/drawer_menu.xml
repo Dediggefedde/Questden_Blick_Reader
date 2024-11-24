@@ -2,12 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigationView">
-    <item android:title="@string/nav_pages_title">
+
+    <item android:title="@string/special">
         <menu>
             <item
                 android:id="@+id/menu_watch_open"
                 android:title="@string/nav_watchlist_open"
                 />
+            <item
+                android:id="@+id/menu_offline_open"
+                android:title="@string/downloaded"
+                />
+        </menu>
+    </item>
+
+    <item android:title="@string/nav_pages_title">
+        <menu>
             <item
                 android:id="@+id/menu_draw"
                 android:title="@string/nav_pages_draw"/>

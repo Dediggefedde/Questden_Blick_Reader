@@ -3,6 +3,7 @@
   <component name="AndroidLayouts">
     <shared>
       <config>
+        <device id="_device_class_phone" />
         <device id="pixel_3a_xl" />
         <device id="pixel" />
         <device id="2.7in QVGA" />
@@ -12,7 +13,8 @@
         <device id="pixel_xl" />
         <device id="pixel_3" />
         <device id="Nexus 5X" />
-        <device id="pixel_2" />
+        <pickBest>false</pickBest>
+        <target>android-34</target>
       </config>
     </shared>
     <layouts>
@@ -95,23 +97,54 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="switch to livebinding &#10;new android studio&#10;lost signature file (unpublished)&#10;added smooth scroller&#10;WIP: swipe to move next/prev.">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__androidx_exifinterface_exifinterface_1_2_0_aar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_github_bumptech_glide_annotations_4_12_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_github_bumptech_glide_disklrucache_4_12_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_github_bumptech_glide_gifdecoder_4_12_0_aar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_github_bumptech_glide_glide_4_12_0_aar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/MyAppGlideModule.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_github_bumptech_glide_annotations_4_4_0.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_github_bumptech_glide_disklrucache_4_4_0.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_github_bumptech_glide_gifdecoder_4_4_0.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_github_bumptech_glide_glide_4_4_0.xml" beforeDir="false" />
+    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="fullview image fixed (live-view issue)&#10;Newer gradle">
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_squareup_okio_okio_jvm_3_2_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_stdlib_jdk7_1_8_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_stdlib_jdk8_1_8_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataViewModel.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/aminus.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/aplus.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/btn_appear_menu.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/btn_bg_inv.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/fontmenudrop.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/offline.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/online.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/refresh.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/AMinus.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/APlus.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/Offline.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/Online.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/refresh.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_squareup_okhttp3_okhttp_3_10_0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_squareup_okhttp3_okhttp_4_11_0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_squareup_okio_okio_1_14_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/outputs/apk/androidTest/debug/output-metadata.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/outputs/apk/debug/app-debug.apk" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/outputs/apk/debug/app-debug.apk" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataClasses.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataClasses.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/GUIListViewClasses.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/GUIListViewClasses.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/GlideImageGetter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/GlideImageGetter.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/MyAppGlideModule.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/NetworkSingleton.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/NetworkSingleton.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/PicassoImageGetter2.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/SyncActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/SyncActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/SyncCompareActivity.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_exclnonimg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_exclnonimg.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_inclnonimg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_inclnonimg.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/item_sel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/item_sel.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/list_item.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/list_item.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/sync.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/sync.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/drawer_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/drawer_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/styles.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -168,11 +201,11 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Kotlin Class" />
         <option value="Class" />
+        <option value="Kotlin File" />
+        <option value="Kotlin Class" />
         <option value="layoutResourceFile" />
         <option value="resourceFile" />
-        <option value="Kotlin File" />
       </list>
     </option>
   </component>
@@ -260,7 +293,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Android App.app.executor": "Run",
+    "Android App.app.executor": "Debug",
     "Gradle.Upgrade Gradle wrapper.executor": "Run",
     "RunOnceActivity.cidr.known.project.marker": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
@@ -285,6 +318,10 @@
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Julian\AndroidStudioProjects\MyApplication2\app\src\main\res\layout" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Julian\AndroidStudioProjects\MyApplication2\images" />
+      <recent name="C:\Users\Julian\AndroidStudioProjects\MyApplication2\app\src\main\res\drawable" />
     </key>
     <key name="android.template.-1787063663">
       <recent name="de.dediggefedde.questden_blick_reader" />
@@ -727,7 +764,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730856389751</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="fullview image fixed (live-view issue)&#10;Newer gradle">
+      <option name="closed" value="true" />
+      <created>1730919048008</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1730919048008</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -756,7 +801,6 @@
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="move screenshots, github file explorer is horrible..." />
     <MESSAGE value="fix watchlist update counter reset when requesting update.&#10;fix crash scrolling to bottom when opening app when it was closed with a thread open&#10;fix sorting watchlist after updating it" />
     <MESSAGE value="release build" />
     <MESSAGE value="compiled apk with v2 signature" />
@@ -781,9 +825,19 @@
     <MESSAGE value="Sorting menu and modes (date, posts, images, native)&#10;also found out how to scroll after updating (callback unit)" />
     <MESSAGE value="layout change (button at sides)&#10;scroll mode image/posts&#10;preparation navigation button watch different color" />
     <MESSAGE value="switch to livebinding &#10;new android studio&#10;lost signature file (unpublished)&#10;added smooth scroller&#10;WIP: swipe to move next/prev." />
-    <option name="LAST_COMMIT_MESSAGE" value="switch to livebinding &#10;new android studio&#10;lost signature file (unpublished)&#10;added smooth scroller&#10;WIP: swipe to move next/prev." />
+    <MESSAGE value="fullview image fixed (live-view issue)&#10;Newer gradle" />
+    <option name="LAST_COMMIT_MESSAGE" value="fullview image fixed (live-view issue)&#10;Newer gradle" />
   </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/SyncActivity.kt</url>
+          <line>87</line>
+          <option name="timeStamp" value="83" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
     <pin-to-top-manager>
       <pinned-members>
         <PinnedItemInfo />
@@ -792,6 +846,16 @@
     <watches-manager>
       <configuration name="app">
         <watch expression="((TreeMap)((NetworkResponse)response).headers).entrySet().toArray()[0]" custom="java.util.TreeMap,com.android.volley.NetworkResponse" />
+      </configuration>
+      <configuration name="AndroidRunConfigurationType">
+        <watch expression="mtg" language="kotlin" />
+        <watch expression="iVBinding.barrier4.top" language="kotlin" />
+        <watch expression="iVBinding.txSummaryTop.top&#10;" language="kotlin" />
+        <watch expression="iVBinding.barrier4.top" language="kotlin" />
+        <watch expression="iVBinding.barrier6.top" language="kotlin" />
+        <watch expression="holder.mtg.imgUrl" language="kotlin" />
+        <watch expression="strbld" language="kotlin" />
+        <watch expression="iVBinding.txWatch.height+iVBinding.txNewImg.height+iVBinding.txNewPosts.height" />
       </configuration>
     </watches-manager>
   </component>

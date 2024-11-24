@@ -13,7 +13,8 @@
     <string name="open_menu">Opens the Menu</string>
     <string name="closesMenu">Closes the Menu</string>
     <string name="btn_update">Update</string>
-    <string name="nav_pages_title">Tgchan</string>
+    <string name="nav_pages_Watch">Watch</string>
+    <string name="nav_pages_title">Boards</string>
     <string name="nav_pages_draw">Draw</string>
     <string name="nav_pages_general">General</string>
     <string name="nav_pages_quest">Quest</string>
@@ -36,7 +37,7 @@
     <string name="menu_sort_postCnt">Sort by New Posts</string>
     <string name="menu_sort_ImgCnt">Sort by New Images</string>
     <string name="menu_sort_jump30">Jump to 30</string>
-    <string name="nav_header_title">Target Page</string>
+    <string name="nav_header_title">Menu</string>
     <string name="nav_header_img_desc">header image</string>
     <string name="img_zoom_desc">Zooming post image to fullscreen</string>
     <string name="Bot_Nav_first"><![CDATA[<<]]></string>
@@ -80,13 +81,13 @@
     <string name="SyncLogin">Login</string>
     <string name="SyncDownload">download</string>
     <string name="SyncUpload">Upload</string>
-    <string name="symb_OpenTools">👓</string>
-    <string name="main_position">1/100</string>
+    <string name="symb_OpenTools">🆎️</string>
+    <string name="main_position">Image:\n1/100</string>
     <string name="symb_Update">🔄</string>
     <string name="main_btnOnlyPics_descr">Show Only Pictures</string>
     <string name="symb_decFont">A-</string>
     <string name="example_date">20/08/21 17:05</string>
-    <string name="example_text">asd asd asd asd asda dassadas asa dsadsa αβζ ΔΦ さよなら 私の手元にdasd asd\nasd 1li</string>
+    <string name="example_text">asd asd asd asd asda dassadas asa dsadsa αβζ ΔΦ さsd asda dassadas asa dsadsa αβζ ΔΦ さ よなら 私の手元にdasd asd\nasd 1li</string>
     <string name="LogOut">Log Out</string>
     <string name="title_activity_syncCompare">Sync Overview</string>
     <string name="localRmoteCompare">Local: %s items\nRemote: %s items</string>
@@ -95,4 +96,20 @@
     <string name="firstCreateEntry">Please create an entry first using the userscript</string>
     <string name="Loggedout">Logged out.</string>
     <string name="sync_disabled_warning">You disabled synchronizing the watchbar!</string>
+    <string name="btn_offline">offline</string>
+    <string name="btn_downloaded">Downloaded</string>
+    <string name="open_appearance_menu">Open Appearance menu</string>
+    <string name="update_page">Update Page</string>
+    <string name="special">Special</string>
+    <string name="downloaded">Downloaded</string>
+    <string name="increase_font_size">Increase Font Size</string>
+    <string name="decrease_font_size">Decrease Font Size</string>
+    <string name="offline_mode">Offline Mode</string>
+    <string name="delete">Delete</string>
+    <string name="downloaded_of_images">Downloaded %1$d of %2$d images</string>
+    <string name="all_images_downloaded">All images downloaded!</string>
+    <string name="there_was_an_error">There was an error: %1$s</string>
+    <string name="posts">%1$s Posts</string>
+    <string name="save_login_data">Save Login Data</string>
+    <string name="watched_threads_imported">%1$d watched threads imported!</string>
 </resources>

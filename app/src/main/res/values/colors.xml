@@ -5,6 +5,7 @@
     <color name="colorAccent">#000</color> <!-- text color -->
     <color name="color_list_date">#1B6FA6</color>
     <color name="color_list_bg">#F0E0D6</color>
+    <color name="color_list_high">#F0C0B6</color>
     <color name="color_list_title">#B60D02</color>
     <color name="color_list_text">#600000</color>
     <color name="color_list_author">#074025</color>
@@ -13,12 +14,16 @@
     <color name="color_list_postID">#1B6FA6</color>
     <color name="color_imgPath_bg">#8DC64B</color>
     <color name="color_navigation_bg">#FCBD7E</color>
-    <color name="color_navigation_text">#000000</color>
+    <color name="color_navigation_text">#00a</color>
+    <color name="color_dropmenu_text">#000</color>
     <color name="color_progress_frame">#000</color>
     <color name="color_progress_center">#FCBD7E</color>
     <color name="color_syncHeader_bg">#FCBD7E</color>
     <color name="color_title_bg">#FCBD7E</color>
     <color name="color_header_bg">#FCBD7E</color>
+    <color name="color_watch_fontOn">#FF37A523</color>
+    <color name="color_watch_fontOff">#A52B23</color>
+    <color name="color_text_quote">#789922</color>
     <color name="tapBtn">#7f00</color>
     <color name="defBtn">#3f00</color>
 </resources>
