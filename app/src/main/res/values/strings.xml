@@ -112,4 +112,8 @@
     <string name="posts">%1$s Posts</string>
     <string name="save_login_data">Save Login Data</string>
     <string name="watched_threads_imported">%1$d watched threads imported!</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="password_for_logging_in">Password for logging in</string>
+    <string name="username">Username</string>
+    <string name="wrong_username_or_password">Wrong username or password!</string>
 </resources>

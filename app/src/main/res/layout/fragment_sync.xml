@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="15dp"
+    android:layout_marginTop="44dp"
+    android:gravity="top|center"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+
+        android:text="@string/SyncName" />
+
+    <EditText
+        android:id="@+id/edit_loginName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="@string/username"
+        android:inputType="textPersonName" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:text="@string/SyncPW" />
+
+    <EditText
+        android:id="@+id/edit_loginPW"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="@string/SyncPW"
+        android:inputType="textPassword"
+        android:text="" />
+
+    <CheckBox
+        android:id="@+id/cb_autologin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/save_login_data"
+        android:textColor="#888" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="41dp" />
+
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/SyncLogin" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="41dp" />
+
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/NotLoggedIn" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="41dp" />
+
+    <Button
+        android:id="@+id/btn_download"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/SyncDownload"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <Button
+        android:id="@+id/btn_upload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/SyncUpload"
+        android:visibility="gone"
+        tools:visibility="visible" />
+</LinearLayout>

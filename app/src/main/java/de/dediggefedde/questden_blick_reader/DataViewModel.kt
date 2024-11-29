@@ -3,7 +3,6 @@ package de.dediggefedde.questden_blick_reader
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-//import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -35,6 +34,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.Exception
 
+//import kotlin.math.log
+
 
 //saving/loading data
 class DataRepository(context: Context) {
@@ -62,6 +63,10 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     private var watchlist = mutableListOf<Watch>()
     private var offlineList = mutableListOf<OfflineThread>() //list of offline available threads (first posts)
 
+    var logState=MutableLiveData<LoginState>()
+    private val serverURL = "https://phi.pf-control.de/tgchan/API.php"
+    var showListDemand=MutableLiveData<Boolean>()
+
     var sets: ModelSettings = ModelSettings()
     private val dataRepository = DataRepository(application)
     private var reqProg: ProgData = ProgData() //http requests progress
@@ -84,6 +89,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         _setsLiveData.value = sets
         _downProgLive.value = downProg
         _reqProgLive.value = reqProg
+        logState.value=LoginState()
     }
 
     fun updateSet() {
@@ -98,20 +104,24 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         _reqProgLive.postValue(reqProg.copy())
     }
 
-    fun getDisplayListSize(): Int {
-        return _displayList.value?.size ?: 0
+    fun getSafeUserSettings(): String {
+        val safeSettings = sets.copy(
+            loginName = "", // Leeren String setzen
+            loginPW = ""    // Leeren String setzen
+        )
+        // Mit Gson serialisieren
+       return Gson().toJson(safeSettings)
     }
 
-    fun getImageListSize(): Int {
-        return this.entryListImg.size
-    }
+    fun serializeUserSettings():String = Gson().toJson(sets)
+    fun serializeWatchList(): String = Gson().toJson(watchlist)
+    fun serializeDownloadList(): String = Gson().toJson(offlineList)
 
+    fun getDisplayListSize(): Int = _displayList.value?.size ?: 0
+    fun getImageListSize(): Int = this.entryListImg.size
+    fun getItemImageCnt(index: Int): Int= _displayList.value?.get(index)?.imgCounter ?: 0
 
-    fun getItemImageCnt(index: Int): Int {
-        return _displayList.value?.get(index)?.imgCounter ?: 0
-    }
-
-    fun updateCurReadId(thread: String, postId: String) {
+    private fun updateCurReadId(thread: String, postId: String) {
         if (postId == "" || thread == "") return
         sets.curReadPostID[thread] = postId
         updateSet()
@@ -156,6 +166,10 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun storeData() {
+        if(!sets.autoLogin){
+            sets.loginName=""
+            sets.loginPW=""
+        }
         dataRepository.saveData("tgchanItems", entryListRaw)
         dataRepository.saveData("watchItems", watchlist)
         dataRepository.saveData("modelSettings", sets)
@@ -168,8 +182,12 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         offlineList = dataRepository.loadData("offlineList", object : TypeToken<MutableList<OfflineThread>>() {}.type) ?: offlineList
         sets = dataRepository.loadData("modelSettings", object : TypeToken<ModelSettings>() {}.type) ?: sets
         updateSet()
-        postProcessRawList()
-        updateDisplayList()
+        if(entryListRaw.isEmpty()){ //default page
+            loadThread(URLBoards.QUEST.url, ThrdItemTyps.BOARD)
+        }else {
+            postProcessRawList()
+            updateDisplayList()
+        }
     }
 
     fun toggleWatch(mtg: TgPost) {
@@ -183,6 +201,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     private fun addToWatch(tg: TgPost) {
         if (getWatched(tg.url) != null) return
         watchlist.add(Watch(tg))
+        loadThread(tg.url,ThrdItemTyps.THREAD,true) //TODO refresh display when finished, evtl by observer in main
         storeData()
     }
 
@@ -191,13 +210,9 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         storeData()
     }
 
-    fun getWatched(url: String): Watch? {
-        return watchlist.firstOrNull { it.thread.url == url }
-    }
+    fun getWatched(url: String): Watch? = watchlist.firstOrNull { it.thread.url == url }
+    fun exportSetting(): List<Any> = listOf(entryListRaw, watchlist, offlineList, sets)
 
-    fun exportSetting(): List<Any> {
-        return listOf(entryListRaw, watchlist, offlineList, sets)
-    }
 
     fun importSettings(entryList: List<TgPost>, watlist: MutableList<Watch>, offList: MutableList<OfflineThread>, set: ModelSettings) {
         entryListRaw = entryList
@@ -212,7 +227,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     private fun importWatchlist(watlist: MutableList<Watch>) {
         watchlist = watlist
         storeData()
-        loadCurThread()
+        updateWatchlist() //fetches images and summaries
     }
 
     private fun loadFromOffline(): Boolean { //checks current sets to exist in download
@@ -323,6 +338,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
 
                         val fileName = thread.substringAfterLast("/")
                         val file = File(offImgPath, fileName)
+                        if(file.exists())return@forEach //skip images already downloaded
 
                         val url = URL("https://questden.org$thread")
                         val connection = url.openConnection()
@@ -376,13 +392,6 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
             highLightInd = index
             _displayList.value!![index].isHighlight = true
         }
-        //TODO test rerender:
-        //        _displayList.value?.let { list ->
-        //            if (index in list.indices) {
-        //                list[index].isHighlight = true
-        //                _displayList.value = list
-        //            }
-        //        }
     }
 
     fun getDownload(id: String): OfflineThread? {
@@ -480,6 +489,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         if (!onlyCheckWatch) {
             sets.listType = mode
             sets.curURL = murl
+            showListDemand.postValue(true)//demand mainfragment display of list
         }
 
         when (mode) {
@@ -509,6 +519,8 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
             ThrdItemTyps.OFFLINE -> { //fetch downloaded quests
                 sets.curTitle = "Downloaded"
                 sets.curThreadId = ""
+                sets.curMaxPage = 0
+                sets.boardPage = 0
                 showOfflines()
                 storeData()
                 afterUpdateReq()
@@ -518,19 +530,14 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
             ThrdItemTyps.WATCH -> { //list watched quests
                 sets.curTitle = "Watch list"
                 sets.curThreadId = ""
+                sets.curMaxPage = 0
+                sets.boardPage = 0
                 showWatches()
                 storeData()
                 afterUpdateReq()
                 return
             }
         }
-
-//TODO: chronik
-//        if (viewSingle)
-//            chronic.add(Navis(NavOperation.THREAD, murl))
-//        else
-//            chronic.add(Navis(NavOperation.PAGE, murl))
-
         viewModelScope.launch {
             try {
                 makeNetRequest(murl, mode, onlyCheckWatch, updOffline)
@@ -587,6 +594,18 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun countOccurrences(text: String, search: String): Int {
+        var count = 0
+        var index = text.indexOf(search)
+
+        while (index >= 0) {
+            count++
+            index = text.indexOf(search, index + 1)
+        }
+
+        return count
+    }
+
     private fun parseThreadMode(resp: String, newestId: String?): MutableList<TgPost> {
         if (newestId != null) { // Neuste Beiträge anzeigen
             val startIdx = resp.indexOf("""id="reply$newestId"""")
@@ -597,9 +616,6 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 .filter { it.postID.isNotEmpty() }
                 .toMutableList()
 
-            if (posts.isEmpty()) {
-                return mutableListOf(TgPost()) // Leere Liste, falls keine Einträge gefunden
-            }
 
             // Thread-Informationen abrufen und hinzufügen
             val infoSectionStart = resp.indexOf("<form id=\"delform\"")
@@ -608,14 +624,28 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
 
             val threadInfo = infoDoc.select("form").map { parseJSoupToTgThread(it) }
                 .firstOrNull { it.postID.isNotEmpty() }
-            threadInfo?.let { posts.add(it) }
+            if(threadInfo!==null){
+                if(threadInfo.title.isEmpty())threadInfo.title="Untitled"
+                threadInfo.postCount=countOccurrences(resp,"<blockquote>")
+            }
 
-            return posts
+
+            if (posts.isEmpty()) { //nothing new
+                return if(threadInfo == null )
+                    mutableListOf<TgPost>() // Leere Liste, falls keine Info-Einträge gefunden
+                else
+                    mutableListOf<TgPost>(threadInfo)
+            }else {
+                threadInfo?.let { posts.add(it) }
+                return posts
+            }
         } else {// Thread anzeigen, wenn keine neue ID vorhanden
             val doc = Jsoup.parse(resp)
-            return doc.select("#delform,#delform>table").map { parseJSoupToTgThread(it) }
+            val tmpLi= doc.select("#delform,#delform>table").map { parseJSoupToTgThread(it) }
                 .filter { it.postID.isNotEmpty() }
                 .toMutableList()
+            if(tmpLi.first().title.isEmpty())tmpLi.first().title="Untitled"
+            return tmpLi
         }
     }
 
@@ -685,6 +715,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun handleWatchOnlyMode(li: MutableList<TgPost>, watchedItem: Watch?) {
+        if(li.size==0)return
         val inf = li.removeAt(li.lastIndex)
         val newPosts = li.count { it.postID.isNotEmpty() }
         val newImgs = li.count { it.imgUrl.isNotEmpty() }
@@ -757,27 +788,21 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 //Server interaction section
-    private val serverURL = "https://phi.pf-control.de/tgchan/api.php"
-    private var loginToken: String = "" //temporary
-    private var accessDate: Long = 0 //UNIX timestamp
 
-    val promptLoginMessage = MutableLiveData<String>()
-    val statusLoginMessage = MutableLiveData<String>()
-
-    fun setCred(name: String = sets.loginName, pw: String = sets.loginPW, saveLogin: Boolean = sets.autoLogin) {
+    fun setCredServer(name: String = sets.loginName, pw: String = sets.loginPW, saveLogin: Boolean = sets.autoLogin) {
         sets.loginName = name
         sets.loginPW = pw
         sets.autoLogin = saveLogin
     }
 
-    private fun formatDate(unixTimestamp: Long = System.currentTimeMillis()): String {
-        val date = Date(unixTimestamp)
+    private fun formatDate(unixTimestampS: Long = System.currentTimeMillis()/1000): String {
+        val date = Date(unixTimestampS*1000)
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         dateFormat.timeZone = TimeZone.getDefault()
         return dateFormat.format(date)
     }
 
-    fun login() {
+    fun loginServer() {
         val jsons = JSONObject().apply {
             put("username", sets.loginName)
             put("password", sets.loginPW)
@@ -785,24 +810,27 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
         makePostRequest(jsons.toString(), onSuccess = { jsonstr ->
             if (jsonstr.has("token")) {
-                loginToken = jsonstr.getString("token")
-                accessDate = jsonstr.optLong("access", 0)
+                logState.value?.token= jsonstr.getString("token")
+                logState.value?.accessDate = jsonstr.optLong("access", 0)
                 sets.loginName = jsonstr.getString("name")
-                sets.loginPW = jsonstr.getString("name")
 
-                promptLoginMessage.value="Hello ${sets.loginName}!"
-                statusLoginMessage.value=if (accessDate == 0L) "No data yet" else formatDate(accessDate)
-
+                logState.value?.errorCode=0
+                logState.value?.promptText=("Hello ${sets.loginName}!")
+                logState.value?.statusText=(if (logState.value==null || logState.value?.accessDate == 0L) "No data yet" else "Data from ${formatDate(logState.value!!.accessDate)}")
             } else {
-                loginToken = ""
-                accessDate = 0
+                logState.value?.errorCode=2
+                logState.value?.token=""
+                logState.value?.accessDate=0
+                logState.value?.promptText="Login failed(#2)!"
+                logState.value?.statusText="Login failed(#2)!"
             }
+            logState.postValue(logState.value)//trigger observe
         })
     }
 
-    fun download(){
+    fun downloadServer(){
         val jsons = JSONObject().apply {
-            put("token", loginToken)
+            put("token", logState.value?.token)
             put("type", "download")
             put("obj","watchbar") //only watchbar data, not editor/sidebar settings
         }
@@ -821,8 +849,10 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                     val value = entry.getJSONObject(1) // Zweites Element des Arrays (value)
 
                     post.postID=key
-                    post.title=value.optString("label","")
-                    post.url="/${value.optString("section","quest")}/res/${key}.html" //TODO verify format
+                    if(post.postID=="")continue
+
+                    post.title=value.optString("label","Untitled")
+                    post.url="/kusaba/${value.optString("section","quest")}/res/${key}.html"
                     post.author=value.optString("author","")
 
                     wat.thread=post
@@ -840,8 +870,16 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 importWatchlist(itemList)
 
-                promptLoginMessage.value="Download successfull!"
-                statusLoginMessage.value=getApplication<Application>().getString(R.string.watched_threads_imported, itemList.size)
+                logState.value?.errorCode=0
+                logState.value?.promptText=("Download successfull!")
+                logState.value?.statusText=(getApplication<Application>().getString(R.string.watched_threads_imported, itemList.size))
+                logState.postValue(logState.value)//trigger observe
+            }else{
+                logState.value?.errorCode=3
+                logState.value?.token=""
+                logState.value?.accessDate=0
+                logState.value?.promptText="Download failed(#3)!"
+                logState.value?.statusText="Download failed(#3)!"
             }
             /*
             {
@@ -889,10 +927,10 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
-    fun upload(){
+    fun uploadServer(){
         // {"numLinkMode":0,"threads":{"_type":"Map","value":[["1092522",{"label":"History Unmade - Thread 3","author":"Silicon","section":"quest","highImgOnly":true,"highIDs":[],"highNames":[],"ignoreIDs":[],"ignoreNames":[],"lastReadId":"1099138","currentReadId":"","newEntrCnt":0,"totalEntrCnt":164}],}
         var data="""{"numLinkMode":${sets.numLinkMode},"threads":{"_type":"Map","value":["""
-        watchlist.joinToString {it->
+        watchlist.joinToString {
             val currentReadId=sets.curReadPostID[it.thread.postID]?:""
 
             """["${it.thread.postID}",{"label":"${it.thread.title}","author":"${it.thread.author}","section":"${it.thread.url.split("/")[2]}",
@@ -903,17 +941,18 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         data+="""]}}"""
 
         val jsons = JSONObject().apply {
-            put("token", loginToken)
+            put("token", logState.value?.token)
             put("type", "upload")
             put("data",data)
             put("obj","watchbar") //only watchbar data, not editor/sidebar settings
         }
         makePostRequest(jsons.toString(), onSuccess = { json ->
             if(json.has("access")){
-                accessDate=json.optLong("access",0)
-
-                promptLoginMessage.value="Uploaded complete!"
-                statusLoginMessage.value=if (accessDate == 0L) "Error fetching date" else formatDate(accessDate)
+                logState.value?.errorCode=0
+                logState.value?.accessDate=json.optLong("access",0)
+                logState.value?.promptText=("Uploaded complete!")
+                logState.value?.statusText=(if (logState.value==null || logState.value?.accessDate == 0L) "Error fetching date" else "Data from ${formatDate(logState.value!!.accessDate)}")
+                logState.postValue(logState.value)//trigger observe
             }
         })
     }
@@ -930,8 +969,10 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
 
-                promptLoginMessage.value= "Request failed: ${e.message}"
-                statusLoginMessage.value="Failed: ${e.message}"
+                logState.value?.promptText=( "Request failed: ${e.message}")
+                logState.value?.statusText=("Failed: ${e.message}")
+                logState.value?.errorCode=1
+                logState.postValue(logState.value)//trigger observe
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -940,9 +981,11 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                         val jsonResponse = JSONObject(responseBody) // JSON-Daten verarbeiten
                         onSuccess(jsonResponse)
                     }
-                } else {//TODO main thread
-                    promptLoginMessage.value= "Request unsuccessfull: ${response.code}"
-                    statusLoginMessage.value= "Error: ${response.code}"
+                } else {
+                    logState.value?.errorCode=response.code
+                    logState.value?.promptText=( "Request unsuccessfull: ${response.code}")
+                    logState.value?.statusText=( "Error: ${response.code}")
+                    logState.postValue(logState.value)//trigger observe
                 }
             }
         })

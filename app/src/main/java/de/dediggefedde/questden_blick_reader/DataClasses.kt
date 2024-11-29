@@ -146,3 +146,10 @@ data class ProgData(
 enum class ProgStatus{
     IDLE, RUNNING,DONE,ERROR
 }
+data class LoginState(
+    var accessDate:Long=0,
+    var token:String="",
+    var promptText:String="",
+    var statusText:String="",
+    var errorCode:Int=0
+)
