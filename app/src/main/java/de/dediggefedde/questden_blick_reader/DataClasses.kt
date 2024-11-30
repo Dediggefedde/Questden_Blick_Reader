@@ -20,10 +20,10 @@ enum class URLBoards(val url: String) {
 /**
  * auto show/hide mode for spoiler images and texts
  */
-enum class SFWModes {
-    @SerializedName("SFWREAL") SFWREAL, //spoiler images stay hidden. Note: Never requested
-    @SerializedName("SFWQUESTION") SFWQUESTION, //spoiler images reveal on click. Note: only request when clicked.
-    @SerializedName("NSFW") NSFW //spoiler images loaded on default. Note: Immediatelly requested
+enum class SFWModes(val displayName:String) {
+    SFWREAL("Always-Hidden"), //spoiler images stay hidden. Note: Never requested
+    SFWQUESTION("Show-On-Click"), //spoiler images reveal on click. Note: only request when clicked.
+    NSFW("Always-Shown") //spoiler images loaded on default. Note: Immediatelly requested
 }
 
 /**
@@ -88,11 +88,6 @@ data class OfflineThread(
     var lastUpdate: Long=System.currentTimeMillis()
 ):Parcelable
 
-//Sorting behavior states
-//enum class SORTING {
-//    DATE,POSTS,IMAGES
-//}
-
 //Types of display:
 // Board=list of threads, thread=a quest, watch=list of watched threads, offline= list of downloaded threads
 enum class ThrdItemTyps {
@@ -122,21 +117,11 @@ data class ModelSettings(
  * enum for navigation object
  * page for quest/tg etc switch, link for quote-clicked, thread for thread opened
  */
-enum class NavOperation { PAGE, LINK, THREAD }
-
-/**
- * navigation object for chronic (back-button)
- */
-data class Navis(
-    var operation: NavOperation,
-    var prop: String,
-    var navStat: Parcelable? = null
-)
 enum class ScrollMode{
     ALL,IMAGES
 }
-//progress from viewmodel
 
+//progress from viewmodel
 data class ProgData(
     var pos:Int=0,
     var max:Int=0,
@@ -152,4 +137,9 @@ data class LoginState(
     var promptText:String="",
     var statusText:String="",
     var errorCode:Int=0
+)
+
+data class backPage (
+    var type:ThrdItemTyps,
+    var url:String
 )

@@ -31,15 +31,15 @@ import kotlin.math.abs
 
 class MainFragment : Fragment() {
     private lateinit var viewModel: DataViewModel
-    lateinit var listAdapt: QuestDenListAdapter
+    var listAdapt: QuestDenListAdapter?=null
     private var curViewedInd = 0 //index of current view item (top) of displayDataList
 
-    private var chronic = mutableListOf<Navis>()
     private var scrollMode = ScrollMode.IMAGES //next/prev got to next img or post
 
     lateinit var binding: FragmentMainBinding
     private lateinit var scrollListener: RecyclerView.OnScrollListener
     var autoscroll = false
+    var atWatchPosition=-1
 
     inner class TopSnappingScroller(context: Context) : LinearSmoothScroller(context) {
         override fun getVerticalSnapPreference(): Int {
@@ -55,10 +55,6 @@ class MainFragment : Fragment() {
         if(!show)binding.toolDropout.visibility=View.GONE
         binding.bottomNavigation.visibility=if(show)View.VISIBLE else View.GONE
     }
-
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -79,6 +75,8 @@ class MainFragment : Fragment() {
         addListviewEvents()
         addEventListeners()
         addObservers()
+
+        viewImage(viewModel.fullViewImg)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -89,6 +87,7 @@ class MainFragment : Fragment() {
         binding.imageZoom.setOnClickListener {
             binding.imageZoom.visibility = View.GONE
             binding.txImgPath.visibility = View.GONE
+            viewModel.fullViewImg=null
         }
         binding.btnOpenFont.setOnClickListener { btnOpenTools() }
         binding.btnFirst.setOnClickListener { btnFirstButton() }
@@ -103,20 +102,36 @@ class MainFragment : Fragment() {
         binding.btnOnlyPics.setOnClickListener { btnToggleOnlyPictures() }
         binding.txPosition.setOnClickListener { btnSkipModeChange() }
         binding.btnOffline.setOnClickListener { btnTglOffline() }
+        binding.btnWatch.setOnClickListener {
+            viewModel.toggleWatch()
+            updateWatchImg()
+            if(viewModel.getWatched()!=null)
+                Toast.makeText(requireContext(), "Thread added to watchlist!", Toast.LENGTH_SHORT).show()
+            else
+                Toast.makeText(requireContext(), "Thread removed from watchlist!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun addListviewEvents() {
-        listAdapt.itemAction = object : QuestDenListAdapter.ItemActionListener {
+        listAdapt?.itemAction = object : QuestDenListAdapter.ItemActionListener {
             override fun openThread(url: String) {
                 viewModel.loadThread(url, ThrdItemTyps.THREAD)
             }
 
             override fun toggleWatch(mtg: TgPost) {
-                viewModel.toggleWatch(mtg)
+                viewModel.toggleWatch(mtg.postID)
+                atWatchPosition = if(viewModel.getWatched(mtg.postID)!=null) viewModel.getPositionById(mtg.postID) else -1
+                updateWatchImg()
             }
 
-            override fun getWatched(url: String): Watch? {
-                return viewModel.getWatched(url)
+            override fun removeOffline(mtg: TgPost) {
+                val htmlFile = File(requireContext().applicationContext.filesDir, "offline/${mtg.postID}.html")
+                viewModel.deleteOffline(mtg.postID)
+                viewModel.loadCurThread() //update thread
+            }
+
+            override fun getWatched(threadId: String): Watch? {
+                return viewModel.getWatched(threadId)
             }
 
             override fun getDownload(postID: String): OfflineThread? {
@@ -124,7 +139,7 @@ class MainFragment : Fragment() {
             }
 
             override fun getIndexById(id: String): Int {
-                return listAdapt.currentList.indexOfFirst { it.postID == id }
+                return listAdapt?.currentList?.indexOfFirst { it.postID == id }?:-1
             }
 
             override fun getSFWState(): SFWModes {
@@ -159,9 +174,12 @@ class MainFragment : Fragment() {
         (binding.postListRecView.layoutManager as LinearLayoutManager).startSmoothScroll(smoothScroller)
     }
 
-    fun scrollHighlight(pos: Int) {
+    fun scrollHighlight(pos: Int,backwards:Boolean=false) {
         if (!viewModel.hasIndex(pos)) return
 
+        if(!backwards) viewModel.displayList.value?.get(curViewedInd)?.postID?.let { postID ->
+            viewModel.backLinkStack.add(postID)
+        }
         val lasthighInd = viewModel.highLightInd
         viewModel.setHighlight(pos)
 
@@ -172,9 +190,12 @@ class MainFragment : Fragment() {
         val smoothScroller = TopSnappingScroller(binding.postListRecView.context)
         smoothScroller.targetPosition = pos
 
-        if (abs(curViewedInd - pos) < 10) (binding.postListRecView.layoutManager as LinearLayoutManager).startSmoothScroll(smoothScroller)
+        val layoutManag = (binding.postListRecView.layoutManager as LinearLayoutManager)
+        val firstvisiblePos = layoutManag.findFirstVisibleItemPosition()
+
+        if (abs(firstvisiblePos - pos) < 10) (binding.postListRecView.layoutManager as LinearLayoutManager).startSmoothScroll(smoothScroller)
         else {
-            (binding.postListRecView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
+            layoutManag.scrollToPositionWithOffset(pos, 0)
         }
         curViewedInd = pos
         updatePositionDisplay()
@@ -185,19 +206,19 @@ class MainFragment : Fragment() {
             vholder = binding.postListRecView.findViewHolderForAdapterPosition(pos)
             vholder?.itemView?.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.color_list_high))
         }, 250)
-
-        // Back button
-        chronic.add(Navis(NavOperation.LINK, pos.toString(), binding.postListRecView.layoutManager?.onSaveInstanceState()))
-
     }
 
     //fullview image
-    fun viewImage(mtg: TgPost) {
+    fun viewImage(mtg: TgPost?) {
+        if(mtg===null)return
         binding.progressBarUndet.visibility = View.VISIBLE
         binding.imageZoom.visibility = View.VISIBLE
         binding.txImgPath.visibility = View.VISIBLE
+        viewModel.fullViewImg=mtg
         var str = "https://questden.org" + mtg.imgUrl.replace("thumb", "src").replace("s.", ".")
         if (mtg.isSpoiler && viewModel.sets.sfw == SFWModes.SFWREAL) str = "https://questden.org/kusaba/spoiler.png"
+
+        binding.txImgPath.text = str
 
         val imgNam = mtg.imgUrl.substringAfterLast("/").replace("thumb", "src").replace("s.", ".")
         val offImgPath = File(requireContext().applicationContext.filesDir, "offline/${viewModel.sets.curThreadId}_img")
@@ -217,16 +238,16 @@ class MainFragment : Fragment() {
                     return false
                 }
             }).into(binding.imageZoom)
-        binding.txImgPath.text = str
     }
 
-    private fun showOfflineConfirmDialog(htmlFile: File) {
+    private fun showOfflineConfirmDialog(threadId: String) {
+        val htmlFile = File(requireContext().applicationContext.filesDir, "offline/${threadId}.html")
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Confirm Action")
         if (htmlFile.exists()) {
             builder.setMessage("Do you want to delete or update local data?")
             builder.setPositiveButton("Delete") { dialog, _ ->
-                viewModel.deleteOffline(htmlFile)
+                viewModel.deleteOffline(threadId)
                 viewModel.loadCurThread() //update thread
                 dialog.dismiss()
             }
@@ -240,13 +261,13 @@ class MainFragment : Fragment() {
         } else {
             builder.setMessage("Do you want to download the thread and ${viewModel.getImageListSize()} images?")
             builder.setPositiveButton("Download") { dialog, _ ->
-                viewModel.writeToOffline(htmlFile, false)
-                viewModel.downloadImages(false)
+                viewModel.writeToOffline(threadId,false)
+                viewModel.downloadImages(threadId,false)
                 dialog.dismiss()
             }
             builder.setNeutralButton("Only thumbnails") { dialog, _ ->
-                viewModel.writeToOffline(htmlFile, true)
-                viewModel.downloadImages(true)
+                viewModel.writeToOffline(threadId,true)
+                viewModel.downloadImages(threadId,true)
                 dialog.dismiss()
             }
             builder.setNegativeButton("Cancel") { dialog, _ ->
@@ -256,9 +277,8 @@ class MainFragment : Fragment() {
         builder.create().show()
     }
 
-    private fun btnTglOffline() {
-        val htmlFile = File(requireContext().applicationContext.filesDir, "offline/${viewModel.sets.curThreadId}.html")
-        showOfflineConfirmDialog(htmlFile)
+    private fun btnTglOffline(threadId:String=viewModel.sets.curThreadId) {
+        showOfflineConfirmDialog(threadId)
     }
 
 
@@ -306,16 +326,17 @@ class MainFragment : Fragment() {
 
         viewModel.displayList.observe(viewLifecycleOwner) { list ->
             list?.let {
-                listAdapt.updateDisplaySetting(viewModel.sets, txtSize = viewModel.sets.txsize)
-                listAdapt.submitList(it, scrolling)
+                listAdapt?.updateDisplaySetting(viewModel.sets, txtSize = viewModel.sets.txsize)
+                listAdapt?.submitList(it, scrolling)
                 updateOfflineImg()
+                updateWatchImg()
                 if (viewModel.fromOffline) Toast.makeText(requireContext(), "Loaded offline data from storage for ${viewModel.sets.curThreadId}.html", Toast.LENGTH_SHORT).show()
             }
         }
 
         viewModel.setsLiveData.observe(viewLifecycleOwner) { set ->
 
-            listAdapt.updateDisplaySetting(set, txtSize = viewModel.sets.txsize)
+            listAdapt?.updateDisplaySetting(set, txtSize = viewModel.sets.txsize)
 
             binding.btnToggleSFW.text = when (set.sfw) {
                 SFWModes.SFWQUESTION -> getString(R.string.SFWQuestion)
@@ -333,12 +354,14 @@ class MainFragment : Fragment() {
                     binding.btnOnlyPics.visibility = View.GONE
                     binding.btnToggleSFW.visibility = View.GONE
                     binding.btnOffline.visibility = View.GONE
+                    binding.btnWatch.visibility = View.GONE
                 }
 
                 ThrdItemTyps.THREAD -> {
                     binding.btnOnlyPics.visibility = View.VISIBLE
                     binding.btnToggleSFW.visibility = View.VISIBLE
                     binding.btnOffline.visibility = View.VISIBLE
+                    binding.btnWatch.visibility = View.VISIBLE
                 }
             }
         }
@@ -358,6 +381,10 @@ class MainFragment : Fragment() {
                     binding.progressBarUndet.progress = 0
                     binding.progressBarDet.progress = 0
                     prog.status = ProgStatus.IDLE
+                    if(atWatchPosition!=-1) {
+                        listAdapt?.notifyItemChanged(atWatchPosition)
+                        atWatchPosition=-1
+                    }
                 }
 
                 ProgStatus.ERROR -> {
@@ -424,6 +451,13 @@ class MainFragment : Fragment() {
             binding.btnOffline.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.offline))
         }
     }
+    private fun updateWatchImg() {
+        if (viewModel.getWatched()!==null) {
+            binding.btnWatch.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.eye_open))
+        } else {
+            binding.btnWatch.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.eye_closed))
+        }
+    }
 
     /*
      * button click event handlers below
@@ -459,9 +493,10 @@ class MainFragment : Fragment() {
     @SuppressLint("NotifyDataSetChanged")
     fun btnTglSFW() {
         viewModel.rotateSFW()
-        listAdapt.updateDisplaySetting(viewModel.sets, txtSize = viewModel.sets.txsize)
-        listAdapt.notifyDataSetChanged()
-        Toast.makeText(requireContext(), "SFW mode set to ${viewModel.sets.sfw}", Toast.LENGTH_SHORT).show()
+        listAdapt?.updateDisplaySetting(viewModel.sets, txtSize = viewModel.sets.txsize)
+        listAdapt?.notifyDataSetChanged()
+
+        Toast.makeText(requireContext(), "SFW mode set to ${viewModel.sets.sfw.displayName}", Toast.LENGTH_SHORT).show()
     }
 
     /**
@@ -481,8 +516,8 @@ class MainFragment : Fragment() {
     @SuppressLint("NotifyDataSetChanged")
     fun btnIncFont() {
         viewModel.sets.txsize += 1f
-        listAdapt.updateDisplaySetting(null, txtSize = viewModel.sets.txsize)
-        listAdapt.notifyDataSetChanged()
+        listAdapt?.updateDisplaySetting(null, txtSize = viewModel.sets.txsize)
+        listAdapt?.notifyDataSetChanged()
     }
 
     /**
@@ -491,8 +526,8 @@ class MainFragment : Fragment() {
     @SuppressLint("NotifyDataSetChanged")
     fun btnDecFont() {
         viewModel.sets.txsize -= 1f
-        listAdapt.updateDisplaySetting(null, txtSize = viewModel.sets.txsize)
-        listAdapt.notifyDataSetChanged()
+        listAdapt?.updateDisplaySetting(null, txtSize = viewModel.sets.txsize)
+        listAdapt?.notifyDataSetChanged()
     }
 
     /**

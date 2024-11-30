@@ -73,8 +73,12 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     private var downProg: ProgData = ProgData() //download progress
     private val client = OkHttpClient()
 
+    val backActionStack=Stack<backPage>()
+    val backLinkStack=Stack<String>()
+
     var highLightInd = -1 //number index of highlighted item
     var fromOffline = false //current thread loaded from offline data
+    var fullViewImg:TgPost?=null //shows image on click when not null
 
     private var _displayList = MutableLiveData<List<TgPost>>()
     val displayList: LiveData<List<TgPost>> get() = _displayList
@@ -113,7 +117,6 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
        return Gson().toJson(safeSettings)
     }
 
-    fun serializeUserSettings():String = Gson().toJson(sets)
     fun serializeWatchList(): String = Gson().toJson(watchlist)
     fun serializeDownloadList(): String = Gson().toJson(offlineList)
 
@@ -136,6 +139,11 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun deleteLastRead(){
+        sets.curReadPostID.clear()
+        storeData()
+        updateSet()
+    }
     fun getLastReadIndex(): Int {
         val currentList = _displayList.value
         val lastid = sets.curReadPostID[sets.curThreadId]
@@ -190,29 +198,37 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun toggleWatch(mtg: TgPost) {
-        if (getWatched(mtg.url) != null) {
-            removeFromWatch(mtg.url)
+    fun toggleWatch(threadId: String=sets.curThreadId) {
+        if (getWatched(threadId) != null) {
+            removeFromWatch(threadId)
         } else {
-            addToWatch(mtg)
+            addToWatch(threadId)
         }
     }
 
-    private fun addToWatch(tg: TgPost) {
-        if (getWatched(tg.url) != null) return
+    private fun addToWatch(threadId: String) {
+        if (getWatched(threadId) != null) return
+        val tg=displayList.value?.firstOrNull { it.postID==threadId }
+        if(tg===null) return
         watchlist.add(Watch(tg))
-        loadThread(tg.url,ThrdItemTyps.THREAD,true) //TODO refresh display when finished, evtl by observer in main
+        loadThread(tg.url,ThrdItemTyps.THREAD,true)
         storeData()
     }
 
-    private fun removeFromWatch(url: String) {
-        watchlist.removeAll(watchlist.filter { it.thread.url == url })
+    private fun removeFromWatch(threadId: String) {
+        watchlist.removeAll(watchlist.filter { it.thread.postID == threadId })
         storeData()
     }
+    fun deleteWatchData(){
+        watchlist.clear()
+        storeData()
+        updateWatchlist()
+    }
 
-    fun getWatched(url: String): Watch? = watchlist.firstOrNull { it.thread.url == url }
+    fun getWatched(threadId: String=sets.curThreadId): Watch? = watchlist.firstOrNull { it.thread.postID == threadId }
     fun exportSetting(): List<Any> = listOf(entryListRaw, watchlist, offlineList, sets)
 
+    fun getPositionById(postID: String):Int = displayList.value?.indexOfFirst{ it.postID==postID }?:-1
 
     fun importSettings(entryList: List<TgPost>, watlist: MutableList<Watch>, offList: MutableList<OfflineThread>, set: ModelSettings) {
         entryListRaw = entryList
@@ -274,15 +290,27 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    fun deleteOffline(htmlFile: File) {
+    fun deleteOfflineData(){
+        val offImgPath = File(getApplication<Application>().filesDir, "offline")
+        deleteDirectory(offImgPath)
+        offImgPath.mkdirs()
+        offlineList.clear()
+        storeData()
+        updateSet()
+        loadCurThread()
+    }
+
+    fun deleteOffline(threadId:String=sets.curThreadId) {
+
+        val htmlFile = File(getApplication<Application>().filesDir, "offline/${threadId}.html")
         htmlFile.delete() //remove html file
 
         //remove image folder
-        val offImgPath = File(getApplication<Application>().filesDir, "offline/${sets.curThreadId}_img")
+        val offImgPath = File(getApplication<Application>().filesDir, "offline/${threadId}_img")
         if (offImgPath.exists()) deleteDirectory(offImgPath)
 
         //remove entry
-        val index = offlineList.indexOfFirst { it.thread.postID == sets.curThreadId }
+        val index = offlineList.indexOfFirst { it.thread.postID == threadId }
         if (index >= 0) offlineList.removeAt(index)
     }
 
@@ -299,8 +327,8 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun downloadImages(onlyThumb: Boolean) {
-        val offImgPath = File(getApplication<Application>().filesDir, "offline/${sets.curThreadId}_img")
+    fun downloadImages(threadId: String, onlyThumb: Boolean) {
+        val offImgPath = File(getApplication<Application>().filesDir, "offline/${threadId}_img")
         if (!offImgPath.exists()) offImgPath.mkdirs()
 
 
@@ -371,11 +399,13 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun writeToOffline(htmlFile: File, onlyThumbs: Boolean) {
+    fun writeToOffline(threadId: String, onlyThumbs: Boolean) {
         val gson = Gson()
         val cont = gson.toJson(this.entryListRaw)
+        val htmlFile = File(getApplication<Application>().filesDir, "offline/${threadId}.html")
+
         htmlFile.writeText(cont)
-        val offitem = offlineList.firstOrNull { it.thread.postID == sets.curThreadId }
+        val offitem = offlineList.firstOrNull { it.thread.postID == threadId }
         if (offitem == null)
             offlineList.add(OfflineThread(entryListRaw.first(), onlyThumbs))
         else {
@@ -454,6 +484,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         updateSet()
         loadCurThread()
     }
+    fun getIdbyUrl(url:String):String = Regex("""(\d+).html""").find(url)?.groupValues?.get(1) ?: ""
 
     /**
      * requests https://questden.org + relative url, expecting it to be a single thread
@@ -469,7 +500,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         else loadThread(sets.curURL, sets.listType)
     }
 
-    fun loadThread(url: String, mode: ThrdItemTyps, onlyCheckWatch: Boolean = false, updOffline: Boolean = false) {
+    fun loadThread(url: String, mode: ThrdItemTyps, onlyCheckWatch: Boolean = false, updOffline: Boolean = false,backwards:Boolean=false) {
         var murl = url
         val fet = murl.indexOf("#")
         if (fet >= 0) murl = murl.substring(0, fet)
@@ -480,7 +511,12 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        val watchedItem = getWatched(murl)
+        val threadId = getIdbyUrl(murl)
+        val watchedItem:Watch? = getWatched(threadId)
+
+        if(!onlyCheckWatch && !updOffline && !backwards)
+            backActionStack.add(backPage(sets.listType,sets.curURL))
+
         reqProg.max++
         reqProg.status = ProgStatus.RUNNING
         fromOffline = false
@@ -500,7 +536,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
 
             ThrdItemTyps.THREAD -> { //fetch a quest
                 if (!onlyCheckWatch) { //fetch and display thread
-                    sets.curThreadId = Regex("""(\d+).html""").find(murl)?.groupValues?.get(1) ?: ""
+                    sets.curThreadId = threadId
 
                     if (!updOffline && loadFromOffline()) {//load from offline files, if downloaded
                         afterUpdateReq()
@@ -556,7 +592,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun makeNetRequest(murl: String, mode: ThrdItemTyps, onlyCheckWatch: Boolean, updOffline: Boolean): Unit = withContext(Dispatchers.IO) {
-        val watchedItem = getWatched(murl)
+        val watchedItem = getWatched(getIdbyUrl(murl))
         val newestId = if (onlyCheckWatch) watchedItem?.lastReadId else null
         val request = Request.Builder().url("https://questden.org$murl").build()
 
@@ -594,7 +630,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun countOccurrences(text: String, search: String): Int {
+    private fun countOccurrences(text: String, search: String): Int {
         var count = 0
         var index = text.indexOf(search)
 
@@ -632,9 +668,9 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
 
             if (posts.isEmpty()) { //nothing new
                 return if(threadInfo == null )
-                    mutableListOf<TgPost>() // Leere Liste, falls keine Info-Einträge gefunden
+                    mutableListOf() // Leere Liste, falls keine Info-Einträge gefunden
                 else
-                    mutableListOf<TgPost>(threadInfo)
+                    mutableListOf(threadInfo)
             }else {
                 threadInfo?.let { posts.add(it) }
                 return posts
@@ -737,7 +773,6 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     private fun handleThreadMode(li: MutableList<TgPost>, murl: String, watchedItem: Watch?) {
         sets.curTitle = li.firstOrNull()?.title.orEmpty()
         sets.curThreadId = Regex("""(\d+).html""").find(murl)?.groupValues?.get(1).orEmpty()
-        // Zählt die Bilder in jedem Thread-Eintrag
         entryListRaw = li
         postProcessRawList()
 
@@ -775,9 +810,8 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     // Function to handle offline updates
     private fun updateOfflineMode() {
         val onlyThumb = offlineList.firstOrNull { it.thread.postID == sets.curThreadId }?.onlyThumbs ?: false
-        val htmlFile = File(getApplication<Application>().filesDir, "offline/${sets.curThreadId}.html")
-        writeToOffline(htmlFile, onlyThumb)
-        downloadImages(onlyThumb)
+        writeToOffline(sets.curThreadId, onlyThumb)
+        downloadImages(sets.curThreadId,onlyThumb)
     }
 
     private fun updateWatchlist() {

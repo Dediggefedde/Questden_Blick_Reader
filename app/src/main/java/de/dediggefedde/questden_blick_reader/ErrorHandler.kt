@@ -4,21 +4,17 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONException
-import org.json.JSONObject
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 
 fun getCurrentStackTrace(): String {
-    // Hole den Stacktrace des aktuellen Threads
     val stackTraceElements = Thread.currentThread().stackTrace
-    // Konvertiere die Stacktrace-Elemente in einen String
     return stackTraceElements.joinToString("\n") { it.toString() }
 }
 fun handleError(
@@ -26,7 +22,8 @@ fun handleError(
     errorType: String,
     errorMessage: String,
     stackTrace: String,
-    dataViewModel: DataViewModel?
+    dataViewModel: DataViewModel?,
+    onDialogClosed: (() -> Unit)?=null
 ) {
     saveErrorToFile(context, errorType, errorMessage, stackTrace)
 
@@ -47,11 +44,12 @@ fun handleError(
         }
         setNegativeButton("Cancel", null)
         setCancelable(true)
+        setOnCancelListener  { onDialogClosed?.invoke()}
     }.show()
 }
 
-fun saveErrorToFile(context: Context, errorType: String, errorMessage: String, stackTrace: String) {
-    val fileName = "error_log.txt"
+fun saveErrorToFile(context: Context, errorType: String, errorMessage: String, stackTrace: String,pending:Boolean=false) {
+    val fileName = if(pending)"tmp_error_log.txt" else "error_log.txt"
     val errorFile = File(context.filesDir, fileName)
     try {
         FileWriter(errorFile, true).use { writer ->
@@ -107,40 +105,39 @@ fun sendErrorReport(
             e.printStackTrace()
             // Fehler beim Senden der Anfrage, Anzeige im UI
             (context as? Activity)?.runOnUiThread {
-                Toast.makeText(context, "Fehler beim Senden des Berichts", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Error at sending the error report", Toast.LENGTH_SHORT).show()
             }
         }
 
         override fun onResponse(call: Call, response: Response) {
             if (response.isSuccessful) {
-                // Hier wird die Antwort des Servers ausgelesen
-                val responseBody = response.body?.string() ?: "Keine Antwort vom Server"
-
-                // Optional: Wenn die Antwort ein JSON oder Text ist, kannst du es weiter parsen
-                // Wenn es ein JSON-Text ist, könnte das z.B. so aussehen:
+                val responseBody = response.body?.string() ?: "No answer from the server"
                 try {
-                    val jsonResponse = JSONObject(responseBody)
-                    val message = jsonResponse.optString("message", "Erfolgreich gesendet")
-
-                    // Erfolgreiche Nachricht vom Server
                     (context as? Activity)?.runOnUiThread {
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, responseBody, Toast.LENGTH_SHORT).show()
                     }
                 } catch (e: JSONException) {
-                    // Fehler beim Parsen der JSON-Antwort
                     (context as? Activity)?.runOnUiThread {
-                        Toast.makeText(context, "Antwort konnte nicht verarbeitet werden", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Error at processing answer", Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
-                // Falls die Antwort nicht erfolgreich war, wird der Fehlertext angezeigt
-                val errmsg = response.body?.string() ?: "Unbekannter Fehler"
+                val errmsg = response.body?.string() ?: "Unknown Error"
 
                 (context as? Activity)?.runOnUiThread {
-                    Toast.makeText(context, "Fehler beim Senden des Berichts: $errmsg", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Error at sending the error report: $errmsg", Toast.LENGTH_LONG).show()
                 }
             }
         }
     })
+}
 
+class GlobalErrorHandler(
+    private val defaultHandler: Thread.UncaughtExceptionHandler?,
+    private val context: Context
+) : Thread.UncaughtExceptionHandler {
+    override fun uncaughtException(t: Thread, e: Throwable) {
+        saveErrorToFile(context,"Unknown Error", e.message.toString(), e.stackTraceToString(),pending = true)
+        defaultHandler?.uncaughtException(t, e)
+    }
 }

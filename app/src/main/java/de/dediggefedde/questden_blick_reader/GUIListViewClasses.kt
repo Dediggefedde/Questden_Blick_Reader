@@ -53,8 +53,9 @@ class QuestDenListAdapter(val mContext: Context) :
 
     interface ItemActionListener {
         fun openThread(url: String)
+        fun removeOffline(mtg: TgPost)
         fun toggleWatch(mtg: TgPost)
-        fun getWatched(url: String): Watch?
+        fun getWatched(threadId: String): Watch?
         fun getDownload(postID: String): OfflineThread?
         fun getIndexById(id: String): Int
         fun getSFWState():SFWModes
@@ -119,9 +120,12 @@ class QuestDenListAdapter(val mContext: Context) :
             }
             iVBinding.txWatch.setOnClickListener {
                 if (mtg.url.indexOf("#") > 0) mtg.url = mtg.url.substring(0, mtg.url.indexOf("#"))
-                itemAction?.toggleWatch(mtg)
+                if(displaySet.listType==ThrdItemTyps.OFFLINE){ //"delete" in offline mode
+                    itemAction?.removeOffline(mtg)
+                }else {
+                    itemAction?.toggleWatch(mtg) //"watch/unwantch" in board/watch mode
+                }
                 adaptToThreadMode()
-//                it.invalidate()
                 notifyItemChanged(position)
             }
             iVBinding.txPostID.setOnClickListener {
@@ -184,7 +188,7 @@ class QuestDenListAdapter(val mContext: Context) :
                 }
 
                 ThrdItemTyps.BOARD, ThrdItemTyps.WATCH -> { //watch is same display, but filtered only by watch
-                    val w: Watch? = itemAction?.getWatched(mtg.url)
+                    val w: Watch? = itemAction?.getWatched(mtg.postID)
 //
                     if (w == null) { //not watched, can also show in watchlist when removing watch
                         iVBinding.txWatch.setTextColor(ContextCompat.getColor(mContext, R.color.color_watch_fontOff))
@@ -588,15 +592,10 @@ class Clickabl(
         view.tag = "clickableClick"
 
         if (span != null && rexTag.matches(span!!.url)) {
+
             val main = mContext as MainActivity
             val pos = itemAction?.getIndexById((rexTag.find(span!!.url)?.groupValues?.get(1) ?: 0).toString())
             if(pos!=null) main.scrollHighlight(pos)
-//            if (main.listAdapt.currentList.size < pos || pos == -1) return
-//            if (main.chronic.size > 0 && main.chronic[main.chronic.lastIndex].prop != pos.toString())
-//                main.chronic.add(Navis(NavOperation.LINK, pos.toString(), binding.postListRecView.layoutManager?.onSaveInstanceState()))
-//            main.listAdapt.currentList.forEach { it.isHighlight = false }
-//            main.listAdapt.currentList[pos].isHighlight = true
-//            main.chronic.add(Navis(NavOperation.LINK, pos.toString(), binding.postListRecView.layoutManager?.onSaveInstanceState()))
         } else if (span != null && !spoiler) {
             val openURL = Intent(Intent.ACTION_VIEW)
             openURL.data = Uri.parse(span!!.url)

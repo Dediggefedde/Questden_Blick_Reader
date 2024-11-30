@@ -30,7 +30,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.content.Context
 import android.util.AttributeSet
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import java.io.File
 
@@ -58,37 +60,11 @@ import java.io.File
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var viewModel: DataViewModel
-    private var chronic = mutableListOf<Navis>()
     private var mainMenu: Menu? = null
     private lateinit var binding: ActivityMainBinding
-//    private lateinit var bindingMainFrag: FragmentMainBinding
-    private var currentFragment :Fragment?=null
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        backpressed()
-    }
-
-    private fun backpressed() {//TODO test & rework
-        if (chronic.size == 0) return
-        chronic.removeAt(chronic.lastIndex)
-        if (chronic.size == 0) return
-
-        val nav = chronic[chronic.lastIndex]
-        when (nav.operation) {
-            NavOperation.LINK -> {
-                if (nav.navStat != null)
-                    (currentFragment as? MainFragment)?.backFromLink(nav.navStat)
-            }
-            NavOperation.PAGE -> {
-                if (nav.prop.isNotEmpty() && viewModel.sets.curURL != nav.prop)
-                    viewModel.loadThread(nav.prop, ThrdItemTyps.THREAD)
-            }
-
-            NavOperation.THREAD -> {
-            }
-        }
-    }
+    //    private lateinit var bindingMainFrag: FragmentMainBinding
+    private var currentFragment: Fragment? = null
 
     fun toggleToolbarVisibility(toShow: Boolean? = null) {
         val show = toShow ?: (binding.toolbar.visibility == View.GONE)
@@ -113,15 +89,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onDestroy()
     }
 
-    private fun loadFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .addToBackStack(null) // Optional: Zum Back-Stack hinzufügen
-            .commit()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         val offlFolder = File(applicationContext.filesDir, "offline")
         if (!offlFolder.exists()) offlFolder.mkdirs()
@@ -129,20 +99,41 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding = ActivityMainBinding.inflate(layoutInflater)
         viewModel = ViewModelProvider(this).get(DataViewModel::class.java)
 
+        val errorHandler = GlobalErrorHandler(Thread.getDefaultUncaughtExceptionHandler(), this)
+        Thread.setDefaultUncaughtExceptionHandler(errorHandler)
+
         setContentView(binding.root)
 
-        currentFragment=MainFragment()
+        currentFragment = MainFragment()
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, currentFragment as MainFragment)
-            .commit()
+            .commitNow()
 
         addObservers()
         navigationStuff()
         loadData()
 
         onBackPressedDispatcher.addCallback(this) {
-            backpressed()
+            if(viewModel.backLinkStack.isNotEmpty()) {
+                val id = viewModel.backLinkStack.pop()
+                val pos = viewModel.getPositionById(id)
+                scrollHighlight(pos,backwards =true)
+//                (currentFragment as? MainFragment)?.binding?.postListRecView?.scrollToPosition(pos)
+            }else if(viewModel.backActionStack.isNotEmpty()){
+                val state = viewModel.backActionStack.pop()
+                viewModel.loadThread(state.url,state.type, backwards = true)
+            }else if (supportFragmentManager.backStackEntryCount > 0) {
+                supportFragmentManager.popBackStack()
+            } else {
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Close App")
+                    .setMessage("Do you want to close the app?")
+                    .setPositiveButton("Yes") { _, _ -> finish() } // App schließen
+                    .setNegativeButton("No", null) // Nichts tun
+                    .show()
+            }
         }
+        checkForErrorFiles()
 
         AppUpdater(this)
             .setUpdateFrom(UpdateFrom.JSON)
@@ -153,11 +144,51 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
 
+    private fun checkForErrorFiles() {
+        val errorFile = File(applicationContext.filesDir, "tmp_error_log.txt")
+        if(errorFile.exists()){
+            AlertDialog.Builder(this@MainActivity)
+                .setTitle("Restart after crash")
+                .setMessage("An error report was saved for the last application crash. Do you want to process it? 'No' will delete the report.")
+                .setPositiveButton("Yes") { _, _ ->
+                    handleError(this,"Crash Report",errorFile.readText(), getCurrentStackTrace(),viewModel)
+                    errorFile.renameTo(File(applicationContext.filesDir, "error_log.txt"))
+                }
+                .setNegativeButton("No") {_,_->
+                    errorFile.delete()
+                }
+                .show()
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.menu_sorting, menu)
+        inflater.inflate(R.menu.menu_deleting, menu)
         mainMenu = menu
         return true
+    }
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(R.id.menu_delete_reading).setVisible(true)
+        menu.findItem(R.id.menu_delete_offline).setVisible(viewModel.sets.listType==ThrdItemTyps.OFFLINE)
+        menu.findItem(R.id.menu_delete_Watch).setVisible(viewModel.sets.listType==ThrdItemTyps.WATCH)
+        return super.onPrepareOptionsMenu(menu)
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_delete_reading -> {
+                viewModel.deleteLastRead()
+                true
+            }
+            R.id.menu_delete_offline -> {
+                viewModel.deleteOfflineData()
+                true
+            }
+            R.id.menu_delete_Watch -> {
+                viewModel.deleteWatchData()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun navigationStuff() {
@@ -180,27 +211,30 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         binding.navigationView.itemIconTintList = null
     }
-
+    private fun navigateToBoard(url: String, type: ThrdItemTyps) {
+        viewModel.loadThread(url, type)
+        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    }
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         viewModel.sets.boardPage = 0 //no liveview connected
 
         when (menuItem.itemId) {
-            R.id.menu_draw -> viewModel.loadThread(URLBoards.DRAW.url, ThrdItemTyps.BOARD)
-            R.id.menu_general -> viewModel.loadThread(URLBoards.MEEP.url, ThrdItemTyps.BOARD)
-            R.id.menu_quest -> viewModel.loadThread(URLBoards.QUEST.url, ThrdItemTyps.BOARD)
-            R.id.menu_questdis -> viewModel.loadThread(URLBoards.QUESTDIS.url, ThrdItemTyps.BOARD)
-            R.id.menu_tg -> viewModel.loadThread(URLBoards.TG.url, ThrdItemTyps.BOARD)
+            R.id.menu_draw ->    navigateToBoard(URLBoards.DRAW.url, ThrdItemTyps.BOARD)
+            R.id.menu_general -> navigateToBoard(URLBoards.MEEP.url, ThrdItemTyps.BOARD)
+            R.id.menu_quest ->   navigateToBoard(URLBoards.QUEST.url, ThrdItemTyps.BOARD)
+            R.id.menu_questdis ->navigateToBoard(URLBoards.QUESTDIS.url, ThrdItemTyps.BOARD)
+            R.id.menu_tg ->      navigateToBoard(URLBoards.TG.url, ThrdItemTyps.BOARD)
             R.id.menu_watch_open -> {
                 viewModel.loadThread("", ThrdItemTyps.WATCH)
             }
 
             R.id.menu_offline_open -> {
-                viewModel.loadThread("", ThrdItemTyps.OFFLINE)
+                navigateToBoard("", ThrdItemTyps.OFFLINE)
             }
 
             R.id.menu_reader_sync -> {
-                currentFragment=SyncFragment()
+                currentFragment = SyncFragment()
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, currentFragment as SyncFragment)
                     .addToBackStack(null) // Backstack für Zurück-Taste
@@ -215,7 +249,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH)
                 val strDate: String = sdf.format(c.time)
 
-                intent.type = "text/json" //not needed, but maybe usefull
+                intent.type = "application/json" //not needed, but maybe usefull
                 intent.putExtra(Intent.EXTRA_TITLE, "questden_backup_$strDate.json") //not needed, but maybe usefull
 
                 startActivityForResult(intent, 2)
@@ -224,7 +258,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.menu_reader_restore -> {
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 intent.addCategory(Intent.CATEGORY_OPENABLE)
-                intent.type = "text/json" //not needed, but maybe usefull
+                intent.type = "application/json" //not needed, but maybe usefull
 
                 startActivityForResult(intent, 3)
             }
@@ -234,17 +268,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
-    fun viewImage(mtg:TgPost){
+
+    fun viewImage(mtg: TgPost) {
         val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as? MainFragment
         fragment?.viewImage(mtg)
     }
-    fun repeatScroll(){
+
+    fun repeatScroll() {
         val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as? MainFragment
         fragment?.repeatScroll()
     }
-    fun scrollHighlight(i:Int){
+
+    fun scrollHighlight(i: Int,backwards:Boolean=false) {
         val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as? MainFragment
-        fragment?.scrollHighlight(i)
+        fragment?.scrollHighlight(i,backwards)
     }
 
     private fun exportFile(shName: Uri?) {
@@ -305,9 +342,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 try {
                     exportFile(data?.data)
                 } catch (e: IOException) {
-                    handleError(this.applicationContext,"Backup error",
-                        e.message?:"Unknown error at exporting backup",
-                        e.stackTraceToString(), viewModel)
+                    handleError(
+                        this.applicationContext, "Backup error",
+                        e.message ?: "Unknown error at exporting backup",
+                        e.stackTraceToString(), viewModel
+                    )
                 }
             }
 
@@ -316,9 +355,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 try {
                     importFile(data?.data)
                 } catch (e: IOException) {
-                    handleError(this.applicationContext,"Backup error",
-                        e.message?:"Unknown error at loading backup",
-                        e.stackTraceToString(), viewModel)
+                    handleError(
+                        this.applicationContext, "Backup error",
+                        e.message ?: "Unknown error at loading backup",
+                        e.stackTraceToString(), viewModel
+                    )
                 }
             }
         }
@@ -327,23 +368,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     @SuppressLint("NotifyDataSetChanged")
     private fun loadData() {
         val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as? MainFragment
-        fragment?.listAdapt?.updateDisplaySetting(viewModel.sets, txtSize = viewModel.sets.txsize)
-        fragment?.listAdapt?.notifyDataSetChanged()
+        fragment?.listAdapt.let {
+            fragment?.listAdapt?.updateDisplaySetting(viewModel.sets, txtSize = viewModel.sets.txsize)
+            fragment?.listAdapt?.notifyDataSetChanged()
+        }
         viewModel.loadData() //calls loadBoard with current settings
     }
 
     private fun storeData() {
         viewModel.storeData()
     }
-    private fun addObservers(){
+
+    private fun addObservers() {
         viewModel.displayList.observe(this) { list ->
             list?.let {
                 binding.toolbar.title = viewModel.sets.curTitle
             }
         }
-        viewModel.showListDemand.observe(this){ state->
-            if(state && currentFragment !is MainFragment){
-                currentFragment=MainFragment()
+        viewModel.showListDemand.observe(this) { state ->
+            if (state && currentFragment !is MainFragment) {
+                currentFragment = MainFragment()
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, currentFragment as MainFragment)
                     .commit()

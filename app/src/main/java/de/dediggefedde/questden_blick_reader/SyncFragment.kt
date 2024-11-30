@@ -32,9 +32,9 @@ class SyncFragment : Fragment() {
         viewModel.logState.observe(viewLifecycleOwner){ state->
             if(state.token=="" && state.errorCode==401){
                 binding.statusText.text = getString(R.string.wrong_username_or_password)
-            }else {
-                Toast.makeText(requireContext(), state.promptText, Toast.LENGTH_LONG).show()
-                binding.statusText.text = state.statusText
+            }else{
+                if(state.promptText.isNotEmpty())Toast.makeText(requireContext(), state.promptText, Toast.LENGTH_LONG).show()
+                if(state.statusText.isNotEmpty())binding.statusText.text = state.statusText
             }
             if(state.token!=""){
                 binding.btnDownload.visibility=View.VISIBLE
