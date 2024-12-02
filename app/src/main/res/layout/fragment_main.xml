@@ -19,12 +19,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
-    <ImageView
+    <com.github.chrisbanes.photoview.PhotoView
         android:id="@+id/imageZoom"
+        android:background="#a000"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#a000"
-        android:contentDescription="@string/img_zoom_desc"
+        android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="@+id/tool_dropout"
         app:layout_constraintEnd_toEndOf="@+id/post_list_rec_view"
         app:layout_constraintHorizontal_bias="0.0"
@@ -32,7 +32,23 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
         android:visibility="gone"
-        app:srcCompat="@drawable/ic_questden" />
+        app:srcCompat="@drawable/ic_questden"
+        />
+
+<!--    <ImageView-->
+<!--        android:id="@+id/imageZoom"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:background="#a000"-->
+<!--        android:contentDescription="@string/img_zoom_desc"-->
+<!--        app:layout_constraintBottom_toBottomOf="@+id/tool_dropout"-->
+<!--        app:layout_constraintEnd_toEndOf="@+id/post_list_rec_view"-->
+<!--        app:layout_constraintHorizontal_bias="0.0"-->
+<!--        app:layout_constraintStart_toStartOf="@+id/post_list_rec_view"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintVertical_bias="1.0"-->
+<!--        android:visibility="gone"-->
+<!--        app:srcCompat="@drawable/ic_questden" />-->
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"

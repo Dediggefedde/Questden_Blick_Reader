@@ -1,2 +1,10 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+        gradlePluginPortal() // Sicherstellen, dass alle Quellen verfügbar sind
+    }
+}
 include ':app'
-rootProject.name = "My Application"
+rootProject.name = "Questden Blick Reader"

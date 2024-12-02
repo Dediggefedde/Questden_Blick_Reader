@@ -25,20 +25,6 @@
             app:titleTextColor="@color/colorAccent"
             app:layout_scrollFlags="scroll|enterAlways"/>
 
-<!--            android:id="@+id/toolbar"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:background="@color/color_title_bg"-->
-<!--            android:minHeight="?attr/actionBarSize"-->
-<!--            android:theme="?attr/actionBarTheme"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent"-->
-<!--            app:navigationIcon="@android:drawable/ic_search_category_default"-->
-<!--            app:title="@string/app_name"-->
-<!--            app:titleTextColor="@color/colorAccent" -->
-<!--        />-->
-
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"

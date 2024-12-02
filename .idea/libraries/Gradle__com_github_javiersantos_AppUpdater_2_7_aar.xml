@@ -2,8 +2,8 @@
   <library name="Gradle: com.github.javiersantos:AppUpdater:2.7@aar" external-system-id="GRADLE">
     <CLASSES>
       <root url="jar://$USER_HOME$/.gradle/caches/8.9/transforms/f8d8cefdc71b8935f8766e210c4998d9/transformed/jetified-AppUpdater-2.7/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/8.9/transforms/f8d8cefdc71b8935f8766e210c4998d9/transformed/jetified-AppUpdater-2.7/res" />
       <root url="file://$USER_HOME$/.gradle/caches/8.9/transforms/f8d8cefdc71b8935f8766e210c4998d9/transformed/jetified-AppUpdater-2.7/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/8.9/transforms/f8d8cefdc71b8935f8766e210c4998d9/transformed/jetified-AppUpdater-2.7/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

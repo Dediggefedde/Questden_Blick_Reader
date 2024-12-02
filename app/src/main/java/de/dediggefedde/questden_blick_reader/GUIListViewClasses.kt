@@ -3,16 +3,17 @@ package de.dediggefedde.questden_blick_reader
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.text.Editable
 import android.text.Html
-import android.text.Layout
+//import android.text.Layout
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.text.StaticLayout
+//import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.*
@@ -58,7 +59,7 @@ class QuestDenListAdapter(val mContext: Context) :
         fun getWatched(threadId: String): Watch?
         fun getDownload(postID: String): OfflineThread?
         fun getIndexById(id: String): Int
-        fun getSFWState():SFWModes
+        fun getSFWState(): SFWModes
     }
 
     var itemAction: ItemActionListener? = null
@@ -120,13 +121,14 @@ class QuestDenListAdapter(val mContext: Context) :
             }
             iVBinding.txWatch.setOnClickListener {
                 if (mtg.url.indexOf("#") > 0) mtg.url = mtg.url.substring(0, mtg.url.indexOf("#"))
-                if(displaySet.listType==ThrdItemTyps.OFFLINE){ //"delete" in offline mode
+                if (displaySet.listType == ThrdItemTyps.OFFLINE) { //"delete" in offline mode
                     itemAction?.removeOffline(mtg)
-                }else {
+                } else {
                     itemAction?.toggleWatch(mtg) //"watch/unwantch" in board/watch mode
                 }
                 adaptToThreadMode()
-                notifyItemChanged(position)
+                itemView.invalidate()
+//                notifyItemChanged(position)
             }
             iVBinding.txPostID.setOnClickListener {
                 val openURL = Intent(Intent.ACTION_VIEW)
@@ -138,7 +140,7 @@ class QuestDenListAdapter(val mContext: Context) :
                 if (displaySet.listType != ThrdItemTyps.THREAD) {
                     mtg.threadExtended = !mtg.threadExtended
                     if (mtg.threadExtended) floatSummary()
-                    else notifyItemChanged(position)
+                    else itemView.invalidate()//notifyItemChanged(position)
                 } else {
                     if (it.tag == "clickableClick") {
                         it.tag = ""
@@ -377,7 +379,7 @@ class QuestDenListAdapter(val mContext: Context) :
                 val availableWidth = cachedTextTopWidth //iVBinding.txSummaryTop.width - iVBinding.txSummaryTop.paddingLeft - iVBinding.txSummaryTop.paddingRight
 //                val availableHeight = iVBinding.txSummaryTop.height - iVBinding.txSummaryTop.paddingTop - iVBinding.txSummaryTop.paddingBottom
                 val charsPerLine = availableWidth / widthPerChar
-                var maxCharsInd = minOf((charsPerLine * maxLines).toInt(), strbld.length)
+                val maxCharsInd = minOf((charsPerLine * maxLines).toInt(), strbld.length)
                 var topText = strbld.subSequence(0, peakPos)
 
                 if (strbld.length < maxCharsInd) { //whole text fits next to image
@@ -389,20 +391,49 @@ class QuestDenListAdapter(val mContext: Context) :
 
                 //static layout + while-loop: real rendering and adjustment of width till fit
                 //average 1-3 iterations. No performance effect on small phone
-                var layout = StaticLayout(topText, paint, availableWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false)
-                while (maxCharsInd > 0 && (layout.height > topTexHeight || layout.lineCount > maxLines)) {
-                    val previousSpaceIndex = topText.lastIndexOf(' ')
-                    val previousLineBreakIndex = topText.lastIndexOf('\n')
-                    maxCharsInd = maxOf(previousSpaceIndex, previousLineBreakIndex)
-                    if (maxCharsInd <= 0) break
-                    topText = topText.subSequence(0, maxCharsInd)
-                    layout = StaticLayout(topText, paint, availableWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false)
+//                var layout = StaticLayout(topText, paint, availableWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false)
+//                while (maxCharsInd > 0 && (layout.height > topTexHeight || layout.lineCount > maxLines)) {
+//                    val previousSpaceIndex = topText.lastIndexOf(' ')
+//                    val previousLineBreakIndex = topText.lastIndexOf('\n')
+//                    maxCharsInd = maxOf(previousSpaceIndex, previousLineBreakIndex)
+//                    if (maxCharsInd <= 0) break
+//                    topText = topText.subSequence(0, maxCharsInd)
+//                    layout = StaticLayout(topText, paint, availableWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false)
+//                }
+
+                val canvas = Canvas()
+                var lineStart = 0
+                var yPos = 0f
+                var bottomText: CharSequence = ""
+                var mlines = maxLines
+
+                while (lineStart < topText.length) {
+                    var lineEnd =lineStart+paint.breakText(topText, lineStart, topText.length, true, availableWidth.toFloat(), null)
+
+                    var currentLine = topText.substring(lineStart, minOf(lineEnd, topText.length))
+                    val lineBreakIndex = currentLine.indexOf('\n')
+                    if (lineBreakIndex != -1) lineEnd =  lineStart+lineBreakIndex+1
+                    else {
+                        val lastSpaceIndex = currentLine.lastIndexOf(' ')
+                        if (lastSpaceIndex != -1) lineEnd = lineStart+lastSpaceIndex+1
+                    }
+                    currentLine=topText.substring(lineStart, minOf(lineEnd, topText.length))
+
+                    canvas.drawText(currentLine, 0f, yPos, paint)
+                    yPos += iVBinding.txSummaryTop.lineHeight
+                    lineStart = minOf( lineEnd, topText.length)
+
+                    if (yPos > topTexHeight || (mlines != -1 && mlines-- <= 0)) {
+                        topText = topText.substring(0, lineStart)
+                        bottomText = strbld.removePrefix(topText.toString())
+                        break
+                    }
                 }
 
                 //tag disruption move all to bottom?
                 //if a tag starts at top, it might be ended prematurely. Seems to work (spoiler,link), though. formatting not checked
                 //otherwise: move whole text to bottom to have working tags
-                val bottomText = strbld.removePrefix(topText)
+//                val bottomText = strbld.removePrefix(topText)
 
                 iVBinding.txSummaryTop.text = topText
                 iVBinding.txSummaryBottom.text = bottomText.trim { it == '\n' || it == '\r' }
@@ -515,8 +546,10 @@ class HTMLTagHandler(
                 for (i in 0 until len)
                     attributes[data[i * 5 + 1]] = data[i * 5 + 4]
         } catch (e: java.lang.Exception) {
-            handleError(mContext,"Parsing thread error",
-                e.message?:"Unknown error parsing the thread", getCurrentStackTrace(),null)
+            handleError(
+                mContext, "Parsing thread error",
+                e.message ?: "Unknown error parsing the thread", getCurrentStackTrace(), null
+            )
         }
     }
 
@@ -595,13 +628,13 @@ class Clickabl(
 
             val main = mContext as MainActivity
             val pos = itemAction?.getIndexById((rexTag.find(span!!.url)?.groupValues?.get(1) ?: 0).toString())
-            if(pos!=null) main.scrollHighlight(pos)
+            if (pos != null) main.scrollHighlight(pos)
         } else if (span != null && !spoiler) {
             val openURL = Intent(Intent.ACTION_VIEW)
             openURL.data = Uri.parse(span!!.url)
             mContext.startActivity(openURL)
         }
-        if (spoiler && itemAction?.getSFWState()==SFWModes.SFWQUESTION)
+        if (spoiler && itemAction?.getSFWState() == SFWModes.SFWQUESTION)
             spoiled = !spoiled
 
         view.invalidate()
