@@ -10,17 +10,20 @@ import android.net.Uri
 import android.os.Build
 import android.text.Editable
 import android.text.Html
-//import android.text.Layout
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-//import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.marginLeft
+import androidx.core.view.marginRight
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -29,7 +32,6 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import de.dediggefedde.questden_blick_reader.databinding.ListItemBinding
 import org.jsoup.Jsoup
 import org.xml.sax.XMLReader
 import java.io.File
@@ -91,23 +93,51 @@ class QuestDenListAdapter(val mContext: Context) :
 //        return mMain.viewModel.displayList.value?.get(position)?.postID?.toLong() ?: 0L
     }
 
-    companion object { //same for all posts, fetched for floating text division, layout adjustment otherwise too late
-        var cachedTextTopWidth: Int = 800 //top text width
-        var cachedTextTopOffset: Int = 57 + 57 //title+author
-    }
+//    companion object { //same for all posts, fetched for floating text division, layout adjustment otherwise too late
+//        var cachedTextTopWidth: Int = 0//800 //top text width
+//        var cachedTextTopOffset: Int = 0//57 + 57 //title+author
+//    }
 
     /**
      * Viewholder item. made abstract to offer multiple layouts. currently only one used
      */
     abstract inner class ViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
-        val iVBinding = ListItemBinding.bind(itemView) // Nutze das richtige Layout-Binding
-        var mtg = TgPost()
+        private val iVBinding =CommonBinding(itemView)// ListItemBinding.bind(itemView) // Nutze das richtige Layout-Binding
+//        private val iVFullBinding = ListItemImgfullBinding.bind(itemView) //binding for fullview image
+//        private val iVBigBinding = ListItemImgbigBinding.bind(itemView) //binding for fullview image
+        private var mtg = TgPost()
 
         init {
-            setListener()
+            if (displaySet.listType != ThrdItemTyps.THREAD) {
+                setListener()
+            } else {
+                setListenerImg()
+            }
         }
 
+        private fun setListenerImg() {
+
+            iVBinding.imgUrl.setOnClickListener {
+                mMain.viewImage(mtg)
+            }
+            iVBinding.txPostID.setOnClickListener {
+                val openURL = Intent(Intent.ACTION_VIEW)
+                val threadurl = mtg.url.replace(Regex("#\\d+"), "")
+                openURL.data = Uri.parse("https://questden.org$threadurl#${mtg.postID}")
+                it.context.startActivity(openURL)
+            }
+            iVBinding.txSummaryBottom.setOnClickListener {
+                if (it.tag == "clickableClick") {
+                    it.tag = ""
+                } else {
+                    mMain.toggleToolbarVisibility()
+                }
+            }
+            iVBinding.txSummaryBottom.movementMethod = LinkMovementMethod.getInstance()
+        }
+
+//        @Suppress("UNUSED_ANONYMOUS_PARAMETER")
         @SuppressLint("ClickableViewAccessibility")
         private fun setListener() {
             val evThreadTitleClick = View.OnClickListener {
@@ -119,6 +149,12 @@ class QuestDenListAdapter(val mContext: Context) :
             iVBinding.imgUrl.setOnClickListener {
                 mMain.viewImage(mtg)
             }
+
+//            iVBinding.imgUrl.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+//                mtg.thumbHeight = bottom - top
+//                if (displaySet.listType == ThrdItemTyps.THREAD && displaySet.imageMode != imgMode.FULL && bottom - top > 0)
+//                    floatSummary(thumbHeight = bottom - top, thumbWidth = right - left)
+//            }
             iVBinding.txWatch.setOnClickListener {
                 if (mtg.url.indexOf("#") > 0) mtg.url = mtg.url.substring(0, mtg.url.indexOf("#"))
                 if (displaySet.listType == ThrdItemTyps.OFFLINE) { //"delete" in offline mode
@@ -128,7 +164,6 @@ class QuestDenListAdapter(val mContext: Context) :
                 }
                 adaptToThreadMode()
                 itemView.invalidate()
-//                notifyItemChanged(position)
             }
             iVBinding.txPostID.setOnClickListener {
                 val openURL = Intent(Intent.ACTION_VIEW)
@@ -139,8 +174,8 @@ class QuestDenListAdapter(val mContext: Context) :
             iVBinding.txSummaryTop.setOnClickListener {
                 if (displaySet.listType != ThrdItemTyps.THREAD) {
                     mtg.threadExtended = !mtg.threadExtended
-                    if (mtg.threadExtended) floatSummary()
-                    else itemView.invalidate()//notifyItemChanged(position)
+                    if (mtg.threadExtended) floatSummary(thumbHeight = iVBinding.imgUrl.height, thumbWidth = iVBinding.imgUrl.width)
+                    else bind(mtg)//notifyItemChanged(position)
                 } else {
                     if (it.tag == "clickableClick") {
                         it.tag = ""
@@ -150,10 +185,16 @@ class QuestDenListAdapter(val mContext: Context) :
                 }
             }
             iVBinding.txSummaryBottom.setOnClickListener {
-                if (it.tag == "clickableClick") {
-                    it.tag = ""
+                if (displaySet.listType != ThrdItemTyps.THREAD) {
+                    mtg.threadExtended = !mtg.threadExtended
+                    if (mtg.threadExtended) floatSummary(thumbHeight = iVBinding.imgUrl.height, thumbWidth = iVBinding.imgUrl.width)
+                    else bind(mtg)//notifyItemChanged(position)
                 } else {
-                    mMain.toggleToolbarVisibility()
+                    if (it.tag == "clickableClick") {
+                        it.tag = ""
+                    } else {
+                        mMain.toggleToolbarVisibility()
+                    }
                 }
             }
 
@@ -221,15 +262,48 @@ class QuestDenListAdapter(val mContext: Context) :
             }
         }
 
-        /**
-         * binds a thread object to an item for the recycle view
-         * also sets visible, parses html, updates watch-state and fetches image
-         * sets internally used mtg to the thread.
-         */
-        @SuppressLint("Range")
+//        private fun bindFullImg(): Boolean { //only threadmode
+//            if (displaySet.imageMode !== imgMode.FULL || displaySet.listType != ThrdItemTyps.THREAD) return false
+//
+//            iVBinding.txAuthor.visibility = if (mtg.author == "") View.GONE else View.VISIBLE
+//            iVBinding.txTitle.visibility = if (mtg.title == "") View.GONE else View.VISIBLE
+//            iVBinding.imgUrl.visibility = if (mtg.imgUrl == "") View.GONE else View.VISIBLE
+//            iVBinding.txSummaryBottom.textSize = textSize
+//
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) { //75% of phones
+//                iVBinding.txTitle.text = Html.fromHtml(mtg.title, Html.FROM_HTML_MODE_COMPACT)
+//                iVBinding.txAuthor.text = Html.fromHtml(mtg.author, Html.FROM_HTML_MODE_COMPACT)
+//
+//                val strbld = getHTMLStringBuilder(mtg.summary)
+//                iVBinding.txSummaryBottom.text = strbld
+//                iVBinding.txSummaryBottom.visibility = View.VISIBLE
+//            } else {
+//                iVBinding.txTitle.text = mtg.title
+//                iVBinding.txAuthor.text = mtg.author
+//                val strbld = getHTMLStringBuilder(removeHTML(mtg.summary))
+//                iVBinding.txSummaryBottom.text = strbld
+//            }
+//
+//            iVBinding.txDate.text = mtg.date
+//            iVBinding.txPostID.text = mtg.postID
+//
+//            if (!mtg.isHighlight) {
+//                iVBinding.linearLayout.setBackgroundColor(ContextCompat.getColor(mContext, R.color.color_list_bg))
+//            } else {
+//                iVBinding.linearLayout.setBackgroundColor(ContextCompat.getColor(mContext, R.color.color_list_high))
+//            }
+//
+//            if (mtg.imgUrl != "") {
+//                loadImg(iVBinding.imgUrl)
+//            }
+//            return true
+//        }
+
         fun bind(tg: TgPost) {
             mtg = tg
             if (mtg.url.indexOf("#") > 0) mtg.url = mtg.url.substring(0, mtg.url.indexOf("#"))
+
+//            if (bindFullImg()) return
 
             adaptToThreadMode()
 
@@ -240,24 +314,23 @@ class QuestDenListAdapter(val mContext: Context) :
             iVBinding.txSummaryTop.textSize = textSize
             iVBinding.txSummaryBottom.textSize = textSize
 
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) { //75% of phones
                 iVBinding.txTitle.text = Html.fromHtml(mtg.title, Html.FROM_HTML_MODE_COMPACT)
 
                 if (displaySet.listType == ThrdItemTyps.THREAD) {
                     val strbld = getHTMLStringBuilder(mtg.summary)
-                    //normal posts: full width. Image posts: Glide will float images
                     iVBinding.txSummaryTop.text = ""
                     iVBinding.txSummaryTop.visibility = View.GONE
                     iVBinding.txSummaryBottom.text = strbld
                     iVBinding.txSummaryBottom.visibility = View.VISIBLE
+//                    floatSummary(thumbHeight = iVBinding.imgUrl.height, thumbWidth = iVBinding.imgUrl.width)
                 } else {//board, watch, offline
                     iVBinding.txSummaryTop.text = removeHTML(mtg.summary) //condense, remove html, preview
                     iVBinding.txSummaryTop.visibility = View.VISIBLE
 
                     if (mtg.threadExtended) {
                         iVBinding.txNewImg.post {
-                            floatSummary()
+                            floatSummary(thumbHeight = iVBinding.imgUrl.height, thumbWidth = iVBinding.imgUrl.width)
                         }
                     } else {
                         iVBinding.txSummaryBottom.text = "" //default next to image
@@ -288,45 +361,63 @@ class QuestDenListAdapter(val mContext: Context) :
             }
 
             if (mtg.imgUrl != "") {
-                var imgUrl = "https://questden.org" + mtg.imgUrl
-                if (mtg.isSpoiler && displaySet.sfw != SFWModes.NSFW) imgUrl = "https://questden.org/kusaba/spoiler.png"
+                loadImg(iVBinding.imgUrl)
 
-                val imgNam = mtg.imgUrl.substringAfterLast("/") //offline mode
-                val offImgPath = File(mMain.filesDir, "offline/${displaySet.curThreadId}_img")
-                if (offImgPath.exists() && File(offImgPath, imgNam).exists()) imgUrl = "${mMain.filesDir}/offline/${displaySet.curThreadId}_img/$imgNam"
-
-                Glide.with(iVBinding.imgUrl)
-                    .load(imgUrl)
-                    .listener(object : RequestListener<Drawable> {
-                        override fun onLoadFailed(p0: GlideException?, p1: Any?, target: Target<Drawable>?, p3: Boolean): Boolean {
-                            return false
-                        }
-
-                        override fun onResourceReady(p0: Drawable?, p1: Any?, target: Target<Drawable>?, p3: DataSource?, p4: Boolean): Boolean {
-                            iVBinding.imgUrl.invalidate()
-//                            val imageWidth = p0?.intrinsicWidth?:0
-                            val imageHeight = p0?.intrinsicHeight ?: 0
-
-                            iVBinding.imgUrl.post {
-                                if (displaySet.listType == ThrdItemTyps.THREAD) {
-                                    mMain.repeatScroll()
-                                    mtg.thumbHeight = imageHeight
-                                    floatSummary()
-                                }
-                            }
-                            return false
-                        }
-                    })
-                    .into(iVBinding.imgUrl)
+//                val layoutParams = iVBinding.imgUrl.layoutParams
+                //80/180 dp for "small"/"big". "Full" does not execute this part
+//                layoutParams.width = (mContext.resources.displayMetrics.density * (if (displaySet.imageMode == imgMode.SMALL || displaySet.listType != ThrdItemTyps.THREAD) 80 else 180)).toInt()
+//                iVBinding.imgUrl.layoutParams = layoutParams
             }
         }
 
+        private fun loadImg(imageView: ImageView) {
+            var imgUrl = "https://questden.org" + mtg.imgUrl
+            if (mtg.isSpoiler && displaySet.sfw != SFWModes.NSFW) imgUrl = "https://questden.org/kusaba/spoiler.png"
+
+            val imgNam = mtg.imgUrl.substringAfterLast("/") //offline mode
+            val offImgPath = File(mMain.filesDir, "offline/${displaySet.curThreadId}_img")
+            if (offImgPath.exists() && File(offImgPath, imgNam).exists()) imgUrl = "${mMain.filesDir}/offline/${displaySet.curThreadId}_img/$imgNam"
+
+            Glide.with(imageView)
+                .load(imgUrl)
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(p0: GlideException?, p1: Any?, target: Target<Drawable>?, p3: Boolean): Boolean {
+                        return false
+                    }
+
+                    override fun onResourceReady(p0: Drawable?, p1: Any?, target: Target<Drawable>?, p3: DataSource?, p4: Boolean): Boolean {
+                        imageView.invalidate()
+                        imageView.post {
+                            if (displaySet.listType == ThrdItemTyps.THREAD) {
+                                mMain.repeatScroll()
+                            }
+                        }
+                        return false
+                    }
+                })
+                .into(imageView)
+        }
+
+        fun SpannableStringBuilder.subSequenceWithSpans(start: Int, end: Int): SpannableStringBuilder {
+            val subSequence = this.subSequence(start, end)
+            val newBuilder = SpannableStringBuilder(subSequence)
+
+            // Übertrage die Spans
+            val spans = this.getSpans(start, end, Any::class.java)
+            for (span in spans) {
+                val spanStart = this.getSpanStart(span).coerceAtLeast(start) - start
+                val spanEnd = this.getSpanEnd(span).coerceAtMost(end) - start
+                newBuilder.setSpan(span, spanStart, spanEnd, this.getSpanFlags(span))
+            }
+            return newBuilder
+        }
+
         //renders html and icons from input. Return contains clickable links/Spoilers etc.
-        private fun getHTMLStringBuilder(html: String?): SpannableStringBuilder {
+        private fun getHTMLStringBuilder(html: String?, textView1: TextView = iVBinding.txSummaryTop, textView2: TextView = iVBinding.txSummaryBottom): SpannableStringBuilder {
             val tagHandler = HTMLTagHandler(mMain, textSize, itemAction) //rendeer HTML tags
-            val imgGetTop = GlideImageGetter(iVBinding.txSummaryBottom, mMain, displaySet) //render images/icons
+            val imgGet = GlideImageGetter(textView1, textView2, mMain, displaySet) //render images/icons
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) { //75% of phones
-                val sequenceTop: CharSequence = Html.fromHtml(convertToCustomTags(html), Html.FROM_HTML_MODE_COMPACT, imgGetTop, tagHandler)
+                val sequenceTop: CharSequence = Html.fromHtml(convertToCustomTags(html), Html.FROM_HTML_MODE_COMPACT, imgGet, tagHandler)
                 return SpannableStringBuilder(sequenceTop.trim { it == '\n' || it == '\r' })
             } else {
                 return SpannableStringBuilder(html?.trim { it == '\n' || it == '\r' }) //no html rendering
@@ -335,7 +426,11 @@ class QuestDenListAdapter(val mContext: Context) :
 
         //divides text to txSummaryTop (next to image) and txSummaryBottom (below, full width)
         //called after images are loaded.
-        fun floatSummary(html: String? = mtg.summary) { //, p0:BitmapDrawable?=iVBinding.imgUrl.drawable as BitmapDrawable
+        private fun floatSummary(
+            html: String? = mtg.summary,
+            thumbHeight: Int = mtg.thumbHeight,
+            thumbWidth: Int = iVBinding.txSummaryBottom.width
+        ) { //, p0:BitmapDrawable?=iVBinding.imgUrl.drawable as BitmapDrawable
             if (html.isNullOrEmpty()) return
 
             val strbld = getHTMLStringBuilder(html)
@@ -348,14 +443,16 @@ class QuestDenListAdapter(val mContext: Context) :
                 return
             }
 
-            //txSummaryTop height/top ändert sich im layout und wird zu spät aktualisiert. Top ist an barrier4 gekoppelt. Ich berechne max-height manuel.
-            val thumbHeight = if (mtg.thumbHeight > 0) mtg.thumbHeight else iVBinding.imgUrl.height
-            var topTexHeight = thumbHeight - cachedTextTopOffset + iVBinding.txWatch.height
+
+            var topTexHeight = thumbHeight +
+                    (iVBinding.txWatch.height.takeIf { iVBinding.txWatch.visibility != View.GONE } ?: 0) +
+                    -(iVBinding.txTitle.height.takeIf { iVBinding.txTitle.text != "" } ?: 0) +
+                    -(iVBinding.txAuthor.height.takeIf { iVBinding.txAuthor.text != "" } ?: 0)
             if (iVBinding.txNewImg.visibility == View.VISIBLE) topTexHeight += iVBinding.txNewImg.height + iVBinding.txNewPosts.height //iVBinding.barrier6.top-iVBinding.barrier4.top // (p0.bitmap.height.toFloat() * iVBinding.imgUrl.width.toFloat() / p0.bitmap.width.toFloat() -(iVBinding.barrier4.top-iVBinding.imgUrl.top)).toInt() //iVBinding.txSummaryTop.height
             val maxLines = (topTexHeight.toFloat() / iVBinding.txSummaryTop.lineHeight).roundToInt()
             val paint = iVBinding.txSummaryTop.paint
 
-            if (maxLines < 0 || topTexHeight < 0) {
+            if (maxLines <= 0 || topTexHeight < 0) {
                 iVBinding.txSummaryBottom.text = strbld
                 iVBinding.txSummaryTop.text = ""
                 iVBinding.txSummaryBottom.visibility = View.VISIBLE
@@ -364,23 +461,23 @@ class QuestDenListAdapter(val mContext: Context) :
             }
 
             //check first 100 charactes for render-length
-            val peakPos = minOf(100, strbld.length)
+            val peakPos = minOf(200, strbld.length)
             val widthPerChar = paint.measureText(strbld.subSequence(0, peakPos).toString()) / peakPos
 
             iVBinding.txSummaryTop.visibility = View.VISIBLE
             iVBinding.txSummaryBottom.visibility = View.VISIBLE
 
-            if (topTexHeight == 0 || maxLines == 0 || widthPerChar == 0.0f) { //error in image size or too low: all in bottom
+            if (topTexHeight == 0 || widthPerChar == 0.0f) { //error in image size or too low: all in bottom
                 iVBinding.txSummaryTop.text = ""
                 iVBinding.txSummaryTop.visibility = View.GONE
                 iVBinding.txSummaryBottom.text = strbld
             } else { //divide text top/bottom
-
-                val availableWidth = cachedTextTopWidth //iVBinding.txSummaryTop.width - iVBinding.txSummaryTop.paddingLeft - iVBinding.txSummaryTop.paddingRight
-//                val availableHeight = iVBinding.txSummaryTop.height - iVBinding.txSummaryTop.paddingTop - iVBinding.txSummaryTop.paddingBottom
+                val totalWidth = iVBinding.txSummaryBottom.width.takeIf { it != 0 }
+                    ?: (iVBinding.linearLayout.width - iVBinding.linearLayout.paddingLeft - iVBinding.linearLayout.paddingRight - iVBinding.txSummaryBottom.marginRight - iVBinding.txSummaryBottom.marginLeft)
+                val availableWidth = totalWidth - thumbWidth//cachedTextTopWidth //iVBinding.txSummaryTop.width - iVBinding.txSummaryTop.paddingLeft - iVBinding.txSummaryTop.paddingRight
                 val charsPerLine = availableWidth / widthPerChar
                 val maxCharsInd = minOf((charsPerLine * maxLines).toInt(), strbld.length)
-                var topText = strbld.subSequence(0, peakPos)
+                var topText = strbld.subSequenceWithSpans(0, peakPos)
 
                 if (strbld.length < maxCharsInd) { //whole text fits next to image
                     iVBinding.txSummaryTop.text = topText
@@ -389,18 +486,6 @@ class QuestDenListAdapter(val mContext: Context) :
                     return
                 }
 
-                //static layout + while-loop: real rendering and adjustment of width till fit
-                //average 1-3 iterations. No performance effect on small phone
-//                var layout = StaticLayout(topText, paint, availableWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false)
-//                while (maxCharsInd > 0 && (layout.height > topTexHeight || layout.lineCount > maxLines)) {
-//                    val previousSpaceIndex = topText.lastIndexOf(' ')
-//                    val previousLineBreakIndex = topText.lastIndexOf('\n')
-//                    maxCharsInd = maxOf(previousSpaceIndex, previousLineBreakIndex)
-//                    if (maxCharsInd <= 0) break
-//                    topText = topText.subSequence(0, maxCharsInd)
-//                    layout = StaticLayout(topText, paint, availableWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false)
-//                }
-
                 val canvas = Canvas()
                 var lineStart = 0
                 var yPos = 0f
@@ -408,23 +493,26 @@ class QuestDenListAdapter(val mContext: Context) :
                 var mlines = maxLines
 
                 while (lineStart < topText.length) {
-                    var lineEnd =lineStart+paint.breakText(topText, lineStart, topText.length, true, availableWidth.toFloat(), null)
+                    var lineEnd = lineStart + paint.breakText(topText, lineStart, topText.length, true, availableWidth.toFloat(), null)
 
                     var currentLine = topText.substring(lineStart, minOf(lineEnd, topText.length))
                     val lineBreakIndex = currentLine.indexOf('\n')
-                    if (lineBreakIndex != -1) lineEnd =  lineStart+lineBreakIndex+1
+                    if (lineBreakIndex != -1) lineEnd = lineStart + lineBreakIndex + 1 //brech beim ersten Zeilenumbruch um
                     else {
-                        val lastSpaceIndex = currentLine.lastIndexOf(' ')
-                        if (lastSpaceIndex != -1) lineEnd = lineStart+lastSpaceIndex+1
+                        val lastSpaceIndex = currentLine.lastIndexOf(' ') //breche beim letzten Leerzeichen um
+                        lineEnd = if (lastSpaceIndex != -1) lineStart + lastSpaceIndex + 1
+                        else { //no space/linebreak to break text
+                            lineStart //nothing in top
+                        }
                     }
-                    currentLine=topText.substring(lineStart, minOf(lineEnd, topText.length))
+                    currentLine = topText.substring(lineStart, minOf(lineEnd, topText.length))
 
                     canvas.drawText(currentLine, 0f, yPos, paint)
                     yPos += iVBinding.txSummaryTop.lineHeight
-                    lineStart = minOf( lineEnd, topText.length)
+                    lineStart = minOf(lineEnd, topText.length)
 
-                    if (yPos > topTexHeight || (mlines != -1 && mlines-- <= 0)) {
-                        topText = topText.substring(0, lineStart)
+                    if (yPos > topTexHeight || (--mlines <= 0)) {
+                        topText = strbld.subSequenceWithSpans(0, lineStart)
                         bottomText = strbld.removePrefix(topText.toString())
                         break
                     }
@@ -435,8 +523,9 @@ class QuestDenListAdapter(val mContext: Context) :
                 //otherwise: move whole text to bottom to have working tags
 //                val bottomText = strbld.removePrefix(topText)
 
-                iVBinding.txSummaryTop.text = topText
+                iVBinding.txSummaryTop.text = topText//bottomText.trim { it == '\n' || it == '\r' }// topText
                 iVBinding.txSummaryBottom.text = bottomText.trim { it == '\n' || it == '\r' }
+//                iVBinding.txSummaryTop.invalidate()
             }
         }
 
@@ -483,20 +572,25 @@ class QuestDenListAdapter(val mContext: Context) :
     override fun getItemCount(): Int = currentList.size
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val comView = inflater.inflate(R.layout.list_item, parent, false)
+        val refLayout = if (displaySet.listType == ThrdItemTyps.THREAD)
+            when (displaySet.imageMode) {
+                imgMode.FULL -> R.layout.list_item_imgfull
+                imgMode.BIG -> R.layout.list_item_imgbig
+                imgMode.SMALL -> R.layout.list_item
+            } else R.layout.list_item
+
+
+        val comView = inflater.inflate(refLayout, parent, false)
         return FullViewHolder(comView)
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return if (displaySet.listType == ThrdItemTyps.THREAD) displaySet.imageMode.ordinal + 1 else 0
+    }
+
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(currentList[position])
-        if (cachedTextTopWidth == 0) {
-            holder.iVBinding.txSummaryTop.post {
-                var wid = holder.iVBinding.txAuthor.width + holder.iVBinding.txDate.width
-                if (wid != 0) cachedTextTopWidth = wid
-                wid = holder.iVBinding.txTitle.height + holder.iVBinding.txAuthor.height
-                if (wid != 0) cachedTextTopOffset = wid
-            }
-        }
     }
 }
 
@@ -656,41 +750,16 @@ class Clickabl(
     }
 }
 
-//class SyncCompareListAdapter(var itemsLocal: List<TgPost>, var itemsRemote: List<TgPost>) :
-//    RecyclerView.Adapter<SyncCompareListAdapter.ViewHolder>() {
-//    private lateinit var syncComItemBinding: SyncCompareItemBinding
-//
-//    /**
-//     * custom viewholder
-//     */
-//    inner class FullViewHolder(itemView: View) : ViewHolder(itemView) {
-////        init {
-////        }
-//    }
-//
-//    abstract inner class ViewHolder(itemView: View) :
-//        RecyclerView.ViewHolder(itemView) {
-//
-//        fun bind(tgLocal: TgPost?, tgRemote: TgPost?) {
-//            var titl = tgLocal?.title ?: ""
-//            if (titl == "") titl = tgRemote?.title ?: ""
-//
-//            syncComItemBinding.syncCompTitle.text = titl
-////            mLocalTitle?.text="local"
-////            mRemoteTitle?.text="remote"
-//        }
-//
-//    }
-//
-//    override fun getItemCount(): Int = itemsLocal.size
-//    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-//        val inflater = LayoutInflater.from(parent.context)
-//        syncComItemBinding = SyncCompareItemBinding.inflate(inflater)
-//        val comView = inflater.inflate(R.layout.sync_compare_item, parent, false)
-//        return FullViewHolder(comView)
-//    }
-//
-//    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-//        holder.bind(itemsLocal[position], itemsLocal[position])
-//    }
-//}
+class CommonBinding(itemView: View) {
+    val imgUrl: ImageView = itemView.findViewById(R.id.img_url)
+    val txPostID: TextView = itemView.findViewById(R.id.tx_postID)
+    val txSummaryBottom: TextView = itemView.findViewById(R.id.tx_Summary_Bottom)
+    val txSummaryTop: TextView = itemView.findViewById(R.id.tx_Summary_Top)
+    val txTitle: TextView = itemView.findViewById(R.id.tx_title)
+    val txAuthor: TextView = itemView.findViewById(R.id.tx_author)
+    val txWatch: TextView = itemView.findViewById(R.id.tx_watch)
+    val txNewPosts: TextView = itemView.findViewById(R.id.tx_newPosts)
+    val txNewImg: TextView = itemView.findViewById(R.id.tx_newImg)
+    val txDate: TextView = itemView.findViewById(R.id.tx_date)
+    val linearLayout: ConstraintLayout = itemView.findViewById(R.id.linearLayout)
+}

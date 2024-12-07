@@ -9,7 +9,6 @@
     tools:context=".MainActivity"
     >
     <!--tools:openDrawer="left"-->
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -24,12 +23,49 @@
             android:theme="?attr/actionBarTheme"
             app:titleTextColor="@color/colorAccent"
             app:layout_scrollFlags="scroll|enterAlways"/>
-
         <FrameLayout
-            android:id="@+id/fragment_container"
+            android:id="@+id/frameLayoutContainer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+            <FrameLayout
+                android:id="@+id/fragment_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
+            <FrameLayout
+                android:id="@+id/viewPagerContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#EEDED4"
+                android:visibility="gone"
+                >
+
+                <!-- ViewPager2 -->
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/viewPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <!-- TabLayout -->
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tabLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:background="@color/colorPrimary" />
+
+                <!-- Close-Button -->
+                <Button
+                    android:id="@+id/closeButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="end|top"
+                    android:text="X"
+                    android:background="#fff"
+
+                    android:contentDescription="Close"/>
+            </FrameLayout>
+        </FrameLayout>
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView

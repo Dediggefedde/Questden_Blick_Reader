@@ -7,11 +7,18 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.text.Html
+import android.text.method.LinkMovementMethod
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.ScrollView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.annotation.RequiresApi
@@ -24,10 +31,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.github.javiersantos.appupdater.AppUpdater
 import com.github.javiersantos.appupdater.enums.UpdateFrom
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import de.dediggefedde.questden_blick_reader.databinding.ActivityMainBinding
@@ -54,10 +63,15 @@ import java.util.*
 * */
 
 /**
- * Main activity
- * So far only activity
- * user interaction. Trying to implement MVVM Model
- */
+ *  TODO:
+ *    - onboarding images
+ *    - fullwidth img load after confirm full img
+ *    - Button with link to Wiki if found
+ *    - tests (img, offline, watch, update)
+ *    - documentation
+ *    - merge into main git branch
+ *    - update license (photoview, viewslider2)
+ *  */
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var viewModel: DataViewModel
@@ -93,37 +107,38 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-        val offlFolder = File(applicationContext.filesDir, "offline")
-        if (!offlFolder.exists()) offlFolder.mkdirs()
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         viewModel = ViewModelProvider(this).get(DataViewModel::class.java)
-
-        val errorHandler = GlobalErrorHandler(Thread.getDefaultUncaughtExceptionHandler(), this)
-        Thread.setDefaultUncaughtExceptionHandler(errorHandler)
-
-        setContentView(binding.root)
 
         currentFragment = MainFragment()
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, currentFragment as MainFragment)
             .commitNow()
 
+        setContentView(binding.root)
+
         addObservers()
         navigationStuff()
         loadData()
 
+        val offlFolder = File(applicationContext.filesDir, "offline")
+        if (!offlFolder.exists()) { //first run
+            intro()
+            offlFolder.mkdirs()
+        }
+
+        val errorHandler = GlobalErrorHandler(Thread.getDefaultUncaughtExceptionHandler(), this)
+        Thread.setDefaultUncaughtExceptionHandler(errorHandler)
+
         onBackPressedDispatcher.addCallback(this) {
-            if(viewModel.backLinkStack.isNotEmpty()) {
+            if (viewModel.backLinkStack.isNotEmpty()) {
                 val id = viewModel.backLinkStack.pop()
                 val pos = viewModel.getPositionById(id)
-                scrollHighlight(pos,backwards =true)
-//                (currentFragment as? MainFragment)?.binding?.postListRecView?.scrollToPosition(pos)
-            }else if(viewModel.backActionStack.isNotEmpty()){
+                scrollHighlight(pos, backwards = true)
+            } else if (viewModel.backActionStack.isNotEmpty()) {
                 val state = viewModel.backActionStack.pop()
-                viewModel.loadThread(state.url,state.type, backwards = true)
-            }else if (supportFragmentManager.backStackEntryCount > 0) {
+                viewModel.loadThread(state.url, state.type, backwards = true)
+            } else if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack()
             } else {
                 AlertDialog.Builder(this@MainActivity)
@@ -141,21 +156,66 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             // .setGitHubUserAndRepo("Dediggefedde", "Questden_Blick_Reader")
             .setUpdateJSON("""https://raw.githubusercontent.com/Dediggefedde/Questden_Blick_Reader/WIP/app/version.json""") //TODO WIP to master
             .start()
-
-//        startActivity(Intent(this, OssLicensesMenuActivity::class.java))
     }
+
+    private fun intro() {
+        binding.viewPagerContainer.visibility = View.VISIBLE
+
+        val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
+        val viewPager = findViewById<ViewPager2>(R.id.viewPager)
+        val images = listOf(R.drawable.eye_open, R.drawable.online, R.drawable.ic_questden) //TODO real pictures
+
+        val adapter = ImagePagerAdapter(images)
+        viewPager.adapter = adapter
+
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = "[${position + 1}]" // Optional: Beschriftung
+        }.attach()
+
+        binding.closeButton.setOnClickListener {
+            binding.viewPagerContainer.visibility = View.GONE
+        }
+
+    }
+
+    private fun showInfoDialog(infoText: String) {
+        val textView = TextView(this).apply {
+            text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Html.fromHtml(infoText, Html.FROM_HTML_MODE_LEGACY)
+            } else {
+                @Suppress("DEPRECATION")
+                Html.fromHtml(infoText)
+            }
+
+            movementMethod = LinkMovementMethod.getInstance() // Links anklickbar machen
+            setPadding(32, 32, 32, 32) // Abstand
+        }
+
+        val scrollView = ScrollView(this).apply {
+            addView(textView)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("About")
+            .setView(scrollView)
+            .setPositiveButton("Close") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
 
     private fun checkForErrorFiles() {
         val errorFile = File(applicationContext.filesDir, "tmp_error_log.txt")
-        if(errorFile.exists()){
+        if (errorFile.exists()) {
             AlertDialog.Builder(this@MainActivity)
                 .setTitle("Restart after crash")
                 .setMessage("An error report was saved for the last application crash. Do you want to process it? 'No' will delete the report.")
                 .setPositiveButton("Yes") { _, _ ->
-                    handleError(this,"Crash Report",errorFile.readText(), getCurrentStackTrace(),viewModel)
+                    handleError(this, "Crash Report", errorFile.readText(), getCurrentStackTrace(), viewModel)
                     errorFile.renameTo(File(applicationContext.filesDir, "error_log.txt"))
                 }
-                .setNegativeButton("No") {_,_->
+                .setNegativeButton("No") { _, _ ->
                     errorFile.delete()
                 }
                 .show()
@@ -168,26 +228,75 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         mainMenu = menu
         return true
     }
+
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.findItem(R.id.menu_delete_reading).setVisible(true)
-        menu.findItem(R.id.menu_delete_offline).setVisible(viewModel.sets.listType==ThrdItemTyps.OFFLINE)
-        menu.findItem(R.id.menu_delete_Watch).setVisible(viewModel.sets.listType==ThrdItemTyps.WATCH)
+        menu.findItem(R.id.menu_delete_offline).setVisible(viewModel.sets.listType == ThrdItemTyps.OFFLINE)
+        menu.findItem(R.id.menu_delete_Watch).setVisible(viewModel.sets.listType == ThrdItemTyps.WATCH)
         return super.onPrepareOptionsMenu(menu)
     }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_delete_reading -> {
                 viewModel.deleteLastRead()
                 true
             }
+
             R.id.menu_delete_offline -> {
                 viewModel.deleteOfflineData()
                 true
             }
+
             R.id.menu_delete_Watch -> {
                 viewModel.deleteWatchData()
                 true
             }
+
+            R.id.menu_intro -> {
+                intro()
+                true
+            }
+
+            R.id.menu_about -> {
+                showInfoDialog(
+                    """
+                    <h3>Questden Blick Reader</h3>
+                    <p><b>Developer</b>: Julian Bergmann</p>
+                    <p><a href="https://phi.pf-control.de/tgchan/reg.php">Account registration / privacy policy</a></p>
+                    <p><a href="https://github.com/Dediggefedde/Questden_Blick_Reader">GitHub: Questden Blick Reader</a>
+                    <p></p>
+                    <p>Vielen Dank für die Nutzung meiner App!</p>
+                """.trimIndent()
+                )
+                true
+            }
+
+            R.id.menu_license -> {
+                showInfoDialog(
+                    """
+                    <h3>License</h3>
+                    <p>Published using the Apache License, Version 2.0</p>
+                    
+                    <h3>Libraries Used:</h3>
+                    <ul>
+                        <li><b>Kotlin Standard Library</b> - Apache License, Version 2.0</li>
+                        <li><b>AndroidX Core</b> - Apache License, Version 2.0</li>
+                        <li><b>AndroidX AppCompat</b> - Apache License, Version 2.0</li>
+                        <li><b>Volley</b> - Apache License, Version 2.0</li>
+                        <li><b>Gson</b> - Apache License, Version 2.0</li>
+                        <li><b>Glide</b> - BSD-2-Clause License</li>
+                        <li><b>JSoup</b> - MIT License</li>
+                        <li><b>OkHttp</b> - Apache License, Version 2.0</li>
+                        <li><b>PhotoView</b> - Apache License, Version 2.0</li>
+                        <li><b>AppUpdater</b> - MIT License</li>
+                        <li><b>Room</b> - Apache License, Version 2.0</li>
+                    </ul>
+                """.trimIndent()
+                )
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -212,20 +321,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         binding.navigationView.itemIconTintList = null
     }
+
     private fun navigateToBoard(url: String, type: ThrdItemTyps) {
         viewModel.loadThread(url, type)
         supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     }
+
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         viewModel.sets.boardPage = 0 //no liveview connected
 
         when (menuItem.itemId) {
-            R.id.menu_draw ->    navigateToBoard(URLBoards.DRAW.url, ThrdItemTyps.BOARD)
+            R.id.menu_draw -> navigateToBoard(URLBoards.DRAW.url, ThrdItemTyps.BOARD)
             R.id.menu_general -> navigateToBoard(URLBoards.MEEP.url, ThrdItemTyps.BOARD)
-            R.id.menu_quest ->   navigateToBoard(URLBoards.QUEST.url, ThrdItemTyps.BOARD)
-            R.id.menu_questdis ->navigateToBoard(URLBoards.QUESTDIS.url, ThrdItemTyps.BOARD)
-            R.id.menu_tg ->      navigateToBoard(URLBoards.TG.url, ThrdItemTyps.BOARD)
+            R.id.menu_quest -> navigateToBoard(URLBoards.QUEST.url, ThrdItemTyps.BOARD)
+            R.id.menu_questdis -> navigateToBoard(URLBoards.QUESTDIS.url, ThrdItemTyps.BOARD)
+            R.id.menu_tg -> navigateToBoard(URLBoards.TG.url, ThrdItemTyps.BOARD)
             R.id.menu_watch_open -> {
                 viewModel.loadThread("", ThrdItemTyps.WATCH)
             }
@@ -253,6 +364,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 intent.type = "application/json" //not needed, but maybe usefull
                 intent.putExtra(Intent.EXTRA_TITLE, "questden_backup_$strDate.json") //not needed, but maybe usefull
 
+                @Suppress("DEPRECATION")
                 startActivityForResult(intent, 2)
             }
 
@@ -261,6 +373,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 intent.addCategory(Intent.CATEGORY_OPENABLE)
                 intent.type = "application/json" //not needed, but maybe usefull
 
+                @Suppress("DEPRECATION")
                 startActivityForResult(intent, 3)
             }
 
@@ -280,9 +393,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         fragment?.repeatScroll()
     }
 
-    fun scrollHighlight(i: Int,backwards:Boolean=false) {
+    fun scrollHighlight(i: Int, backwards: Boolean = false) {
         val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as? MainFragment
-        fragment?.scrollHighlight(i,backwards)
+        fragment?.scrollHighlight(i, backwards)
     }
 
     private fun exportFile(shName: Uri?) {
@@ -333,6 +446,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    @Deprecated("for minsdk 16")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != Activity.RESULT_OK) return
@@ -408,4 +522,21 @@ class CustomRecyclerView @JvmOverloads constructor(
         super.performClick()
         return true
     }
+}
+
+class ImagePagerAdapter(private val images: List<Int>) : RecyclerView.Adapter<ImagePagerAdapter.ImageViewHolder>() {
+    inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val imageView: ImageView = itemView.findViewById(R.id.sliderImg)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.slider_image_item, parent, false)
+        return ImageViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
+        holder.imageView.setImageResource(images[position])
+    }
+
+    override fun getItemCount(): Int = images.size
 }

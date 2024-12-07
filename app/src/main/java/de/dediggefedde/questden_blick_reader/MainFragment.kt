@@ -31,7 +31,7 @@ import kotlin.math.abs
 
 class MainFragment : Fragment() {
     private lateinit var viewModel: DataViewModel
-    var listAdapt: QuestDenListAdapter?=null
+    var listAdapt: QuestDenListAdapter? = null
     private var curViewedInd = 0 //index of current view item (top) of displayDataList
 
     private var scrollMode = ScrollMode.IMAGES //next/prev got to next img or post
@@ -39,7 +39,7 @@ class MainFragment : Fragment() {
     lateinit var binding: FragmentMainBinding
     private lateinit var scrollListener: RecyclerView.OnScrollListener
     var autoscroll = false
-    var atWatchPosition=-1
+    var atWatchPosition = -1
 
     inner class TopSnappingScroller(context: Context) : LinearSmoothScroller(context) {
         override fun getVerticalSnapPreference(): Int {
@@ -48,12 +48,13 @@ class MainFragment : Fragment() {
 
         override fun calculateTimeForScrolling(dx: Int): Int {
             val time = super.calculateTimeForScrolling(dx)
-            return time * 2 // Verdopple die Scrollzeit
+            return time/ 2
         }
     }
-    fun showToolbar(show:Boolean){
-        if(!show)binding.toolDropout.visibility=View.GONE
-        binding.bottomNavigation.visibility=if(show)View.VISIBLE else View.GONE
+
+    fun showToolbar(show: Boolean) {
+        if (!show) binding.toolDropout.visibility = View.GONE
+        binding.bottomNavigation.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -83,18 +84,19 @@ class MainFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_main, container, false)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun addEventListeners() {
         binding.imageZoom.setOnClickListener {
             binding.imageZoom.visibility = View.GONE
             binding.txImgPath.visibility = View.GONE
-            viewModel.fullViewImg=null
+            viewModel.fullViewImg = null
         }
         binding.btnOpenFont.setOnClickListener { btnOpenTools() }
         binding.btnFirst.setOnClickListener { btnFirstButton() }
         binding.btnLast.setOnClickListener { btnLastButton() }
         binding.btnNext.setOnClickListener { btnNextButton() }
         binding.btnPrev.setOnClickListener { btnPrevButton() }
-        binding.txImgPath.setOnClickListener{btnimgZoomPath()}
+        binding.txImgPath.setOnClickListener { btnimgZoomPath() }
         binding.btnToggleSFW.setOnClickListener { btnTglSFW() }
         binding.btnIncFont.setOnClickListener { btnIncFont() }
         binding.btnDecFont.setOnClickListener { btnDecFont() }
@@ -102,14 +104,21 @@ class MainFragment : Fragment() {
         binding.btnOnlyPics.setOnClickListener { btnToggleOnlyPictures() }
         binding.txPosition.setOnClickListener { btnSkipModeChange() }
         binding.btnOffline.setOnClickListener { btnTglOffline() }
+        binding.btnImgMode.setOnClickListener {
+            viewModel.rotateImgMode()
+            listAdapt?.updateDisplaySetting(viewModel.sets, txtSize = viewModel.sets.txsize)
+            listAdapt?.notifyDataSetChanged()
+            Toast.makeText(requireContext(), "Image mode set to ${viewModel.sets.imageMode.displayName}", Toast.LENGTH_SHORT).show()
+        }
         binding.btnWatch.setOnClickListener {
             viewModel.toggleWatch()
             updateWatchImg()
-            if(viewModel.getWatched()!=null)
+            if (viewModel.getWatched() != null)
                 Toast.makeText(requireContext(), "Thread added to watchlist!", Toast.LENGTH_SHORT).show()
             else
                 Toast.makeText(requireContext(), "Thread removed from watchlist!", Toast.LENGTH_SHORT).show()
         }
+
     }
 
     private fun addListviewEvents() {
@@ -120,7 +129,7 @@ class MainFragment : Fragment() {
 
             override fun toggleWatch(mtg: TgPost) {
                 viewModel.toggleWatch(mtg.postID)
-                atWatchPosition = if(viewModel.getWatched(mtg.postID)!=null) viewModel.getPositionById(mtg.postID) else -1
+                atWatchPosition = if (viewModel.getWatched(mtg.postID) != null) viewModel.getPositionById(mtg.postID) else -1
                 updateWatchImg()
             }
 
@@ -139,7 +148,7 @@ class MainFragment : Fragment() {
             }
 
             override fun getIndexById(id: String): Int {
-                return listAdapt?.currentList?.indexOfFirst { it.postID == id }?:-1
+                return listAdapt?.currentList?.indexOfFirst { it.postID == id } ?: -1
             }
 
             override fun getSFWState(): SFWModes {
@@ -174,10 +183,10 @@ class MainFragment : Fragment() {
         (binding.postListRecView.layoutManager as LinearLayoutManager).startSmoothScroll(smoothScroller)
     }
 
-    fun scrollHighlight(pos: Int,backwards:Boolean=false) {
+    fun scrollHighlight(pos: Int, backwards: Boolean = false) {
         if (!viewModel.hasIndex(pos)) return
 
-        if(!backwards) viewModel.displayList.value?.get(curViewedInd)?.postID?.let { postID ->
+        if (!backwards) viewModel.displayList.value?.get(curViewedInd)?.postID?.let { postID ->
             viewModel.backLinkStack.add(postID)
         }
         val lasthighInd = viewModel.highLightInd
@@ -210,11 +219,11 @@ class MainFragment : Fragment() {
 
     //fullview image
     fun viewImage(mtg: TgPost?) {
-        if(mtg===null)return
+        if (mtg === null) return
         binding.progressBarUndet.visibility = View.VISIBLE
         binding.imageZoom.visibility = View.VISIBLE
         binding.txImgPath.visibility = View.VISIBLE
-        viewModel.fullViewImg=mtg
+        viewModel.fullViewImg = mtg
         var str = "https://questden.org" + mtg.imgUrl.replace("thumb", "src").replace("s.", ".")
         if (mtg.isSpoiler && viewModel.sets.sfw == SFWModes.SFWREAL) str = "https://questden.org/kusaba/spoiler.png"
 
@@ -225,19 +234,19 @@ class MainFragment : Fragment() {
         if (offImgPath.exists() && File(offImgPath, imgNam).exists()) str = "${requireContext().applicationContext.filesDir}/offline/${viewModel.sets.curThreadId}_img/$imgNam"
 
         Glide.with(binding.imageZoom).asDrawable().load(str).listener(object : RequestListener<Drawable> {
-                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-                    binding.progressBarUndet.visibility = View.GONE
-                    return false
-                }
+            override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                binding.progressBarUndet.visibility = View.GONE
+                return false
+            }
 
-                override fun onResourceReady(
-                    resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean
-                ): Boolean {
-                    // Manuell die Größe des ImageViews festlegen
-                    binding.progressBarUndet.visibility = View.GONE
-                    return false
-                }
-            }).into(binding.imageZoom)
+            override fun onResourceReady(
+                resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean
+            ): Boolean {
+                // Manuell die Größe des ImageViews festlegen
+                binding.progressBarUndet.visibility = View.GONE
+                return false
+            }
+        }).into(binding.imageZoom)
     }
 
     private fun showOfflineConfirmDialog(threadId: String) {
@@ -261,13 +270,13 @@ class MainFragment : Fragment() {
         } else {
             builder.setMessage("Do you want to download the thread and ${viewModel.getImageListSize()} images?")
             builder.setPositiveButton("Download") { dialog, _ ->
-                viewModel.writeToOffline(threadId,false)
-                viewModel.downloadImages(threadId,false)
+                viewModel.writeToOffline(threadId, false)
+                viewModel.downloadImages(threadId, false)
                 dialog.dismiss()
             }
             builder.setNeutralButton("Only thumbnails") { dialog, _ ->
-                viewModel.writeToOffline(threadId,true)
-                viewModel.downloadImages(threadId,true)
+                viewModel.writeToOffline(threadId, true)
+                viewModel.downloadImages(threadId, true)
                 dialog.dismiss()
             }
             builder.setNegativeButton("Cancel") { dialog, _ ->
@@ -277,7 +286,7 @@ class MainFragment : Fragment() {
         builder.create().show()
     }
 
-    private fun btnTglOffline(threadId:String=viewModel.sets.curThreadId) {
+    private fun btnTglOffline(threadId: String = viewModel.sets.curThreadId) {
         showOfflineConfirmDialog(threadId)
     }
 
@@ -290,12 +299,11 @@ class MainFragment : Fragment() {
         val curPos: Int
         var maxPos: Int
 
-        if(viewModel.getDisplayListSize()==0){//empty offline/watch list
+        if (viewModel.getDisplayListSize() == 0) {//empty offline/watch list
             maxPos = 1
-            curPos =1
+            curPos = 1
             posMod = "Post:\n"
-        }
-        else if (!viewModel.hasIndex(curViewedInd))
+        } else if (!viewModel.hasIndex(curViewedInd))
             return //something wrong
         else if (viewModel.sets.listType == ThrdItemTyps.THREAD) {
             if (scrollMode == ScrollMode.IMAGES || viewModel.sets.showOnlyPics) {
@@ -381,9 +389,9 @@ class MainFragment : Fragment() {
                     binding.progressBarUndet.progress = 0
                     binding.progressBarDet.progress = 0
                     prog.status = ProgStatus.IDLE
-                    if(atWatchPosition!=-1) {
+                    if (atWatchPosition != -1) {
                         listAdapt?.notifyItemChanged(atWatchPosition)
-                        atWatchPosition=-1
+                        atWatchPosition = -1
                     }
                 }
 
@@ -393,8 +401,10 @@ class MainFragment : Fragment() {
                     binding.progressBarUndet.progress = 0
                     binding.progressBarDet.progress = 0
 
-                    handleError(requireContext().applicationContext,"Loading Thread error",
-                        prog.msg, getCurrentStackTrace(), viewModel)
+                    handleError(
+                        requireContext().applicationContext, "Loading Thread error",
+                        prog.msg, getCurrentStackTrace(), viewModel
+                    )
                     prog.status = ProgStatus.IDLE
                 }
 
@@ -431,8 +441,10 @@ class MainFragment : Fragment() {
                     updateOfflineImg()
                     prog.status = ProgStatus.IDLE
 
-                    handleError(requireContext().applicationContext,"Downloading thread error",
-                        prog.msg, getCurrentStackTrace(), viewModel)
+                    handleError(
+                        requireContext().applicationContext, "Downloading thread error",
+                        prog.msg, getCurrentStackTrace(), viewModel
+                    )
                 }
 
                 ProgStatus.IDLE -> {
@@ -451,8 +463,9 @@ class MainFragment : Fragment() {
             binding.btnOffline.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.offline))
         }
     }
+
     private fun updateWatchImg() {
-        if (viewModel.getWatched()!==null) {
+        if (viewModel.getWatched() !== null) {
             binding.btnWatch.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.eye_open))
         } else {
             binding.btnWatch.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.eye_closed))

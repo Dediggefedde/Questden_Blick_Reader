@@ -4,14 +4,26 @@
     android:id="@+id/menu_deleting">
     <item
         android:id="@+id/menu_delete_reading"
-        android:title="Delete Reading Status"
+        android:title="@string/delete_reading_status"
         app:showAsAction="never" />
     <item
         android:id="@+id/menu_delete_offline"
-        android:title="Delete Offline Data"
+        android:title="@string/delete_offline_data"
         app:showAsAction="never" />
     <item
         android:id="@+id/menu_delete_Watch"
-        android:title="Delete Watchlist"
+        android:title="@string/delete_watchlist"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_intro"
+        android:title="@string/introduction"
+        />
+    <item
+        android:id="@+id/menu_about"
+        android:title="@string/about"
+        />
+    <item
+        android:id="@+id/menu_license"
+        android:title="@string/license"
+        />
 </menu>

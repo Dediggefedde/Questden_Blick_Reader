@@ -19,22 +19,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
-    <com.github.chrisbanes.photoview.PhotoView
-        android:id="@+id/imageZoom"
-        android:background="#a000"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:scaleType="fitCenter"
-        app:layout_constraintBottom_toBottomOf="@+id/tool_dropout"
-        app:layout_constraintEnd_toEndOf="@+id/post_list_rec_view"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/post_list_rec_view"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_questden"
-        />
-
 <!--    <ImageView-->
 <!--        android:id="@+id/imageZoom"-->
 <!--        android:layout_width="0dp"-->
@@ -174,17 +158,6 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tx_img_path"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/color_imgPath_bg"
-        android:text=""
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/post_list_rec_view"
-        tools:visibility="gone" />
 
 
     <LinearLayout
@@ -220,7 +193,12 @@
             android:contentDescription="@string/decrease_font_size"
             app:srcCompat="@drawable/aminus"
             />
-
+        <ImageButton
+            android:id="@+id/btn_imgMode"
+            style="@style/ImgButtonStyle"
+            android:contentDescription="@string/offline_mode"
+            app:srcCompat="@drawable/imgmode"
+            />
         <Button
             android:id="@+id/btn_toggleSFW"
             style="@style/ImgButtonStyle"
@@ -239,6 +217,7 @@
             android:contentDescription="@string/offline_mode"
             app:srcCompat="@drawable/eye_closed"
             />
+
     </LinearLayout>
 
     <ProgressBar
@@ -263,4 +242,33 @@
         app:layout_constraintStart_toStartOf="@+id/progressBar"
         android:visibility="gone"
         tools:visibility="visible" />
+
+
+    <TextView
+        android:id="@+id/tx_img_path"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:background="@color/color_imgPath_bg"
+        android:text=""
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+    <com.github.chrisbanes.photoview.PhotoView
+        android:id="@+id/imageZoom"
+        android:background="#a000"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toTopOf="@+id/tx_img_path"
+        app:layout_constraintEnd_toEndOf="@+id/post_list_rec_view"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/post_list_rec_view"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_questden"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>

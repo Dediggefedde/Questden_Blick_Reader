@@ -7,11 +7,14 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.text.Html.ImageGetter
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.Request
+import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.SizeReadyCallback
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
@@ -23,49 +26,67 @@ import java.lang.ref.WeakReference
  * This class uses Glide for image requests and prepends "https://questden.org" in front of src attr
  */
 class GlideImageGetter(
-    textView: TextView,
-    mContext: Context,
-    private val sets:ModelSettings,
+    textView1: TextView,
+    textView2: TextView,
+    private val mContext: Context,
+    private val sets: ModelSettings,
     private val matchParentWidth: Boolean = false,
     densityAware: Boolean = false
 ) : ImageGetter {
-    private val container: WeakReference<TextView> = WeakReference(textView)
+    private val container1: WeakReference<TextView> = WeakReference(textView1)
+    private val container2: WeakReference<TextView> = WeakReference(textView2)
     private var density = 2f
     private val mMain: MainActivity = (mContext as MainActivity)
 
     init {
         if (densityAware) {
-            container.get()?.let {
+            container1.get()?.let {
+                density = it.resources.displayMetrics.density
+            }
+            container2.get()?.let {
                 density = it.resources.displayMetrics.density
             }
         }
     }
 
     override fun getDrawable(source: String): Drawable {
-//        imagesHandler?.addImage(source)
+        var drawable1 = BitmapDrawablePlaceholder(container1)
+        var drawable2 = BitmapDrawablePlaceholder(container2)
+        var reqnam = "https://questden.org$source"
 
-        val drawable = BitmapDrawablePlaceholder()
-        var reqnam="https://questden.org$source"
+        val offImgPath = File(mMain.filesDir, "offline/${sets.curThreadId}_img")
+        val imgNam = source.substringAfterLast("/") //offline mode
+        if (offImgPath.exists() && File(offImgPath, imgNam).exists()) reqnam = "${mMain.filesDir}/offline/${sets.curThreadId}_img/$imgNam"
 
-        val offImgPath =File(mMain.filesDir,"offline/${sets.curThreadId}_img")
-        val imgNam=source.substringAfterLast("/") //offline mode
-//        val imgfold= File(offImgPath,imgNam)
-        if(offImgPath.exists() && File(offImgPath,imgNam).exists())reqnam="${mMain.filesDir}/offline/${sets.curThreadId}_img/$imgNam"
+        val placeholderDrawable = BitmapDrawable(container1.get()?.resources, Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888))
+        val placeholderDrawable2 = BitmapDrawable(container2.get()?.resources, Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888))
 
         // Load Image to the Drawable
-        container.get()?.apply {
+        container1.get()?.apply {
             post {
                 Glide.with(context)
                     .asBitmap()
                     .load(reqnam)
-                    .into(drawable)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(placeholderDrawable)
+                    .into(drawable1)
+            }
+        }
+        container2.get()?.apply {
+            post {
+                Glide.with(context)
+                    .asBitmap()
+                    .load(reqnam)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(placeholderDrawable2)
+                    .into(drawable2)
             }
         }
 
-        return drawable
+        return drawable2
     }
 
-    private inner class BitmapDrawablePlaceholder : BitmapDrawable(container.get()?.resources, Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)), Target<Bitmap> {
+    private inner class BitmapDrawablePlaceholder(private val container:WeakReference<TextView>) : BitmapDrawable(container.get()?.resources, Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)), Target<Bitmap> {
         private var drawable: Drawable? = null
             set(value) {
                 field = value
@@ -117,21 +138,30 @@ class GlideImageGetter(
 
         override fun removeCallback(cb: SizeReadyCallback) { // no-op
         }
+
         override fun setRequest(request: Request?) { // no-op
         }
+
         override fun getRequest(): Request? {
             return null
         }
 
+        fun updateBitmap(newBitmap: Bitmap) {
+            val updatedDrawable = BitmapDrawable(container.get()!!.resources, newBitmap).apply {
+                setBounds(0, 0, newBitmap.width, newBitmap.height)
+            }
+            drawable = updatedDrawable
+            container.get()?.text = container.get()?.text
+        }
+
         override fun onStart() { // no-op
         }
+
         override fun onStop() { // no-op
         }
+
         override fun onDestroy() { // no-op
         }
     }
 
-//    interface HtmlImagesHandler {
-//        fun addImage(uri: String?)
-//    }
 }

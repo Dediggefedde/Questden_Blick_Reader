@@ -448,6 +448,15 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
         updateSet()
     }
+    fun rotateImgMode(){
+        sets.imageMode= when (sets.imageMode) {
+            imgMode.SMALL -> imgMode.BIG
+            imgMode.BIG -> imgMode.FULL
+            imgMode.FULL -> imgMode.SMALL
+        }
+        updateSet()
+    }
+
 
     fun getNextPos(index: Int, mode: ScrollMode): Int {
         val list = _displayList.value

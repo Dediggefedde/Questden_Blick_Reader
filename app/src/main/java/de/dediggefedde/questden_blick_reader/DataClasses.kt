@@ -93,6 +93,7 @@ data class OfflineThread(
 enum class ThrdItemTyps {
     BOARD,THREAD,WATCH,OFFLINE
 }
+enum class imgMode(val displayName:String){SMALL("Small-Images"),BIG("Big-Images"),FULL("Full-Width-Images")}
 
 //how model renders view
 @Parcelize
@@ -111,6 +112,7 @@ data class ModelSettings(
     var loginPW:String="",
     var autoLogin:Boolean=true,
     var numLinkMode:Int=0, //for upload, not used in app
+    var imageMode:imgMode=imgMode.SMALL //in thread mode image size
 ):Parcelable
 
 /**

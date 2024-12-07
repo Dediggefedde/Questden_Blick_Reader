@@ -1,5 +1,7 @@
 package de.dediggefedde.questden_blick_reader
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
@@ -48,6 +50,10 @@ class SyncFragment : Fragment() {
         binding.btnDownload.setOnClickListener{btnDownload()}
         binding.btnUpload.setOnClickListener{btnUpload()}
         binding.btnLogin.setOnClickListener{ loginClick() }
+        binding.txRegister.setOnClickListener{
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://phi.pf-control.de/tgchan/reg.php"))
+            startActivity(intent)
+        }
 
     }
 

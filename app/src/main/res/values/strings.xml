@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">QuestDen Blick Reader</string>
     <string name="preference_file_key">de.dediggefedde.questden_blick_reader.PREFERENCE_FILE_KEY</string>
     <string name="author">Author</string>
@@ -62,32 +62,28 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="title_activity_sync">Sync with BLICK</string>
-    <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="NotLoggedIn">Not logged in.</string>
     <string name="LoggedIn">Logged in!</string>
     <string name="NotVerified">Account not verified!</string>
     <string name="LoginError">Login-Error.</string>
-    <string name="ErrorReachingServer">Error Reaching Server...\n%s\n%s</string>
+    <string name="ErrorReachingServer">Error Reaching Server…\n%s\n%s</string>
     <string name="SyncName">Name</string>
     <string name="SyncPW">Password</string>
     <string name="SyncStatus">status</string>
     <string name="SyncLogin">Login</string>
     <string name="SyncDownload">download</string>
     <string name="SyncUpload">Upload</string>
-    <string name="symb_OpenTools">🆎️</string>
     <string name="main_position">Image:\n1/100</string>
-    <string name="symb_Update">🔄</string>
     <string name="main_btnOnlyPics_descr">Show Only Pictures</string>
     <string name="symb_decFont">A-</string>
     <string name="example_date">20/08/21 17:05</string>
-    <string name="example_text">asd asd asd asd asda dassadas asa dsadsa αβζ ΔΦ さsd asda dassadas asa dsadsa αβζ ΔΦ さ よなら 私の手元にdasd asd\nasd 1li</string>
+    <string name="example_text" tools:ignore="Typos">asd asd asd asd asda dassadas asa dsadsa αβζ ΔΦ さsd asda dassadas asa dsadsa αβζ ΔΦ さ よなら 私の手元にdasd asd\nasd 1li</string>
     <string name="LogOut">Log Out</string>
     <string name="title_activity_syncCompare">Sync Overview</string>
     <string name="localRmoteCompare">Local: %s items\nRemote: %s items</string>
@@ -116,4 +112,12 @@
     <string name="password_for_logging_in">Password for logging in</string>
     <string name="username">Username</string>
     <string name="wrong_username_or_password">Wrong username or password!</string>
+    <string name="delete_reading_status">Delete Reading Status</string>
+    <string name="delete_offline_data">Delete Offline Data</string>
+    <string name="delete_watchlist">Delete Watchlist</string>
+    <string name="about">About</string>
+    <string name="license">License</string>
+    <string name="register_account">Register Account</string>
+    <string name="introduction">Introduction</string>
+
 </resources>

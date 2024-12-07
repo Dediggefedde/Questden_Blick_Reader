@@ -59,6 +59,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/SyncLogin" />
+    <TextView
+        android:id="@+id/tx_register"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/register_account"
+        android:layout_gravity="end"
+        android:textColorLink="@android:color/holo_blue_light"
+        android:padding="5dp"/>
 
     <Space
         android:layout_width="match_parent"
