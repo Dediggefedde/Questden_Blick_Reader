@@ -3,7 +3,6 @@ package de.dediggefedde.questden_blick_reader
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
-import android.widget.Toast
 import com.google.gson.Gson
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -59,11 +58,7 @@ fun saveErrorToFile(context: Context, errorType: String, errorMessage: String, s
             writer.appendLine(stackTrace)
             writer.appendLine("---")
         }
-        Toast.makeText(
-            context,
-            "Report saved as: ${errorFile.absolutePath}",
-            Toast.LENGTH_LONG
-        ).show()
+        MsgHelper.showMsg(context,  "Report saved as: ${errorFile.absolutePath}")
     } catch (e: IOException) {
         e.printStackTrace()
     }
@@ -105,7 +100,7 @@ fun sendErrorReport(
             e.printStackTrace()
             // Fehler beim Senden der Anfrage, Anzeige im UI
             (context as? Activity)?.runOnUiThread {
-                Toast.makeText(context, "Error at sending the error report", Toast.LENGTH_SHORT).show()
+                MsgHelper.showMsg(context,  "Error at sending the error report")
             }
         }
 
@@ -114,18 +109,18 @@ fun sendErrorReport(
                 val responseBody = response.body?.string() ?: "No answer from the server"
                 try {
                     (context as? Activity)?.runOnUiThread {
-                        Toast.makeText(context, responseBody, Toast.LENGTH_SHORT).show()
+                        MsgHelper.showMsg(context,  responseBody)
                     }
                 } catch (e: JSONException) {
                     (context as? Activity)?.runOnUiThread {
-                        Toast.makeText(context, "Error at processing answer", Toast.LENGTH_SHORT).show()
+                        MsgHelper.showMsg(context,   "Error at processing answer")
                     }
                 }
             } else {
                 val errmsg = response.body?.string() ?: "Unknown Error"
 
                 (context as? Activity)?.runOnUiThread {
-                    Toast.makeText(context, "Error at sending the error report: $errmsg", Toast.LENGTH_LONG).show()
+                    MsgHelper.showMsg(context,  "Error at sending the error report: $errmsg")
                 }
             }
         }
@@ -134,7 +129,7 @@ fun sendErrorReport(
 
 class GlobalErrorHandler(
     private val defaultHandler: Thread.UncaughtExceptionHandler?,
-    private val context: Context
+    private val context:Context
 ) : Thread.UncaughtExceptionHandler {
     override fun uncaughtException(t: Thread, e: Throwable) {
         saveErrorToFile(context,"Unknown Error", e.message.toString(), e.stackTraceToString(),pending = true)

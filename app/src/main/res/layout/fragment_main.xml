@@ -12,27 +12,13 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scrollbars="vertical"
+        android:divider="@color/cardview_light_background"
         app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
-
-<!--    <ImageView-->
-<!--        android:id="@+id/imageZoom"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="0dp"-->
-<!--        android:background="#a000"-->
-<!--        android:contentDescription="@string/img_zoom_desc"-->
-<!--        app:layout_constraintBottom_toBottomOf="@+id/tool_dropout"-->
-<!--        app:layout_constraintEnd_toEndOf="@+id/post_list_rec_view"-->
-<!--        app:layout_constraintHorizontal_bias="0.0"-->
-<!--        app:layout_constraintStart_toStartOf="@+id/post_list_rec_view"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintVertical_bias="1.0"-->
-<!--        android:visibility="gone"-->
-<!--        app:srcCompat="@drawable/ic_questden" />-->
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
@@ -177,26 +163,26 @@
         <ImageButton
             android:id="@+id/btn_only_pics"
             style="@style/ImgButtonStyle"
-            android:contentDescription="@string/main_btnOnlyPics_descr"
+            android:contentDescription="@string/change_post_mode"
             app:srcCompat="@drawable/ic_inclnonimg"/>
 
         <ImageButton
             android:id="@+id/btn_incFont"
             style="@style/ImgButtonStyle"
-            android:contentDescription="@string/increase_font_size"
+            android:contentDescription="@string/increase_font_sizebtn"
             app:srcCompat="@drawable/aplus"
             />
 
         <ImageButton
             android:id="@+id/btn_decFont"
             style="@style/ImgButtonStyle"
-            android:contentDescription="@string/decrease_font_size"
+            android:contentDescription="@string/decrease_font_sizebtn"
             app:srcCompat="@drawable/aminus"
             />
         <ImageButton
             android:id="@+id/btn_imgMode"
             style="@style/ImgButtonStyle"
-            android:contentDescription="@string/offline_mode"
+            android:contentDescription="@string/change_image_mode"
             app:srcCompat="@drawable/imgmode"
             />
         <Button
@@ -208,14 +194,20 @@
         <ImageButton
             android:id="@+id/btn_offline"
             style="@style/ImgButtonStyle"
-            android:contentDescription="@string/offline_mode"
             app:srcCompat="@drawable/offline"
+            android:contentDescription="@string/download_thread"
             />
         <ImageButton
             android:id="@+id/btn_watch"
             style="@style/ImgButtonStyle"
-            android:contentDescription="@string/offline_mode"
             app:srcCompat="@drawable/eye_closed"
+            android:contentDescription="@string/watch_thread"
+            />
+        <ImageButton
+            android:id="@+id/btn_wiki"
+            style="@style/ImgButtonStyle"
+            app:srcCompat="@drawable/wiki"
+            android:contentDescription="@string/open_chapter_overview"
             />
 
     </LinearLayout>
@@ -271,4 +263,11 @@
         android:visibility="gone"
         app:srcCompat="@drawable/ic_questden"
         />
+
+<!--    <WebView -->
+<!--        android:id="@+id/webview"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        tools:layout_editor_absoluteX="2dp"-->
+<!--        tools:layout_editor_absoluteY="418dp" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

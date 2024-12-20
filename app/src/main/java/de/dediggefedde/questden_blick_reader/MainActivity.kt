@@ -64,13 +64,10 @@ import java.util.*
 
 /**
  *  TODO:
- *    - onboarding images
- *    - fullwidth img load after confirm full img
  *    - Button with link to Wiki if found
- *    - tests (img, offline, watch, update)
+ *    - onboarding images
  *    - documentation
  *    - merge into main git branch
- *    - update license (photoview, viewslider2)
  *  */
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -127,6 +124,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             offlFolder.mkdirs()
         }
 
+        val preferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        var password = preferences.getString("reply_password", null)
+        if (password == null) {
+            password = generateRandomPassword()
+            preferences.edit().putString("reply_password", password).apply()
+        }
+
         val errorHandler = GlobalErrorHandler(Thread.getDefaultUncaughtExceptionHandler(), this)
         Thread.setDefaultUncaughtExceptionHandler(errorHandler)
 
@@ -140,6 +144,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 viewModel.loadThread(state.url, state.type, backwards = true)
             } else if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack()
+                currentFragment = MainFragment()
             } else {
                 AlertDialog.Builder(this@MainActivity)
                     .setTitle("Close App")
@@ -157,7 +162,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             .setUpdateJSON("""https://raw.githubusercontent.com/Dediggefedde/Questden_Blick_Reader/WIP/app/version.json""") //TODO WIP to master
             .start()
     }
-
+    fun generateRandomPassword(length: Int = 6): String {
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        return (1..length)
+            .map { chars.random() }
+            .joinToString("")
+    }
     private fun intro() {
         binding.viewPagerContainer.visibility = View.VISIBLE
 
@@ -230,26 +240,59 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.menu_delete_reading).setVisible(true)
-        menu.findItem(R.id.menu_delete_offline).setVisible(viewModel.sets.listType == ThrdItemTyps.OFFLINE)
-        menu.findItem(R.id.menu_delete_Watch).setVisible(viewModel.sets.listType == ThrdItemTyps.WATCH)
+        val curFragIsMain = (currentFragment is MainFragment)
+        menu.findItem(R.id.menu_delete_reading).setVisible(curFragIsMain)
+        menu.findItem(R.id.menu_delete_offline).setVisible(curFragIsMain && viewModel.sets.listType == ThrdItemTyps.OFFLINE)
+        menu.findItem(R.id.menu_delete_Watch).setVisible(curFragIsMain && viewModel.sets.listType == ThrdItemTyps.WATCH)
+        menu.findItem(R.id.menu_reply).setVisible(curFragIsMain && viewModel.sets.listType == ThrdItemTyps.THREAD)
         return super.onPrepareOptionsMenu(menu)
     }
 
+    fun openWiki(){
+        currentFragment = WikiFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, currentFragment as WikiFragment)
+            .addToBackStack(null)
+            .commit()
+    }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.menu_reply -> {
+                currentFragment = ReplyFragment()
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, currentFragment as ReplyFragment)
+                    .addToBackStack(null)
+                    .commit()
+                true
+            }
+
             R.id.menu_delete_reading -> {
-                viewModel.deleteLastRead()
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Delete Reading Status")
+                    .setMessage("Do you want to delete the reading status of all your threads?")
+                    .setPositiveButton("Yes") { _, _ -> viewModel.deleteLastRead() } // App schließen
+                    .setNegativeButton("No", null) // Nichts tun
+                    .show()
                 true
             }
 
             R.id.menu_delete_offline -> {
-                viewModel.deleteOfflineData()
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Delete Downloaded Data")
+                    .setMessage("Do you want to delete all your downloaded threads?")
+                    .setPositiveButton("Yes") { _, _ -> viewModel.deleteOfflineData() } // App schließen
+                    .setNegativeButton("No", null) // Nichts tun
+                    .show()
                 true
             }
 
             R.id.menu_delete_Watch -> {
-                viewModel.deleteWatchData()
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Delete Downloaded Data")
+                    .setMessage("Do you want to remove all threads from your watch list?")
+                    .setPositiveButton("Yes") { _, _ -> viewModel.deleteWatchData() } // App schließen
+                    .setNegativeButton("No", null) // Nichts tun
+                    .show()
                 true
             }
 
@@ -259,6 +302,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
 
             R.id.menu_about -> {
+                val preferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                val password = preferences.getString("reply_password", null)?:""
+
                 showInfoDialog(
                     """
                     <h3>Questden Blick Reader</h3>
@@ -266,6 +312,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     <p><a href="https://phi.pf-control.de/tgchan/reg.php">Account registration / privacy policy</a></p>
                     <p><a href="https://github.com/Dediggefedde/Questden_Blick_Reader">GitHub: Questden Blick Reader</a>
                     <p></p>
+                    <p>Reply Password: $password</p>
                     <p>Vielen Dank für die Nutzung meiner App!</p>
                 """.trimIndent()
                 )
@@ -291,6 +338,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         <li><b>PhotoView</b> - Apache License, Version 2.0</li>
                         <li><b>AppUpdater</b> - MIT License</li>
                         <li><b>Room</b> - Apache License, Version 2.0</li>
+                        <li><b>ViewPager2</b> - Apache License, Version 2.0</li>
                     </ul>
                 """.trimIndent()
                 )
@@ -409,10 +457,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     out.write(cont.toByteArray())
                 }
             }
-            Toast.makeText(this, "Done", Toast.LENGTH_SHORT).show()
+            MsgHelper.showMsg(this, "Done")
         } catch (e: IOException) {
             e.printStackTrace()
-            Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show()
+            MsgHelper.showMsg(this, "Failed")
         }
     }
 
@@ -427,7 +475,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val li: List<Any> = gson.fromJson(content, itemType)
 
             if (li.size < 3) {
-                Toast.makeText(this, "Wrong format", Toast.LENGTH_SHORT).show()
+                MsgHelper.showMsg(this, "Wrong format")
                 return
             }
 
@@ -438,11 +486,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             viewModel.importSettings(entryList, watchList, offList, modsets)
 
-            Toast.makeText(this, "Done", Toast.LENGTH_SHORT).show()
+            MsgHelper.showMsg(this, "Done")
             viewModel.loadCurThread() // (sets.curpage, sets.curSingle)
         } catch (e: IOException) {
             e.printStackTrace()
-            Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show()
+            MsgHelper.showMsg(this, "Failed")
         }
     }
 
@@ -458,7 +506,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     exportFile(data?.data)
                 } catch (e: IOException) {
                     handleError(
-                        this.applicationContext, "Backup error",
+                        this, "Backup error",
                         e.message ?: "Unknown error at exporting backup",
                         e.stackTraceToString(), viewModel
                     )
@@ -471,7 +519,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     importFile(data?.data)
                 } catch (e: IOException) {
                     handleError(
-                        this.applicationContext, "Backup error",
+                        this, "Backup error",
                         e.message ?: "Unknown error at loading backup",
                         e.stackTraceToString(), viewModel
                     )
@@ -501,16 +549,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
         viewModel.showListDemand.observe(this) { state ->
-            if (state && currentFragment !is MainFragment) {
-                currentFragment = MainFragment()
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, currentFragment as MainFragment)
-                    .commit()
-            }
+            if (state ) showMainList()
         }
     }
-
+    fun showMainList(){
+        if(currentFragment is MainFragment)return
+        currentFragment = MainFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, currentFragment as MainFragment)
+            .commitNow()
+    }
 }
+
 
 class CustomRecyclerView @JvmOverloads constructor(
     context: Context,
@@ -539,4 +589,15 @@ class ImagePagerAdapter(private val images: List<Int>) : RecyclerView.Adapter<Im
     }
 
     override fun getItemCount(): Int = images.size
+}
+
+object MsgHelper {
+    private var currentToast: Toast? = null
+
+    fun showMsg(context: Context, message: String, duration: Int = Toast.LENGTH_SHORT) {
+        currentToast?.cancel()
+        currentToast = Toast.makeText(context, message, duration).apply {
+            show()
+        }
+    }
 }

@@ -112,7 +112,8 @@ data class ModelSettings(
     var loginPW:String="",
     var autoLogin:Boolean=true,
     var numLinkMode:Int=0, //for upload, not used in app
-    var imageMode:imgMode=imgMode.SMALL //in thread mode image size
+    var imageMode:imgMode=imgMode.SMALL, //in thread mode image size
+    var thumbFromFull:Boolean=false //in thread mode image size
 ):Parcelable
 
 /**

@@ -119,5 +119,12 @@
     <string name="license">License</string>
     <string name="register_account">Register Account</string>
     <string name="introduction">Introduction</string>
-
+    <string name="reply">Reply</string>
+    <string name="change_post_mode">Change post mode</string>
+    <string name="increase_font_sizebtn">Increase font size</string>
+    <string name="decrease_font_sizebtn">Decrease font size</string>
+    <string name="change_image_mode">Change image mode</string>
+    <string name="download_thread">Download thread</string>
+    <string name="watch_thread">watch thread</string>
+    <string name="open_chapter_overview">Open chapter overview</string>
 </resources>

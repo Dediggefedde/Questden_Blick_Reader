@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import de.dediggefedde.questden_blick_reader.databinding.FragmentSyncBinding
 
@@ -35,7 +34,8 @@ class SyncFragment : Fragment() {
             if(state.token=="" && state.errorCode==401){
                 binding.statusText.text = getString(R.string.wrong_username_or_password)
             }else{
-                if(state.promptText.isNotEmpty())Toast.makeText(requireContext(), state.promptText, Toast.LENGTH_LONG).show()
+                if(state.promptText.isNotEmpty())
+                    MsgHelper.showMsg(requireContext(), state.promptText)
                 if(state.statusText.isNotEmpty())binding.statusText.text = state.statusText
             }
             if(state.token!=""){

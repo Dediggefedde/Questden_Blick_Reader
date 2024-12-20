@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Name"
+            android:layout_gravity="bottom"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/button_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="X"
+            android:textSize="20sp"
+            android:textColor="#FF0000"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="Close Fragment" />
+    </LinearLayout>
+
+        <EditText
+            android:id="@+id/input_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="optional"
+            android:paddingTop="5dp"
+            android:layout_marginBottom="5dp"
+            />
+        <!-- Email Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:textStyle="bold"/>
+
+        <EditText
+            android:id="@+id/input_email"
+            android:layout_width="match_parent"
+            android:hint="optional, will be displayed"
+            android:layout_marginBottom="5dp"
+            android:paddingTop="5dp"
+            android:layout_height="wrap_content"/>
+
+        <!-- Subject Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subject"
+            android:textStyle="bold"/>
+
+        <EditText
+            android:id="@+id/input_subject"
+            android:layout_width="match_parent"
+            android:hint="optional, usually best left blank"
+            android:layout_marginBottom="5dp"
+            android:paddingTop="5dp"
+            android:layout_height="wrap_content"/>
+
+        <!-- Message Input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Message"
+            android:textStyle="bold"/>
+
+        <EditText
+            android:id="@+id/input_message"
+            android:hint="Type your message here"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingTop="5dp"
+            android:gravity="top"
+            android:inputType="textMultiLine" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload a file"
+            android:textStyle="bold"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/cb_spoiler"
+            android:text="Spoiler"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+
+
+        <TextView
+            android:id="@+id/filename"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+        <Button
+            android:id="@+id/button_upload_file"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Choose File"/>
+        <!-- Submit Button -->
+        <Button
+            android:id="@+id/button_submit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Submit"
+            android:backgroundTint="#f88"/>
+    </LinearLayout>

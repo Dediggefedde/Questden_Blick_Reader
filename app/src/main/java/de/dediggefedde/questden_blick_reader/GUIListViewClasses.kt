@@ -24,6 +24,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.marginLeft
 import androidx.core.view.marginRight
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -53,6 +54,7 @@ class QuestDenListAdapter(val mContext: Context) :
     private val mMain: MainActivity = (mContext as MainActivity)
     private var displaySet: ModelSettings = ModelSettings()
     private var textSize: Float = 16f
+    private lateinit var replyViewModel: ReplyViewModel
 
     interface ItemActionListener {
         fun openThread(url: String)
@@ -65,11 +67,8 @@ class QuestDenListAdapter(val mContext: Context) :
     }
 
     var itemAction: ItemActionListener? = null
-
     inner class FullViewHolder(itemView: View) : ViewHolder(itemView)
-
     private class DiffCallback : DiffUtil.ItemCallback<TgPost>() {
-
         override fun areItemsTheSame(oldItem: TgPost, newItem: TgPost) =
             oldItem.postID == newItem.postID
 
@@ -77,26 +76,16 @@ class QuestDenListAdapter(val mContext: Context) :
             oldItem == newItem
 
     }
-
     init {
         setHasStableIds(true)
     }
-
     fun updateDisplaySetting(setting: ModelSettings?, txtSize: Float?) {
         if (setting !== null) displaySet = setting
         if (txtSize !== null) textSize = txtSize
     }
-
-    // getItemId überschreiben und eine eindeutige, stabile ID zurückgeben
     override fun getItemId(position: Int): Long {
         return getItem(position).postID.toLongOrNull() ?: 0
-//        return mMain.viewModel.displayList.value?.get(position)?.postID?.toLong() ?: 0L
     }
-
-//    companion object { //same for all posts, fetched for floating text division, layout adjustment otherwise too late
-//        var cachedTextTopWidth: Int = 0//800 //top text width
-//        var cachedTextTopOffset: Int = 0//57 + 57 //title+author
-//    }
 
     /**
      * Viewholder item. made abstract to offer multiple layouts. currently only one used
@@ -104,19 +93,25 @@ class QuestDenListAdapter(val mContext: Context) :
     abstract inner class ViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
         private val iVBinding =CommonBinding(itemView)// ListItemBinding.bind(itemView) // Nutze das richtige Layout-Binding
-//        private val iVFullBinding = ListItemImgfullBinding.bind(itemView) //binding for fullview image
-//        private val iVBigBinding = ListItemImgbigBinding.bind(itemView) //binding for fullview image
         private var mtg = TgPost()
 
         init {
             if (displaySet.listType != ThrdItemTyps.THREAD) {
                 setListener()
             } else {
-                setListenerImg()
+                setListenerThread()
             }
         }
 
-        private fun setListenerImg() {
+        private fun setListenerThread() {
+            val replLink={_:View->
+                replyViewModel.insertAtCur(">>${mtg.postID}")
+                MsgHelper.showMsg(mContext,">>${mtg.postID} copied into reply form.")
+            }
+
+            iVBinding.txDate.setOnClickListener(replLink)
+            iVBinding.txTitle.setOnClickListener(replLink)
+            iVBinding.txAuthor.setOnClickListener(replLink)
 
             iVBinding.imgUrl.setOnClickListener {
                 mMain.viewImage(mtg)
@@ -137,7 +132,6 @@ class QuestDenListAdapter(val mContext: Context) :
             iVBinding.txSummaryBottom.movementMethod = LinkMovementMethod.getInstance()
         }
 
-//        @Suppress("UNUSED_ANONYMOUS_PARAMETER")
         @SuppressLint("ClickableViewAccessibility")
         private fun setListener() {
             val evThreadTitleClick = View.OnClickListener {
@@ -150,11 +144,6 @@ class QuestDenListAdapter(val mContext: Context) :
                 mMain.viewImage(mtg)
             }
 
-//            iVBinding.imgUrl.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
-//                mtg.thumbHeight = bottom - top
-//                if (displaySet.listType == ThrdItemTyps.THREAD && displaySet.imageMode != imgMode.FULL && bottom - top > 0)
-//                    floatSummary(thumbHeight = bottom - top, thumbWidth = right - left)
-//            }
             iVBinding.txWatch.setOnClickListener {
                 if (mtg.url.indexOf("#") > 0) mtg.url = mtg.url.substring(0, mtg.url.indexOf("#"))
                 if (displaySet.listType == ThrdItemTyps.OFFLINE) { //"delete" in offline mode
@@ -262,48 +251,9 @@ class QuestDenListAdapter(val mContext: Context) :
             }
         }
 
-//        private fun bindFullImg(): Boolean { //only threadmode
-//            if (displaySet.imageMode !== imgMode.FULL || displaySet.listType != ThrdItemTyps.THREAD) return false
-//
-//            iVBinding.txAuthor.visibility = if (mtg.author == "") View.GONE else View.VISIBLE
-//            iVBinding.txTitle.visibility = if (mtg.title == "") View.GONE else View.VISIBLE
-//            iVBinding.imgUrl.visibility = if (mtg.imgUrl == "") View.GONE else View.VISIBLE
-//            iVBinding.txSummaryBottom.textSize = textSize
-//
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) { //75% of phones
-//                iVBinding.txTitle.text = Html.fromHtml(mtg.title, Html.FROM_HTML_MODE_COMPACT)
-//                iVBinding.txAuthor.text = Html.fromHtml(mtg.author, Html.FROM_HTML_MODE_COMPACT)
-//
-//                val strbld = getHTMLStringBuilder(mtg.summary)
-//                iVBinding.txSummaryBottom.text = strbld
-//                iVBinding.txSummaryBottom.visibility = View.VISIBLE
-//            } else {
-//                iVBinding.txTitle.text = mtg.title
-//                iVBinding.txAuthor.text = mtg.author
-//                val strbld = getHTMLStringBuilder(removeHTML(mtg.summary))
-//                iVBinding.txSummaryBottom.text = strbld
-//            }
-//
-//            iVBinding.txDate.text = mtg.date
-//            iVBinding.txPostID.text = mtg.postID
-//
-//            if (!mtg.isHighlight) {
-//                iVBinding.linearLayout.setBackgroundColor(ContextCompat.getColor(mContext, R.color.color_list_bg))
-//            } else {
-//                iVBinding.linearLayout.setBackgroundColor(ContextCompat.getColor(mContext, R.color.color_list_high))
-//            }
-//
-//            if (mtg.imgUrl != "") {
-//                loadImg(iVBinding.imgUrl)
-//            }
-//            return true
-//        }
-
         fun bind(tg: TgPost) {
             mtg = tg
             if (mtg.url.indexOf("#") > 0) mtg.url = mtg.url.substring(0, mtg.url.indexOf("#"))
-
-//            if (bindFullImg()) return
 
             adaptToThreadMode()
 
@@ -323,7 +273,6 @@ class QuestDenListAdapter(val mContext: Context) :
                     iVBinding.txSummaryTop.visibility = View.GONE
                     iVBinding.txSummaryBottom.text = strbld
                     iVBinding.txSummaryBottom.visibility = View.VISIBLE
-//                    floatSummary(thumbHeight = iVBinding.imgUrl.height, thumbWidth = iVBinding.imgUrl.width)
                 } else {//board, watch, offline
                     iVBinding.txSummaryTop.text = removeHTML(mtg.summary) //condense, remove html, preview
                     iVBinding.txSummaryTop.visibility = View.VISIBLE
@@ -362,17 +311,14 @@ class QuestDenListAdapter(val mContext: Context) :
 
             if (mtg.imgUrl != "") {
                 loadImg(iVBinding.imgUrl)
-
-//                val layoutParams = iVBinding.imgUrl.layoutParams
-                //80/180 dp for "small"/"big". "Full" does not execute this part
-//                layoutParams.width = (mContext.resources.displayMetrics.density * (if (displaySet.imageMode == imgMode.SMALL || displaySet.listType != ThrdItemTyps.THREAD) 80 else 180)).toInt()
-//                iVBinding.imgUrl.layoutParams = layoutParams
             }
         }
 
         private fun loadImg(imageView: ImageView) {
             var imgUrl = "https://questden.org" + mtg.imgUrl
             if (mtg.isSpoiler && displaySet.sfw != SFWModes.NSFW) imgUrl = "https://questden.org/kusaba/spoiler.png"
+            if(displaySet.thumbFromFull)imgUrl=imgUrl.replace("thumb", "src").replace("s.", ".")
+
 
             val imgNam = mtg.imgUrl.substringAfterLast("/") //offline mode
             val offImgPath = File(mMain.filesDir, "offline/${displaySet.curThreadId}_img")
@@ -518,14 +464,12 @@ class QuestDenListAdapter(val mContext: Context) :
                     }
                 }
 
-                //tag disruption move all to bottom?
                 //if a tag starts at top, it might be ended prematurely. Seems to work (spoiler,link), though. formatting not checked
                 //otherwise: move whole text to bottom to have working tags
 //                val bottomText = strbld.removePrefix(topText)
 
                 iVBinding.txSummaryTop.text = topText//bottomText.trim { it == '\n' || it == '\r' }// topText
                 iVBinding.txSummaryBottom.text = bottomText.trim { it == '\n' || it == '\r' }
-//                iVBinding.txSummaryTop.invalidate()
             }
         }
 
@@ -578,9 +522,10 @@ class QuestDenListAdapter(val mContext: Context) :
                 imgMode.BIG -> R.layout.list_item_imgbig
                 imgMode.SMALL -> R.layout.list_item
             } else R.layout.list_item
-
-
         val comView = inflater.inflate(refLayout, parent, false)
+
+        replyViewModel = ViewModelProvider(mMain).get(ReplyViewModel::class.java)
+
         return FullViewHolder(comView)
     }
 
@@ -640,10 +585,13 @@ class HTMLTagHandler(
                 for (i in 0 until len)
                     attributes[data[i * 5 + 1]] = data[i * 5 + 4]
         } catch (e: java.lang.Exception) {
-            handleError(
-                mContext, "Parsing thread error",
-                e.message ?: "Unknown error parsing the thread", getCurrentStackTrace(), null
-            )
+            val activity = mContext as? MainActivity
+            activity?.findViewById<View>(android.R.id.content)?.let { rootView ->
+                handleError(
+                    mContext, "Parsing thread error",
+                    e.message ?: "Unknown error parsing the thread", getCurrentStackTrace(), null
+                )
+            }
         }
     }
 

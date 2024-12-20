@@ -8,15 +8,14 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.Parcelable
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
@@ -31,6 +30,7 @@ import kotlin.math.abs
 
 class MainFragment : Fragment() {
     private lateinit var viewModel: DataViewModel
+    private lateinit var wikiModel: WikiViewModel
     var listAdapt: QuestDenListAdapter? = null
     private var curViewedInd = 0 //index of current view item (top) of displayDataList
 
@@ -48,7 +48,7 @@ class MainFragment : Fragment() {
 
         override fun calculateTimeForScrolling(dx: Int): Int {
             val time = super.calculateTimeForScrolling(dx)
-            return time/ 2
+            return time / 2
         }
     }
 
@@ -62,6 +62,7 @@ class MainFragment : Fragment() {
 
         viewModel = ViewModelProvider(requireActivity()).get(DataViewModel::class.java)
         listAdapt = QuestDenListAdapter(requireContext())
+        wikiModel = ViewModelProvider(requireActivity()).get(WikiViewModel::class.java)
 
         binding = FragmentMainBinding.bind(view)
         binding.postListRecView.layoutManager = LinearLayoutManager(requireContext())
@@ -106,19 +107,37 @@ class MainFragment : Fragment() {
         binding.btnOffline.setOnClickListener { btnTglOffline() }
         binding.btnImgMode.setOnClickListener {
             viewModel.rotateImgMode()
-            listAdapt?.updateDisplaySetting(viewModel.sets, txtSize = viewModel.sets.txsize)
+
+            viewModel.setThumbFromFull(false)
+            if (viewModel.sets.imageMode == imgMode.FULL)
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Full Sized Images")
+                    .setMessage("Do you want to replace thumbnails with the original images?")
+                    .setPositiveButton("Yes") { _, _ ->
+                        viewModel.setThumbFromFull(true)
+                        listAdapt?.notifyDataSetChanged()
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
+
+//            listAdapt?.updateDisplaySetting(viewModel.sets, txtSize = viewModel.sets.txsize)
             listAdapt?.notifyDataSetChanged()
-            Toast.makeText(requireContext(), "Image mode set to ${viewModel.sets.imageMode.displayName}", Toast.LENGTH_SHORT).show()
+            MsgHelper.showMsg(requireContext(), "Image mode set to ${viewModel.sets.imageMode.displayName}")
         }
         binding.btnWatch.setOnClickListener {
             viewModel.toggleWatch()
             updateWatchImg()
             if (viewModel.getWatched() != null)
-                Toast.makeText(requireContext(), "Thread added to watchlist!", Toast.LENGTH_SHORT).show()
+                MsgHelper.showMsg(requireContext(), "Thread added to watchlist!")
             else
-                Toast.makeText(requireContext(), "Thread removed from watchlist!", Toast.LENGTH_SHORT).show()
+                MsgHelper.showMsg(requireContext(), "Thread removed from watchlist!")
         }
 
+    }
+
+    override fun onResume() {
+        requireActivity().invalidateOptionsMenu()
+        super.onResume()
     }
 
     private fun addListviewEvents() {
@@ -134,7 +153,7 @@ class MainFragment : Fragment() {
             }
 
             override fun removeOffline(mtg: TgPost) {
-                val htmlFile = File(requireContext().applicationContext.filesDir, "offline/${mtg.postID}.html")
+                // val htmlFile = File(requireContext().applicationContext.filesDir, "offline/${mtg.postID}.html")
                 viewModel.deleteOffline(mtg.postID)
                 viewModel.loadCurThread() //update thread
             }
@@ -338,7 +357,8 @@ class MainFragment : Fragment() {
                 listAdapt?.submitList(it, scrolling)
                 updateOfflineImg()
                 updateWatchImg()
-                if (viewModel.fromOffline) Toast.makeText(requireContext(), "Loaded offline data from storage for ${viewModel.sets.curThreadId}.html", Toast.LENGTH_SHORT).show()
+                if (viewModel.fromOffline)
+                    MsgHelper.showMsg(requireContext(), "Loaded offline data from storage for ${viewModel.sets.curThreadId}.html")
             }
         }
 
@@ -363,6 +383,8 @@ class MainFragment : Fragment() {
                     binding.btnToggleSFW.visibility = View.GONE
                     binding.btnOffline.visibility = View.GONE
                     binding.btnWatch.visibility = View.GONE
+                    binding.btnImgMode.visibility = View.GONE
+                    binding.btnWiki.visibility = View.GONE
                 }
 
                 ThrdItemTyps.THREAD -> {
@@ -370,6 +392,8 @@ class MainFragment : Fragment() {
                     binding.btnToggleSFW.visibility = View.VISIBLE
                     binding.btnOffline.visibility = View.VISIBLE
                     binding.btnWatch.visibility = View.VISIBLE
+                    binding.btnImgMode.visibility = View.VISIBLE
+                    binding.btnWiki.visibility = View.VISIBLE
                 }
             }
         }
@@ -402,7 +426,7 @@ class MainFragment : Fragment() {
                     binding.progressBarDet.progress = 0
 
                     handleError(
-                        requireContext().applicationContext, "Loading Thread error",
+                        requireContext(), "Loading Thread error",
                         prog.msg, getCurrentStackTrace(), viewModel
                     )
                     prog.status = ProgStatus.IDLE
@@ -431,7 +455,7 @@ class MainFragment : Fragment() {
                     binding.progressBar.visibility = View.GONE
                     binding.progressText.visibility = View.GONE
                     updateOfflineImg()
-                    Toast.makeText(requireContext().applicationContext, getString(R.string.all_images_downloaded), Toast.LENGTH_SHORT).show()
+                    MsgHelper.showMsg(requireContext(), getString(R.string.all_images_downloaded))
                     prog.status = ProgStatus.IDLE
                 }
 
@@ -442,7 +466,7 @@ class MainFragment : Fragment() {
                     prog.status = ProgStatus.IDLE
 
                     handleError(
-                        requireContext().applicationContext, "Downloading thread error",
+                        requireContext(), "Downloading thread error",
                         prog.msg, getCurrentStackTrace(), viewModel
                     )
                 }
@@ -454,6 +478,30 @@ class MainFragment : Fragment() {
                 }
             }
         }
+
+        binding.btnWiki.setOnClickListener {
+            val threadId =viewModel.sets.curThreadId
+            wikiModel.loadTableData(threadId)
+        }
+        wikiModel.reqProgLive.observe(viewLifecycleOwner){state->
+            if(state==ProgStatus.RUNNING){
+                binding.progressBarUndet.visibility = View.VISIBLE
+            }else{
+                binding.progressBarUndet.visibility = View.GONE
+            }
+
+            if(state==ProgStatus.DONE){
+                wikiModel.setIdle()
+                if(wikiModel.linksLiveData.value.isNullOrEmpty()){
+                    return@observe
+                }
+                (requireActivity() as MainActivity).openWiki()
+            }
+            if(state==ProgStatus.ERROR){
+                MsgHelper.showMsg(requireContext(),wikiModel.errorLiveData.value?:"Unknown Error")
+            }
+        }
+
     }
 
     private fun updateOfflineImg() {
@@ -509,7 +557,7 @@ class MainFragment : Fragment() {
         listAdapt?.updateDisplaySetting(viewModel.sets, txtSize = viewModel.sets.txsize)
         listAdapt?.notifyDataSetChanged()
 
-        Toast.makeText(requireContext(), "SFW mode set to ${viewModel.sets.sfw.displayName}", Toast.LENGTH_SHORT).show()
+        MsgHelper.showMsg(requireContext(), "SFW mode set to ${viewModel.sets.sfw.displayName}")
     }
 
     /**
@@ -562,8 +610,10 @@ class MainFragment : Fragment() {
         viewModel.updateSet()
         viewModel.updateDisplayList()
 
-        if (newMode) Toast.makeText(requireContext(), "Only Posts with images", Toast.LENGTH_SHORT).show()
-        else Toast.makeText(requireContext(), "Showing all Posts", Toast.LENGTH_SHORT).show()
+        if (newMode)
+            MsgHelper.showMsg(requireContext(), "Only Posts with images")
+        else
+            MsgHelper.showMsg(requireContext(), "Showing all Posts")
     }
 
     /**
@@ -624,8 +674,8 @@ class MainFragment : Fragment() {
         }
     }
 
-    fun backFromLink(navStat: Parcelable?) {
-        binding.postListRecView.layoutManager?.onRestoreInstanceState(navStat)
-    }
+//    fun backFromLink(navStat: Parcelable?) {
+//        binding.postListRecView.layoutManager?.onRestoreInstanceState(navStat)
+//    }
 
 }
