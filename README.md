@@ -1,62 +1,51 @@
-## About
+# About
 
-**Currently in beta-phase**</br>
 Reader app for questden.org<br/>
 This app aims for making reading quests and threads on questden.org enjoyable for smartphone-users.
 [Download the apk](https://github.com/Dediggefedde/Questden_Blick_Reader/raw/release/app/release/app-release.apk)<br/>
 
-## Screenshots
+# Features
 
-<p align="center">
-<img src="./screenshots/Screenshot_20200901-014309.png?raw=true" align="center"  width="15%"  />
-<img src="./screenshots/Screenshot_20201103-005305.png?raw=true" align="center"  width="15%"  />
-<img src="./screenshots/Screenshot_20201103-005321.png?raw=true" align="center"  width="15%"  />
-<img src="./screenshots/Screenshot_20201103-005345.png?raw=true" align="center"  width="15%" />
-<img src="./screenshots/Screenshot_20201103-005926.png?raw=true" align="center"  width="15%"  />
-<img src="./screenshots/Screenshot_20201103-005939.png?raw=true" align="center" width="15%" />
-</p>
-
-## Readability
-
-Much like my userscript questden_BLICK, there is emphasis on readability and thread-management.
-
-Based on scientific publications I adjusted default colors, text-sizes, margins etc. However, there are also customization options to adapt the website to your needs.
-
-## Features
-
-* improved readability
-* customizable display
+* Reading:
   + Font size bigger/smaller
-  + 3 NSFW modes: always hide (*SFW*, doesn't download spoiler-images), download/show on tap (*NSFW?*) and always show spoilers (*NSFW*)
+  + 3 NSFW modes: always hide (*SFW*, doesn't download spoiler-images), download/show on tap (*SFW?*) and always show spoilers (*NSFW*)
   + Hide all posts without images
-* saves last-read position for each post
-* Position/Navigation
-  + Buttons for first/last/next/previous image
-  + Position indicator for images in thread
-  + tap links to jump and highlight to their posts
+  + three image sizes
+  + Navigation to next/previous image/post
+  + Tapping ref-links jumps to their post.
+  + Links to open posts/threads/images in your browser on demand
+  + fullview images with zoom
+  + saves last-read position for each thread
+  + Reply form with basic editor
+* Chapter Overview
+  + Connects with questden-wiki and shows available thread chapters.
 * Watchlist
-  + separate list of all your watched threads/quests
-  + new posts and images since your last visit
-  + update only posts on this list per button.
+  + watched threads to get counters of new posts/images since your last visit
+  + refresh watchlist to check all watched threads for new posts
+* Download
+  + Download threads and their images to read them while offline!
+  + Image quality can be lowered to reduce traffic
 * Synchronize with questden_BLICK
-  + Experimental: only downloading works for now
-
----
-
-## Supports
+  + Synchronize devices or create backups
+  + Works with the Questden_Blick userscript! Synchronize your reading status with your desktop-PC!
+  + No communication with the server except you press "login", "upload" or "download"
+* Offline backup
+  + Can create and load backup files on your phone
+  
+# Requirements
 
 Full support Android version >20.<br/>
 Compatibility support Android version >17.
 
-## How to Install
+# Install
 
 [Download the apk](https://github.com/Dediggefedde/Questden_Blick_Reader/raw/release/app/release/app-release.apk)<br/>
 You might need to allow installing apps from unknown sources.
 Open the file via browser or file-explorer and you will be prompted to install
 Since I'm unknown on playstore, "play protect" will warn you once. 
-I there is an update, the app will prompt you to download the latest apk from this website (same link as above).
+If there is an update, the app will prompt you to download the latest apk from this website (same link as above).
 
-## How to use
+# Quickstart
 
 + **Navigation**
   * Use the side-navigation to go to a board or your watchlist
@@ -72,6 +61,35 @@ I there is an update, the app will prompt you to download the latest apk from th
     - The img-url will appear at the bottom. Tap to open in your browser
   * Tap the refresh button to update the current page
     - Watchlist: press the refresh-button to check for updates
+
+---
+
+# Screenshots
+
+<p align="center">
+<img src="./images/screenshots/board.png?raw=true" align="center"  width="20%"  />
+<img src="./images/screenshots/quest+tools.png?raw=true" align="center"  width="20%"  />
+<img src="./images/screenshots/quest_fullimgs.png?raw=true" align="center"  width="20%"  />
+<img src="./images/screenshots/watchlist.png?raw=true" align="center"  width="20%"  />
+<img src="./images/screenshots/img_fullview_landscape.png?raw=true" align="center"  width="60%"  />
+</p>
+
+# Onboarding Screens
+
+<p align="center">
+<img src="./images/onboarding/onboarding_00_welcome.png?raw=true" align="center"  width="20%"  />
+<img src="./images/onboarding/onboarding_01_navigation.png?raw=true" align="center"  width="20%"  />
+<img src="./images/onboarding/onboarding_02_boards.png?raw=true" align="center"  width="20%"  />
+<img src="./images/onboarding/onboarding_03_thread.png?raw=true" align="center"  width="20%" />
+<img src="./images/onboarding/onboarding_04_toolbar.png?raw=true" align="center"  width="20%"  />
+<img src="./images/onboarding/onboarding_05_imagemode.png?raw=true" align="center" width="20%" />
+<img src="./images/onboarding/onboarding_05_imagemode.png?raw=true" align="center" width="20%" />
+<img src="./images/onboarding/onboarding_06_reply.png?raw=true" align="center" width="20%" />
+<img src="./images/onboarding/onboarding_07_watchlist_downloaded.png?raw=true" align="center" width="20%" />
+<img src="./images/onboarding/onboarding_08_sync.png?raw=true" align="center" width="20%" />
+</p>
+
+<p>The images in the screenshots are mostly dran by Toxoglossa in the quest "Moot Point" (NSFW)</p>
 
 ---
 
