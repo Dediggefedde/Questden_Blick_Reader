@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import de.dediggefedde.questden_blick_reader.databinding.FragmentReplyBinding
 import okhttp3.Call
@@ -19,7 +18,6 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.IOException
@@ -30,8 +28,6 @@ class ReplyFragment : Fragment() {
     private lateinit var replyViewModel: ReplyViewModel
     private lateinit var binding: FragmentReplyBinding
     private lateinit var viewModel: DataViewModel
-    private var uploadFile:RequestBody?=null
-    private var uploadName:String=""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,13 +55,21 @@ class ReplyFragment : Fragment() {
             (requireActivity() as MainActivity).showMainList()
         }
 
-        binding.inputMessage.setText(replyViewModel.messageText.value)
-        binding.inputMessage.setSelection(replyViewModel.cursorPosition.value?:0)
+        binding.inputMessage.setText(replyViewModel.messageText)
+        binding.inputMessage.setSelection(replyViewModel.cursorPosition)
+        binding.inputName.setText(replyViewModel.author)
+        binding.inputSubject.setText(replyViewModel.subject)
+        binding.inputEmail.setText(replyViewModel.email)
+        binding.filename.text=(replyViewModel.uploadName)
         //no observers required, closing the form is destroying it
 
+        binding.inputName.addTextChangedListener { replyViewModel.author=it.toString()}
+        binding.inputSubject.addTextChangedListener { replyViewModel.subject=it.toString()}
+        binding.inputEmail.addTextChangedListener { replyViewModel.email=it.toString()}
+
         binding.inputMessage.addTextChangedListener {
-            replyViewModel.updateMessageText(it.toString())
-            replyViewModel.updateCursorPosition(binding.inputMessage.selectionStart)
+            replyViewModel.messageText=it.toString()
+            replyViewModel.cursorPosition=binding.inputMessage.selectionStart
         }
     }
 
@@ -94,7 +98,7 @@ class ReplyFragment : Fragment() {
                 binding.filename.text=fileName
                 val fileBytes = inputStream.readBytes()
 
-                uploadFile= fileBytes.toRequestBody("multipart/form-data".toMediaTypeOrNull()).also { uploadName=fileName }
+                replyViewModel.uploadFile= fileBytes.toRequestBody("multipart/form-data".toMediaTypeOrNull()).also { replyViewModel.uploadName=fileName }
             }
         }
     }
@@ -149,10 +153,10 @@ class ReplyFragment : Fragment() {
             .addFormDataPart("email", "")
             .addFormDataPart("postpassword", password) //TODO: password management, website: cookie for 1 year expiration
 
-        val reqF=uploadFile
-        if (reqF!=null && uploadName.isNotEmpty()) {
+        val reqF=replyViewModel.uploadFile
+        if (reqF!=null && replyViewModel.uploadName.isNotEmpty()) {
             formBodyBuilder//.addFormDataPart("imagefile", file.name, fileRequestBody)
-                .addFormDataPart("imagefile", uploadName, reqF) // Dateinamen optional anpassen
+                .addFormDataPart("imagefile", replyViewModel.uploadName, reqF) // Dateinamen optional anpassen
 
         }
 
@@ -195,7 +199,7 @@ class ReplyFragment : Fragment() {
                     activity?.runOnUiThread {
                         MsgHelper.showMsg(requireContext(),  "Post submitted successfully!")
                         (requireActivity() as MainActivity).showMainList()
-                        replyViewModel.updateMessageText("")
+                        replyViewModel.clear()
                         viewModel.loadCurThread()
                     }
                 }

@@ -15,6 +15,10 @@
         android:title="@string/delete_offline_data"
         app:showAsAction="never" />
     <item
+        android:id="@+id/menu_clear_form"
+        android:title="Clear Form"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/menu_delete_Watch"
         android:title="@string/delete_watchlist"
         app:showAsAction="never" />

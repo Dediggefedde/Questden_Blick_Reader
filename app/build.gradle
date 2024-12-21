@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.application' version '8.7.2'  // Hier die Version hinzufügen
+    id 'com.android.application' version '8.7.3'  // Hier die Version hinzufügen
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-parcelize'
 }

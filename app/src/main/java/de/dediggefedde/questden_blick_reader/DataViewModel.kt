@@ -24,6 +24,7 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.json.JSONObject
@@ -1052,30 +1053,31 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
 }
 
 class ReplyViewModel : ViewModel() {
-    private val _messageText = MutableLiveData<String>()
-    val messageText: LiveData<String> get() = _messageText
+    var messageText: String=""
+    var author: String=""
+    var subject: String=""
+    var email: String=""
+    var cursorPosition: Int =0
+    var uploadFile: RequestBody?=null
+    var uploadName:String=""
 
-    private val _cursorPosition = MutableLiveData<Int>()
-    val cursorPosition: LiveData<Int> get() = _cursorPosition
-
-    fun updateMessageText(newText: String) {
-        _messageText.value = newText
-    }
-
-    fun updateCursorPosition(position: Int) {
-        _cursorPosition.value = position
+    fun clear(){
+        messageText=""
+        cursorPosition=0
+        author=""
+        subject=""
+        email=""
+        uploadFile=null
+        uploadName=""
     }
 
     fun insertAtCur(newText: String) {
-        val currentText = _messageText.value ?: ""
-        val currentPosition = _cursorPosition.value ?: 0
-
-        val updatedText = StringBuilder(currentText).apply {
-            insert(currentPosition, newText)
+        val updatedText = StringBuilder(messageText).apply {
+            insert(cursorPosition, newText)
         }.toString()
 
-        _messageText.value = updatedText
-        _cursorPosition.value = currentPosition + newText.length
+        messageText = updatedText
+        cursorPosition += newText.length
     }
 }
 

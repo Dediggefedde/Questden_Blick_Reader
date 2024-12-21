@@ -32,6 +32,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.github.chrisbanes.photoview.PhotoView
 import com.github.javiersantos.appupdater.AppUpdater
 import com.github.javiersantos.appupdater.enums.UpdateFrom
 import com.google.android.material.navigation.NavigationView
@@ -72,6 +73,7 @@ import java.util.*
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var viewModel: DataViewModel
+    private lateinit var replyModel: ReplyViewModel
     private var mainMenu: Menu? = null
     private lateinit var binding: ActivityMainBinding
 
@@ -106,6 +108,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         viewModel = ViewModelProvider(this).get(DataViewModel::class.java)
+        replyModel = ViewModelProvider(this).get(ReplyViewModel::class.java)
 
         currentFragment = MainFragment()
         supportFragmentManager.beginTransaction()
@@ -173,13 +176,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
         val viewPager = findViewById<ViewPager2>(R.id.viewPager)
-        val images = listOf(R.drawable.eye_open, R.drawable.online, R.drawable.ic_questden) //TODO real pictures
+        val images = listOf(
+            R.drawable.onboarding_00_welcome1,
+            R.drawable.onboarding_01_navigation,
+            R.drawable.onboarding_02_boards,
+            R.drawable.onboarding_03_thread,
+            R.drawable.onboarding_04_toolbar,
+            R.drawable.onboarding_05_imagemode,
+            R.drawable.onboarding_06_reply,
+            R.drawable.onboarding_07_watchlist_downloaded,
+            R.drawable.onboarding_08_sync
+        )
 
         val adapter = ImagePagerAdapter(images)
         viewPager.adapter = adapter
 
+        val tabTitle= listOf("Welcome","Navi","Board","Thread","Tools","Image","Reply","Watch","Sync")
+
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = "[${position + 1}]" // Optional: Beschriftung
+            if(position in tabTitle.indices)
+                tab.text=tabTitle[position]
+            else
+                tab.text = "${position + 1}"
         }.attach()
 
         binding.closeButton.setOnClickListener {
@@ -245,6 +263,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         menu.findItem(R.id.menu_delete_offline).setVisible(curFragIsMain && viewModel.sets.listType == ThrdItemTyps.OFFLINE)
         menu.findItem(R.id.menu_delete_Watch).setVisible(curFragIsMain && viewModel.sets.listType == ThrdItemTyps.WATCH)
         menu.findItem(R.id.menu_reply).setVisible(curFragIsMain && viewModel.sets.listType == ThrdItemTyps.THREAD)
+        menu.findItem(R.id.menu_clear_form).setVisible(currentFragment is ReplyFragment)
+
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -273,6 +293,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     .setPositiveButton("Yes") { _, _ -> viewModel.deleteLastRead() } // App schließen
                     .setNegativeButton("No", null) // Nichts tun
                     .show()
+                true
+            }
+
+            R.id.menu_clear_form->{
+                replyModel.clear()
+                showMainList()
                 true
             }
 
@@ -576,7 +602,7 @@ class CustomRecyclerView @JvmOverloads constructor(
 
 class ImagePagerAdapter(private val images: List<Int>) : RecyclerView.Adapter<ImagePagerAdapter.ImageViewHolder>() {
     inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imageView: ImageView = itemView.findViewById(R.id.sliderImg)
+        val imageView: PhotoView = itemView.findViewById(R.id.sliderImg)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
@@ -590,6 +616,7 @@ class ImagePagerAdapter(private val images: List<Int>) : RecyclerView.Adapter<Im
 
     override fun getItemCount(): Int = images.size
 }
+
 
 object MsgHelper {
     private var currentToast: Toast? = null
