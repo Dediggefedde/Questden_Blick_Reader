@@ -127,4 +127,5 @@
     <string name="download_thread">Download thread</string>
     <string name="watch_thread">watch thread</string>
     <string name="open_chapter_overview">Open chapter overview</string>
+    <string name="quest_archive">Quest Archive</string>
 </resources>

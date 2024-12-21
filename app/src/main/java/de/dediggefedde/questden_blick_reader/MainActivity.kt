@@ -410,6 +410,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.menu_general -> navigateToBoard(URLBoards.MEEP.url, ThrdItemTyps.BOARD)
             R.id.menu_quest -> navigateToBoard(URLBoards.QUEST.url, ThrdItemTyps.BOARD)
             R.id.menu_questdis -> navigateToBoard(URLBoards.QUESTDIS.url, ThrdItemTyps.BOARD)
+            R.id.menu_questarch -> navigateToBoard(URLBoards.QUESTARCH.url, ThrdItemTyps.BOARD)
             R.id.menu_tg -> navigateToBoard(URLBoards.TG.url, ThrdItemTyps.BOARD)
             R.id.menu_watch_open -> {
                 viewModel.loadThread("", ThrdItemTyps.WATCH)
@@ -532,7 +533,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     exportFile(data?.data)
                 } catch (e: IOException) {
                     handleError(
-                        this, "Backup error",
+                        this, "Backup Error",
                         e.message ?: "Unknown error at exporting backup",
                         e.stackTraceToString(), viewModel
                     )
@@ -545,7 +546,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     importFile(data?.data)
                 } catch (e: IOException) {
                     handleError(
-                        this, "Backup error",
+                        this, "Backup Error",
                         e.message ?: "Unknown error at loading backup",
                         e.stackTraceToString(), viewModel
                     )

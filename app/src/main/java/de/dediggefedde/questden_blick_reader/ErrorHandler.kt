@@ -3,7 +3,9 @@ package de.dediggefedde.questden_blick_reader
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
+import android.view.LayoutInflater
 import com.google.gson.Gson
+import de.dediggefedde.questden_blick_reader.databinding.DialogErrorBinding
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -21,30 +23,44 @@ fun handleError(
     errorType: String,
     errorMessage: String,
     stackTrace: String,
-    dataViewModel: DataViewModel?,
-    onDialogClosed: (() -> Unit)?=null
+    dataViewModel: DataViewModel?
 ) {
     saveErrorToFile(context, errorType, errorMessage, stackTrace)
 
-    AlertDialog.Builder(context).apply {
-        setTitle("An error occured")
-        setMessage("$errorType: $errorMessage")
+    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_error, null)
+    val binding:DialogErrorBinding=DialogErrorBinding.bind(dialogView)
 
-        if(dataViewModel!==null) {
-            setPositiveButton("Send with data") { _, _ ->
-                val userSettingsJson = dataViewModel.getSafeUserSettings()
-                val watchListJson = dataViewModel.serializeWatchList()
-                val downloadListJson = dataViewModel.serializeDownloadList()
-                sendErrorReport(context, errorType, errorMessage, stackTrace, userSettingsJson, watchListJson, downloadListJson)
-            }
-        }
-        setNeutralButton("Send only error") { _, _ ->
-            sendErrorReport(context, errorType,errorMessage, stackTrace, "", "", "")
-        }
-        setNegativeButton("Cancel", null)
+    val dialog = AlertDialog.Builder(context).apply {
+        setView(dialogView)
         setCancelable(true)
-        setOnCancelListener  { onDialogClosed?.invoke()}
-    }.show()
+    }.create()
+
+    binding.errorTitle.text=errorType
+    binding.errorMessage.text = errorMessage
+
+    binding.sendButton.setOnClickListener {
+        sendErrorReport(context, errorType,errorMessage, stackTrace, "", "", "")
+        dialog.dismiss()
+    }
+    binding.cancelButton.setOnClickListener{
+        dialog.cancel()
+    }
+    binding.sendWithDataButton.setOnClickListener{
+        if(dataViewModel===null)return@setOnClickListener
+        val userSettingsJson = dataViewModel.getSafeUserSettings()
+        val watchListJson = dataViewModel.serializeWatchList()
+        val downloadListJson = dataViewModel.serializeDownloadList()
+        sendErrorReport(context, errorType, errorMessage, stackTrace, userSettingsJson, watchListJson, downloadListJson)
+        dialog.dismiss()
+    }
+    dialog.show()
+
+//    dialog.window?.setLayout(
+//        ViewGroup.LayoutParams.MATCH_PARENT,
+//        ViewGroup.LayoutParams.WRAP_CONTENT
+//    )
+//    dialog.window?.setGravity(Gravity.CENTER) // Vertikal zentrieren
+
 }
 
 fun saveErrorToFile(context: Context, errorType: String, errorMessage: String, stackTrace: String,pending:Boolean=false) {

@@ -287,7 +287,7 @@ class MainFragment : Fragment() {
                 dialog.dismiss()
             }
         } else {
-            builder.setMessage("Do you want to download the thread and ${viewModel.getImageListSize()} images?")
+            builder.setMessage("Do you want to download the thread and ${viewModel.getImageListSize()} images plus thumbnails?")
             builder.setPositiveButton("Download") { dialog, _ ->
                 viewModel.writeToOffline(threadId, false)
                 viewModel.downloadImages(threadId, false)
@@ -426,7 +426,7 @@ class MainFragment : Fragment() {
                     binding.progressBarDet.progress = 0
 
                     handleError(
-                        requireContext(), "Loading Thread error",
+                        requireContext(), "Loading Thread Error",
                         prog.msg, getCurrentStackTrace(), viewModel
                     )
                     prog.status = ProgStatus.IDLE
@@ -466,7 +466,7 @@ class MainFragment : Fragment() {
                     prog.status = ProgStatus.IDLE
 
                     handleError(
-                        requireContext(), "Downloading thread error",
+                        requireContext(), "Downloading Thread Error",
                         prog.msg, getCurrentStackTrace(), viewModel
                     )
                 }

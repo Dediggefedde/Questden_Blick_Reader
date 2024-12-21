@@ -317,12 +317,12 @@ class QuestDenListAdapter(val mContext: Context) :
         private fun loadImg(imageView: ImageView) {
             var imgUrl = "https://questden.org" + mtg.imgUrl
             if (mtg.isSpoiler && displaySet.sfw != SFWModes.NSFW) imgUrl = "https://questden.org/kusaba/spoiler.png"
-            if(displaySet.thumbFromFull)imgUrl=imgUrl.replace("thumb", "src").replace("s.", ".")
-
 
             val imgNam = mtg.imgUrl.substringAfterLast("/") //offline mode
             val offImgPath = File(mMain.filesDir, "offline/${displaySet.curThreadId}_img")
             if (offImgPath.exists() && File(offImgPath, imgNam).exists()) imgUrl = "${mMain.filesDir}/offline/${displaySet.curThreadId}_img/$imgNam"
+
+            if(displaySet.thumbFromFull)imgUrl=imgUrl.replace("thumb", "src").replace("s.", ".")
 
             Glide.with(imageView)
                 .load(imgUrl)
@@ -588,7 +588,7 @@ class HTMLTagHandler(
             val activity = mContext as? MainActivity
             activity?.findViewById<View>(android.R.id.content)?.let { rootView ->
                 handleError(
-                    mContext, "Parsing thread error",
+                    mContext, "Parsing Thread Error",
                     e.message ?: "Unknown error parsing the thread", getCurrentStackTrace(), null
                 )
             }

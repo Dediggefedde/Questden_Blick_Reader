@@ -31,6 +31,9 @@
                 android:id="@+id/menu_questdis"
                 android:title="@string/nav_pages_questdis"/>
             <item
+                android:id="@+id/menu_questarch"
+                android:title="@string/quest_archive"/>
+            <item
                 android:id="@+id/menu_tg"
                 android:title="@string/nav_pages_tg"/>
         </menu>

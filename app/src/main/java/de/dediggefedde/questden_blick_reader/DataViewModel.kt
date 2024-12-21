@@ -3,6 +3,8 @@ package de.dediggefedde.questden_blick_reader
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,8 +22,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.io.PrintWriter
-import java.io.StringWriter
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -36,10 +36,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.Exception
 
-//import kotlin.math.log
-
-
-//saving/loading data
+/** Data storage of app to preserve view during shutoff using SharedPreferences*/
 class DataRepository(context: Context) {
     private val sharedPreferences: SharedPreferences = context.getSharedPreferences("app_data", Context.MODE_PRIVATE)
     fun <T> saveData(key: String, data: T) {
@@ -59,18 +56,22 @@ class DataRepository(context: Context) {
     }
 }
 
+/** Main Data View Model for MVVM approach
+ * handles displayed data, inclidng the displayed item list of posts, downloaded threads, watchlist and threads
+ * Also includes functions to search, access, process, load and save this data
+ * Livedata to view in listadapter and imply progress*/
 class DataViewModel(application: Application) : AndroidViewModel(application) {
     private var entryListRaw = listOf<TgPost>() //all entries/posts that can be displayed
     private var entryListImg = listOf<TgPost>() //only entries with images
-    private var watchlist = mutableListOf<Watch>()
+    private var watchlist = mutableListOf<Watch>() //list of watched threads
     private var offlineList = mutableListOf<OfflineThread>() //list of offline available threads (first posts)
 
-    var logState = MutableLiveData<LoginState>()
-    private val serverURL = "https://phi.pf-control.de/tgchan/API.php"
-    var showListDemand = MutableLiveData<Boolean>()
+    var logState = MutableLiveData<LoginState>() //Login state life data
+    private val serverURL = "https://phi.pf-control.de/tgchan/API.php" //URL for my server to synchronize threads
+    var showListDemand = MutableLiveData<Boolean>() //Livedata to demand from mainActivity to show the list
 
-    var sets: ModelSettings = ModelSettings()
-    private val dataRepository = DataRepository(application)
+    var sets: ModelSettings = ModelSettings() //Main settings object of the dataviewmodel state
+    private val dataRepository = DataRepository(application) //storing data for shutdown to preserve view
     private var reqProg: ProgData = ProgData() //http requests progress
     private var downProg: ProgData = ProgData() //download progress
     private val client = OkHttpClient()
@@ -82,13 +83,13 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     var fromOffline = false //current thread loaded from offline data
     var fullViewImg: TgPost? = null //shows image on click when not null
 
-    private var _displayList = MutableLiveData<List<TgPost>>()
+    private var _displayList = MutableLiveData<List<TgPost>>() //displayed list of posts livedata.
     val displayList: LiveData<List<TgPost>> get() = _displayList
-    private val _setsLiveData = MutableLiveData<ModelSettings>()
+    private val _setsLiveData = MutableLiveData<ModelSettings>() //settings livedata
     val setsLiveData: LiveData<ModelSettings> get() = _setsLiveData
-    private val _downProgLive = MutableLiveData<ProgData>()
+    private val _downProgLive = MutableLiveData<ProgData>() //download for offline view progress livedata
     val downProgLive: LiveData<ProgData> get() = _downProgLive
-    private val _reqProgLive = MutableLiveData<ProgData>()
+    private val _reqProgLive = MutableLiveData<ProgData>() //http request progress livedata
     val reqProgLive: LiveData<ProgData> get() = _reqProgLive
 
     init {
@@ -98,27 +99,25 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         logState.value = LoginState()
     }
 
+    /** helper functions to update livedata */
     fun updateSet() {
         _setsLiveData.postValue(sets.copy())
     }
-
     private fun updateDownPrg() {
         _downProgLive.postValue(downProg.copy())
     }
-
     private fun updateReqPrg() {
         _reqProgLive.postValue(reqProg.copy())
     }
 
+    /** for error reports, replace personalized data (login name/PW) before sending*/
     fun getSafeUserSettings(): String {
         val safeSettings = sets.copy(
-            loginName = "", // Leeren String setzen
-            loginPW = ""    // Leeren String setzen
+            loginName = "",
+            loginPW = ""
         )
-        // Mit Gson serialisieren
         return Gson().toJson(safeSettings)
     }
-
     fun serializeWatchList(): String = Gson().toJson(watchlist)
     fun serializeDownloadList(): String = Gson().toJson(offlineList)
 
@@ -126,12 +125,14 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     fun getImageListSize(): Int = this.entryListImg.size
     fun getItemImageCnt(index: Int): Int = _displayList.value?.get(index)?.imgCounter ?: 0
 
+    /** updates current reading ID for the given thread*/
     private fun updateCurReadId(thread: String, postId: String) {
         if (postId == "" || thread == "") return
         sets.curReadPostID[thread] = postId
         updateSet()
     }
 
+    /** updates current reading ID of current list to post at index*/
     fun updateCurReadId(index: Int) {
         val currentList = _displayList.value
         if (sets.curThreadId.isNotEmpty() && currentList != null && hasIndex(index)) {
@@ -141,12 +142,14 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /**delete all last-reading IDs*/
     fun deleteLastRead() {
         sets.curReadPostID.clear()
         storeData()
         updateSet()
     }
 
+    /**get index of last read post in current displaylist*/
     fun getLastReadIndex(): Int {
         val currentList = _displayList.value
         val lastid = sets.curReadPostID[sets.curThreadId]
@@ -154,6 +157,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         return currentList.indexOfFirst { it.postID == lastid }
     }
 
+    /** lists watched threads*/
     private fun showWatches() {
         sets.listType = ThrdItemTyps.WATCH
         updateSet()
@@ -165,6 +169,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         updateDisplayList()
     }
 
+    /** lists downloaded threads*/
     private fun showOfflines() {
         sets.listType = ThrdItemTyps.OFFLINE
         updateSet()
@@ -176,6 +181,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         updateDisplayList()
     }
 
+    /** saves data to SharedPreferences*/
     fun storeData() {
         if (!sets.autoLogin) {
             sets.loginName = ""
@@ -187,20 +193,23 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         dataRepository.saveData("offlineList", offlineList)
     }
 
+    /** loads data from SharedPreferences and updates view*/
     fun loadData() {
         entryListRaw = dataRepository.loadData("tgchanItems", object : TypeToken<List<TgPost>>() {}.type) ?: entryListRaw
         watchlist = dataRepository.loadData("watchItems", object : TypeToken<MutableList<Watch>>() {}.type) ?: watchlist
         offlineList = dataRepository.loadData("offlineList", object : TypeToken<MutableList<OfflineThread>>() {}.type) ?: offlineList
         sets = dataRepository.loadData("modelSettings", object : TypeToken<ModelSettings>() {}.type) ?: sets
-        updateSet()
+        updateSet() //invoke lifedata update on setings
+
         if (entryListRaw.isEmpty()) { //default page
             loadThread(URLBoards.QUEST.url, ThrdItemTyps.BOARD)
         } else {
-            postProcessRawList()
-            updateDisplayList()
+            postProcessRawList() //last displaylist is saved, works also offline, but no image guarantee
+            updateDisplayList() //invoke lifedata update on displaylist
         }
     }
 
+    /** toggles watchlist status of current thread*/
     fun toggleWatch(threadId: String = sets.curThreadId) {
         if (getWatched(threadId) != null) {
             removeFromWatch(threadId)
@@ -209,6 +218,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** adds current thread to watchlist and checks for updates*/
     private fun addToWatch(threadId: String) {
         if (getWatched(threadId) != null) return
         val tg = displayList.value?.firstOrNull { it.postID == threadId }
@@ -218,22 +228,29 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         storeData()
     }
 
+    /** removes current thread from watchlist*/
     private fun removeFromWatch(threadId: String) {
         watchlist.removeAll(watchlist.filter { it.thread.postID == threadId })
         storeData()
     }
 
+    /** deletes all watchlist entries*/
     fun deleteWatchData() {
         watchlist.clear()
         storeData()
         updateWatchlist()
     }
 
+    /** returns watched thread or null*/
     fun getWatched(threadId: String = sets.curThreadId): Watch? = watchlist.firstOrNull { it.thread.postID == threadId }
+
+    /** returns all data as list for backup*/
     fun exportSetting(): List<Any> = listOf(entryListRaw, watchlist, offlineList, sets)
 
+    /** returns index of post with given ID*/
     fun getPositionById(postID: String): Int = displayList.value?.indexOfFirst { it.postID == postID } ?: -1
 
+    /** imports data from backup*/
     fun importSettings(entryList: List<TgPost>, watlist: MutableList<Watch>, offList: MutableList<OfflineThread>, set: ModelSettings) {
         entryListRaw = entryList
         watchlist = watlist
@@ -244,14 +261,17 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         loadCurThread()
     }
 
+    /** imports watchlist from backup*/
     private fun importWatchlist(watlist: MutableList<Watch>) {
         watchlist = watlist
         storeData()
         updateWatchlist() //fetches images and summaries
     }
 
-    private fun loadFromOffline(): Boolean { //checks current sets to exist in download
+    /** loads current thread from offline data and returns false if not found*/
+    private fun loadFromOffline(): Boolean {
         val htmlFile = File(getApplication<Application>().filesDir, "offline/${sets.curThreadId}.html")
+        //html-file is actually JSON as post-list
 
         if (!htmlFile.exists()) return false
         val gson = Gson()
@@ -259,17 +279,19 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         val listType = object : TypeToken<List<TgPost>>() {}.type
         entryListRaw = gson.fromJson(json, listType)
 
+        //update dataview and settings
         postProcessRawList()
         sets.curTitle = entryListRaw.first().title
         sets.curURL = entryListRaw.first().url
         sets.curThreadId = Regex("""(\d+).html""").find(entryListRaw.first().url)?.groupValues?.get(1) ?: ""
 
-        fromOffline = true
+        fromOffline = true //offline flag
         updateSet()
 
         return true
     }
 
+    /** clean up after requests: watch/offline/board: show list, otherwise show thread, upadte lifedata*/
     private fun afterUpdateReq() {
         reqProg.pos = 0
         reqProg.max = 0
@@ -294,18 +316,20 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
+    /** deletes all offline data, keep offline-folder, refresh displayed list*/
     fun deleteOfflineData() {
         val offImgPath = File(getApplication<Application>().filesDir, "offline")
         deleteDirectory(offImgPath)
         offImgPath.mkdirs()
         offlineList.clear()
+
         storeData()
         updateSet()
         loadCurThread()
     }
 
+    /** deletes single offline thread*/
     fun deleteOffline(threadId: String = sets.curThreadId) {
-
         val htmlFile = File(getApplication<Application>().filesDir, "offline/${threadId}.html")
         htmlFile.delete() //remove html file
 
@@ -318,6 +342,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         if (index >= 0) offlineList.removeAt(index)
     }
 
+    /** Helper function: deletes all files in directory and subdirectories*/
     private fun deleteDirectory(directory: File) {
         if (directory.exists() && directory.isDirectory) {
             directory.listFiles()?.forEach { file ->
@@ -331,30 +356,32 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** downloads images of current thread*/
     fun downloadImages(threadId: String, onlyThumb: Boolean) {
         val offImgPath = File(getApplication<Application>().filesDir, "offline/${threadId}_img")
-        if (!offImgPath.exists()) offImgPath.mkdirs()
-
+        if (!offImgPath.exists()) offImgPath.mkdirs() //fallback, should be there
 
         var downloadlist = entryListImg.map { it.imgUrl }
-        if (!onlyThumb) {
+        if (!onlyThumb) { //if "only thumbnails" is selected, only download thread.imgUrl. Redirect of fullview-url in Glide-viewer
             downloadlist = entryListImg.flatMap { thread ->
                 listOf(
                     thread.imgUrl,
                     thread.imgUrl.replace("thumb", "src").replace("s.", ".")
+                    //thumbnails have format "/thumb/[...]s.[...]". Fullview path is calculated as "/src/[...].[...]"
                 )
             }
         }
-        downloadlist = downloadlist.filter {
+        downloadlist = downloadlist.filter { //only download images not already there!
             val file = File(offImgPath, it)
             !file.exists()
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch { //download images, show progress in mainUI
             downloadImgList(downloadlist, offImgPath)
         }
     }
 
+    /** downloads given images list into given folder path*/
     private suspend fun downloadImgList(downloadlist: List<String>, offImgPath: File) {
         withContext(Dispatchers.IO) {
             try {
@@ -403,6 +430,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** saves thread to offline data. add ID to offlineList*/
     fun writeToOffline(threadId: String, onlyThumbs: Boolean) {
         val gson = Gson()
         val cont = gson.toJson(this.entryListRaw)
@@ -420,6 +448,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         storeData()
     }
 
+    /** sets highlight to given index*/
     fun setHighlight(index: Int) {
         if (_displayList.value != null && hasIndex(index)) {
             if (highLightInd >= 0 && hasIndex(highLightInd)) _displayList.value!![highLightInd].isHighlight = false
@@ -428,27 +457,33 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** updates settings: thumbnail from full resolution in fullwidth mode. invokes lifedata update to refresh view*/
     fun setThumbFromFull(state: Boolean) {
         sets.thumbFromFull = state
         updateSet()
     }
 
+    /** returns thread if downloaded or null*/
     fun getDownload(id: String): OfflineThread? {
         return offlineList.firstOrNull { it.thread.postID == id }
     }
 
+    /** Checks if thread is downloaded */
     fun isDownloaded(id: String = sets.curThreadId): Boolean {
         return offlineList.any { it.thread.postID == id }
     }
 
+    /** checks if index is in range if displayed List*/
     fun hasIndex(index: Int): Boolean {
         return index >= 0 && index < (_displayList.value?.size ?: 0)
     }
 
+    /** displaylist livedata invkoe*/
     fun updateDisplayList() {
         _displayList.postValue(if (sets.showOnlyPics) entryListImg else entryListRaw)
     }
 
+    /** rotates through SWFModes and inkoes update*/
     fun rotateSFW() {
         sets.sfw = when (sets.sfw) {
             SFWModes.SFWQUESTION -> SFWModes.SFWREAL
@@ -458,6 +493,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         updateSet()
     }
 
+    /** rotates through thumbnail size modes and inkoes update*/
     fun rotateImgMode() {
         sets.imageMode = when (sets.imageMode) {
             imgMode.SMALL -> imgMode.BIG
@@ -467,7 +503,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         updateSet()
     }
 
-
+    /** get next position given a scrollmode in displaylist (next button)*/
     fun getNextPos(index: Int, mode: ScrollMode): Int {
         val list = _displayList.value
         if (list.isNullOrEmpty() || index >= getDisplayListSize()) return -1
@@ -478,10 +514,13 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** get previous position given a scrollmode in displaylist (prev button)*/
     fun getPrevPos(index: Int, mode: ScrollMode, withinCur: Boolean): Int {
         val list = _displayList.value
         if (list.isNullOrEmpty() || index >= getDisplayListSize()) return -1
         val sameType = (mode == ScrollMode.IMAGES) == (list[index].imgUrl.isNotEmpty())
+
+        //if half a post is in view, scroll to its top
         if (sameType && withinCur) return index
         return if (mode == ScrollMode.IMAGES) {
             list.subList(0, index).indexOfLast { it.imgUrl.isNotEmpty() }
@@ -490,12 +529,14 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** get last position given a scrollmode in displaylist (last button)*/
     fun getLastPos(index: Int, mode: ScrollMode): Int {
         val list = _displayList.value
         if (list.isNullOrEmpty() || index >= getDisplayListSize()) return -1
         return if (mode == ScrollMode.IMAGES) list.indexOfLast { it.imgUrl.isNotEmpty() } else list.lastIndex
     }
 
+    /** navigate to given board page */
     fun navigatePage(page: Int, rel: Boolean = false) {
         val npage = if (rel) sets.boardPage + page else page
         if (sets.listType == ThrdItemTyps.WATCH || npage < 0 || npage > sets.curMaxPage) return
@@ -504,28 +545,27 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         loadCurThread()
     }
 
+    /** Extracts ID from URL string */
     private fun getIdbyUrl(url: String): String = Regex("""(\d+).html""").find(url)?.groupValues?.get(1) ?: ""
 
-    /**
-     * requests https://questden.org + relative url, expecting it to be a single thread
-     * regex is used to parse this into displayDataList
-     * calls displayThreadList() then to refresh recycleViewer
-     * watchlist count update if watched
-     * storedata to open again on start +watchlist save)
-     *
-     * complex method since none of these parts is repeated somewhere else.
-     */
-    fun loadCurThread() {//reload current.
+    /** reloads current thread or updates watchlist  */
+    fun loadCurThread() {
         if (sets.listType == ThrdItemTyps.WATCH) updateWatchlist()
         else loadThread(sets.curURL, sets.listType)
     }
 
+    /**
+     * fills dataviewmodel with data from requests
+     * handles all different thread modes, watchlist update checks or update downloaded threads
+     * access do downloaded data is redirected to storage. Internet access is checked
+     * requires relative URL, should work with absolute URLs as well (tgchan.org and questden.org)
+     * */
     fun loadThread(url: String, mode: ThrdItemTyps, onlyCheckWatch: Boolean = false, updOffline: Boolean = false, backwards: Boolean = false) {
         var murl = url
         val fet = murl.indexOf("#")
-        if (fet >= 0) murl = murl.substring(0, fet)
+        if (fet >= 0) murl = murl.substring(0, fet) //remove highlight #
 
-        //weird bug where board has normal url -> change type
+        //fallback if mode is board, but unknown board is requested
         if (url != "" && mode == ThrdItemTyps.BOARD && !URLBoards.entries.any { it.url == url }) {
             loadThread(url, ThrdItemTyps.THREAD, onlyCheckWatch, updOffline)
             return
@@ -534,14 +574,30 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         val threadId = getIdbyUrl(murl)
         val watchedItem: Watch? = getWatched(threadId)
 
+        //Internet connection check
+        val context = getApplication<Application>().applicationContext
+        if (!isInternetAvailable(context)) {
+            //only allow watchlist, downloaded, sync, backup and showing downloaded threads
+            //do not allow boards, online threads or updating downloaded threads
+            if ((mode == ThrdItemTyps.THREAD && !isDownloaded(threadId)) || updOffline ||
+                mode == ThrdItemTyps.BOARD
+            ) {
+                MsgHelper.showMsg(context, "You are offline!\nOnly downloaded threads can be displayed.")
+                return
+            }
+        }
+
+        //back button for navigation
         if (!onlyCheckWatch && !updOffline && !backwards)
             backActionStack.add(backPage(sets.listType, sets.curURL))
 
+        //progress lifedata
         reqProg.max++
         reqProg.status = ProgStatus.RUNNING
         fromOffline = false
         updateReqPrg()
 
+        //not just checking status: update sets.
         if (!onlyCheckWatch) {
             sets.listType = mode
             sets.curURL = murl
@@ -577,7 +633,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 sets.curThreadId = ""
                 sets.curMaxPage = 0
                 sets.boardPage = 0
-                showOfflines()
+                showOfflines() //display list
                 storeData()
                 afterUpdateReq()
                 return
@@ -588,7 +644,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 sets.curThreadId = ""
                 sets.curMaxPage = 0
                 sets.boardPage = 0
-                showWatches()
+                showWatches() //display list
                 storeData()
                 afterUpdateReq()
                 return
@@ -602,19 +658,18 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 reqProg.max = 0
                 reqProg.status = ProgStatus.ERROR
 
-                val sw = StringWriter()
-                e.printStackTrace(PrintWriter(sw))
                 val errorMessage = e.message ?: "Unknown Error"
-                reqProg.msg = "creating download Coroutine: $errorMessage\nStackTrace:\n$sw"
+                reqProg.msg = "Creating Download Coroutine: $errorMessage"
                 updateReqPrg()
             }
         }
     }
 
+    /** Actual Network request to questden.org */
     private suspend fun makeNetRequest(murl: String, mode: ThrdItemTyps, onlyCheckWatch: Boolean, updOffline: Boolean): Unit = withContext(Dispatchers.IO) {
         val watchedItem = getWatched(getIdbyUrl(murl))
-        val newestId = if (onlyCheckWatch) watchedItem?.lastReadId else null
-        val request =
+        val newestId = if (onlyCheckWatch) watchedItem?.lastReadId else null //update watchlist after reading status
+        val request = //handle absolute/relative URLs
             if (murl.startsWith("https://"))
                 Request.Builder().url(murl).build()
             else
@@ -630,24 +685,20 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 val li = when (mode) {
                     ThrdItemTyps.THREAD -> parseThreadMode(resp, newestId)
                     ThrdItemTyps.BOARD -> parseBoardMode(resp)
-                    ThrdItemTyps.WATCH -> throw Exception("WATCH mode not supported in MakeNetRequest")
-                    ThrdItemTyps.OFFLINE -> throw Exception("OFFLINE mode not supported in MakeNetRequest")
+                    ThrdItemTyps.WATCH -> throw Exception("WATCH mode not supported in MakeNetRequest") //failsave, should not be reached
+                    ThrdItemTyps.OFFLINE -> throw Exception("OFFLINE mode not supported in MakeNetRequest") //failsave, should not be reached
                 }
 
                 processParsedData(li, murl, mode, watchedItem, onlyCheckWatch) //sets storage to results
-
                 if (updOffline) updateOfflineMode() //updates offline data
-
                 storeData() //stores current view and settings
 
                 if (reqProg.pos == reqProg.max) afterUpdateReq()
             } catch (e: Exception) {
                 reqProg.status = ProgStatus.ERROR
 
-                val sw = StringWriter()
-                e.printStackTrace(PrintWriter(sw))
                 val errorMessage = e.message ?: "Unknown Error"
-                reqProg.msg = "Error: $errorMessage\nStackTrace:\n$sw"
+                reqProg.msg = "Creating Net Request: $errorMessage"
 
                 updateReqPrg()
                 afterUpdateReq()
@@ -655,6 +706,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** Helper function: counts occurrences of a string in a text */
     private fun countOccurrences(text: String, search: String): Int {
         var count = 0
         var index = text.indexOf(search)
@@ -667,6 +719,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         return count
     }
 
+    /** Handles Threads/Quests. Accepts HTMLstring and newest ID for update watchlist*/
     private fun parseThreadMode(resp: String, newestId: String?): MutableList<TgPost> {
         if (newestId != null) { // Neuste Beiträge anzeigen
             val startIdx = resp.indexOf("""id="reply$newestId"""")
@@ -676,7 +729,6 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
             val posts = doc.select("table").map { parseJSoupToTgThread(it) }
                 .filter { it.postID.isNotEmpty() }
                 .toMutableList()
-
 
             // Thread-Informationen abrufen und hinzufügen
             val infoSectionStart = resp.indexOf("<form id=\"delform\"")
@@ -689,7 +741,6 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 if (threadInfo.title.isEmpty()) threadInfo.title = "Untitled"
                 threadInfo.postCount = countOccurrences(resp, "<blockquote>")
             }
-
 
             if (posts.isEmpty()) { //nothing new
                 return if (threadInfo == null)
@@ -710,7 +761,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Helper function to parse BOARD mode
+    /** Helper function to parse BOARD mode using regexp*/
     private fun parseBoardMode(resp: String): MutableList<TgPost> {
         val rexSec = Regex("<div id=\"thread.*?>(.*?)<blockquote>(.*?)</blockquote>(?:.*?<span.*?class=\"omittedposts\">.*?(\\d+).*?posts.*?omitted)?", RegexOption.DOT_MATCHES_ALL)
         val rexTitle = Regex("<span.*?class=\"filetitle\".*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
@@ -747,6 +798,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         return threads
     }
 
+    /** Handles processed list of Posts */
     private fun processParsedData(
         li: MutableList<TgPost>, murl: String, mode: ThrdItemTyps, watchedItem: Watch?, onlyCheckWatch: Boolean
     ) {
@@ -763,11 +815,12 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 handleBoardMode(li)
             }
 
-            ThrdItemTyps.WATCH -> throw Exception("WATCH not supported in processParsedData")
-            ThrdItemTyps.OFFLINE -> throw Exception("OFFLINE not supported in processParsedData")
+            ThrdItemTyps.WATCH -> throw Exception("WATCH not supported in processParsedData") //failsave, should not be reached
+            ThrdItemTyps.OFFLINE -> throw Exception("OFFLINE not supported in processParsedData")//failsave, should not be reached
         }
     }
 
+    /** Preloads all thumbnails for faster view while scrolling */
     private fun preloadThumbnails() {
         val context = getApplication<Application>().applicationContext
         Glide.with(context)
@@ -775,9 +828,10 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
             .preload()  // Bilder werden im Hintergrund vorab geladen
     }
 
+    /** Handles Watchlist Mode, updating thread counters. Posts before lastreadID are removed beforehand*/
     private fun handleWatchOnlyMode(li: MutableList<TgPost>, watchedItem: Watch?) {
         if (li.size == 0) return
-        val inf = li.removeAt(li.lastIndex)
+        val inf = li.removeAt(li.lastIndex) //last item is artificial added with meta data
         val newPosts = li.count { it.postID.isNotEmpty() }
         val newImgs = li.count { it.imgUrl.isNotEmpty() }
 
@@ -795,6 +849,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** Handles Thread Mode, updating dataviewmodel settings and list */
     private fun handleThreadMode(li: MutableList<TgPost>, murl: String, watchedItem: Watch?) {
         sets.curTitle = li.firstOrNull()?.title.orEmpty()
         sets.curThreadId = Regex("""(\d+).html""").find(murl)?.groupValues?.get(1).orEmpty()
@@ -808,6 +863,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** Processes rawlist, adding an image counter and creating the listimg objekt*/
     private fun postProcessRawList() {
         var imageCount = 0
         entryListRaw.forEach { thread ->
@@ -817,9 +873,10 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
             thread.imgCounter = imageCount  // Bildzähler in jedem Eintrag speichern
             thread.threadExtended = false //preview extended in overview
         }
-        entryListImg = entryListRaw.filter { it.imgUrl.isNotEmpty() }
+        entryListImg = entryListRaw.filter { it.imgUrl.isNotEmpty() } //only items with images
     }
 
+    /** Handles Board Mode, updating dataviewmodel settings and list */
     private fun handleBoardMode(li: MutableList<TgPost>) {
         sets.curTitle = sets.curURL
         sets.curThreadId = ""
@@ -832,13 +889,14 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-    // Function to handle offline updates
+    /** updates downloaded threads*/
     private fun updateOfflineMode() {
         val onlyThumb = offlineList.firstOrNull { it.thread.postID == sets.curThreadId }?.onlyThumbs ?: false
         writeToOffline(sets.curThreadId, onlyThumb)
         downloadImages(sets.curThreadId, onlyThumb)
     }
 
+    /** updates watchlist, iterating through items*/
     private fun updateWatchlist() {
         for (w in watchlist) {
             loadThread(w.thread.url, ThrdItemTyps.THREAD, onlyCheckWatch = true)
@@ -846,14 +904,22 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         if (watchlist.size == 0) afterUpdateReq()
     }
 
-//Server interaction section
+    /** checks for  internet connection using getSystemService as ConnectivityManager*/
+    private fun isInternetAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo //deprecated, minsdk 16 support
+        return networkInfo != null && networkInfo.isConnected //deprecated, minsdk 16 support
+    }
 
+//Server interaction section
+    /** Update credentials for server synchronization*/
     fun setCredServer(name: String = sets.loginName, pw: String = sets.loginPW, saveLogin: Boolean = sets.autoLogin) {
         sets.loginName = name
         sets.loginPW = pw
         sets.autoLogin = saveLogin
     }
 
+    /** Helper function to format dates */
     private fun formatDate(unixTimestampS: Long = System.currentTimeMillis() / 1000): String {
         val date = Date(unixTimestampS * 1000)
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -861,6 +927,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         return dateFormat.format(date)
     }
 
+    /** Login to server, updating logState livedata and token */
     fun loginServer() {
         val jsons = JSONObject().apply {
             put("username", sets.loginName)
@@ -887,6 +954,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
+    /** Download watchlist from server using token */
     fun downloadServer() {
         val jsons = JSONObject().apply {
             put("token", logState.value?.token)
@@ -941,6 +1009,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 logState.value?.statusText = "Download failed(#3)!"
             }
             /*
+             Server JSON format:
             {
                 "numLinkMode":0,
                 "threads":{
@@ -963,6 +1032,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                   }
             }
 
+        // typescript types in userscript:
         type threaddata = {
             label: string, //title
             author: string, //authorname
@@ -986,7 +1056,9 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
+    /** Upload watchlist to server using token */
     fun uploadServer() {
+        // Server JSON format:
         // {"numLinkMode":0,"threads":{"_type":"Map","value":[["1092522",{"label":"History Unmade - Thread 3","author":"Silicon","section":"quest","highImgOnly":true,"highIDs":[],"highNames":[],"ignoreIDs":[],"ignoreNames":[],"lastReadId":"1099138","currentReadId":"","newEntrCnt":0,"totalEntrCnt":164}],}
         var data = """{"numLinkMode":${sets.numLinkMode},"threads":{"_type":"Map","value":["""
         watchlist.joinToString {
@@ -1016,6 +1088,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
+    /** Helper function to make a POST request to the server and updates logState*/
     private fun makePostRequest(jsonBody: String, onSuccess: (JSONObject) -> Unit) {
 
         val client = OkHttpClient()
@@ -1052,25 +1125,30 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     }
 }
 
-class ReplyViewModel : ViewModel() {
-    var messageText: String=""
-    var author: String=""
-    var subject: String=""
-    var email: String=""
-    var cursorPosition: Int =0
-    var uploadFile: RequestBody?=null
-    var uploadName:String=""
 
-    fun clear(){
-        messageText=""
-        cursorPosition=0
-        author=""
-        subject=""
-        email=""
-        uploadFile=null
-        uploadName=""
+/** Viewmodel for reply form, preserving inputs during navigation
+ * No Livedata, since no Observer
+ * */
+class ReplyViewModel : ViewModel() {
+    var messageText: String = ""
+    var author: String = ""
+    var subject: String = ""
+    var email: String = ""
+    var cursorPosition: Int = 0
+    var uploadFile: RequestBody? = null
+    var uploadName: String = ""
+
+    fun clear() {
+        messageText = ""
+        cursorPosition = 0
+        author = ""
+        subject = ""
+        email = ""
+        uploadFile = null
+        uploadName = ""
     }
 
+    /**Inser at cursor, mostly for references >># */
     fun insertAtCur(newText: String) {
         val updatedText = StringBuilder(messageText).apply {
             insert(cursorPosition, newText)
@@ -1081,51 +1159,60 @@ class ReplyViewModel : ViewModel() {
     }
 }
 
+/** Helper class for wiki links*/
 data class LinkItem(val text: String, val url: String)
 
+/** Viewmodel for Chapter List*/
 class WikiViewModel : ViewModel() {
-    private val _linksLiveData = MutableLiveData<List<LinkItem>>()
+    private val _linksLiveData = MutableLiveData<List<LinkItem>>() //actual List
     val linksLiveData: LiveData<List<LinkItem>> = _linksLiveData
 
-    private val _reqProgLive = MutableLiveData<ProgStatus>()
+    private val _reqProgLive = MutableLiveData<ProgStatus>() //progress status
     val reqProgLive: LiveData<ProgStatus> get() = _reqProgLive
+    //default is IDLE, request set it to RUNNING, afterwards its DONE until processed, then again IDLE
 
-    private val _errorLiveData = MutableLiveData<String>()
+    private val _errorLiveData = MutableLiveData<String>() //error message
     val errorLiveData: LiveData<String> = _errorLiveData
 
     init {
         setIdle()
     }
 
-    fun setIdle(){
-        _reqProgLive.value=ProgStatus.IDLE
+    fun setIdle() {
+        _reqProgLive.value = ProgStatus.IDLE
     }
+
+    /** fetch links from a wiki page and update progress
+     * 1. search for thread ID in wiki search and extract URL of thread
+     * 2. request wiki page of thread and extract infobox.
+     * 3. extract links from infobox  */
     fun loadTableData(threadId: String) {
         _reqProgLive.postValue(ProgStatus.RUNNING)
         viewModelScope.launch {
             try {
-                val searchUrl = "https://questden.org/w/index.php?search=$threadId"
-                val wikiUrl = fetchWikiUrl(searchUrl)
+                val searchUrl = "https://questden.org/w/index.php?search=$threadId" //search wiki
+                val wikiUrl = fetchWikiUrl(searchUrl) //fetch wiki thread url
                 if (wikiUrl != null) {
-                    val links = fetchLinksFromWiki("https://questden.org$wikiUrl")
+                    val links = fetchLinksFromWiki("https://questden.org$wikiUrl") //visit wiki thread and extract infobox links
                     if (links.isNotEmpty()) {
                         _linksLiveData.postValue(links)
                         _reqProgLive.postValue(ProgStatus.DONE)
                     } else {
-                        _errorLiveData.postValue("Keine Links gefunden.")
+                        _errorLiveData.postValue("No chapters found.")
                         _reqProgLive.postValue(ProgStatus.ERROR)
                     }
                 } else {
-                    _errorLiveData.postValue("Kein passender Eintrag gefunden.")
+                    _errorLiveData.postValue("No thread found.")
                     _reqProgLive.postValue(ProgStatus.ERROR)
                 }
             } catch (e: Exception) {
-                _errorLiveData.postValue("Fehler: ${e.message}")
+                _errorLiveData.postValue("Error: ${e.message}")
                 _reqProgLive.postValue(ProgStatus.ERROR)
             }
         }
     }
 
+    /** fetch wiki thread url from wiki search, first search result identified by CSS selector */
     private suspend fun fetchWikiUrl(searchUrl: String): String? = withContext(Dispatchers.IO) {
         val client = OkHttpClient()
         val request = Request.Builder().url(searchUrl).build()
@@ -1134,7 +1221,7 @@ class WikiViewModel : ViewModel() {
         if (response.isSuccessful) {
             response.body?.string()?.let { html ->
                 val doc = Jsoup.parse(html)
-                val link = doc.selectFirst(".mw-search-results .mw-search-result-heading a")
+                val link = doc.selectFirst(".mw-search-results .mw-search-result-heading a") //first search result
                 return@withContext link?.attr("href")
             }
         } else {
@@ -1142,6 +1229,7 @@ class WikiViewModel : ViewModel() {
         }
     }
 
+    /** visit wiki thread and extract links from infobox by CSS selector*/
     private suspend fun fetchLinksFromWiki(wikiUrl: String): List<LinkItem> = withContext(Dispatchers.IO) {
         val client = OkHttpClient()
         val request = Request.Builder().url(wikiUrl).build()
@@ -1150,8 +1238,8 @@ class WikiViewModel : ViewModel() {
         if (response.isSuccessful) {
             response.body?.string()?.let { html ->
                 val doc = Jsoup.parse(html)
-                return@withContext doc.select(".infobox a[href*=html]").map {
-                    LinkItem(text = it.text(), url = it.attr("href").replaceFirst("https://questden.org","",ignoreCase = true).replaceFirst("https://tgchan.org","",ignoreCase = true))
+                return@withContext doc.select(".infobox a[href*=html]").map { //CSS selector of links to .html pages in infobox. turn absolute to relative urls.
+                    LinkItem(text = it.text(), url = it.attr("href").replaceFirst("https://questden.org", "", ignoreCase = true).replaceFirst("https://tgchan.org", "", ignoreCase = true))
                 }
             }
         }

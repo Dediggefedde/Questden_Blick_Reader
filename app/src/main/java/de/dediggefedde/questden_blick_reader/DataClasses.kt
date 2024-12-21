@@ -14,6 +14,7 @@ enum class URLBoards(val url: String) {
     MEEP("/kusaba/meep/"),
     QUEST("/kusaba/quest/"),
     QUESTDIS("/kusaba/questdis/"),
+    QUESTARCH("/kusaba/questarch/"),
     TG("/kusaba/tg/")
 }
 
