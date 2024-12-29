@@ -7,6 +7,12 @@ android {
     namespace 'de.dediggefedde.questden_blick_reader'
     compileSdk 34
 
+    applicationVariants.configureEach { variant ->
+        variant.outputs.configureEach { output ->
+            output.outputFileName = "Questden_Blick_Reader.apk"
+        }
+    }
+
     defaultConfig {
         applicationId 'de.dediggefedde.questden_blick_reader'
         minSdk 16

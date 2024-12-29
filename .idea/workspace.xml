@@ -126,10 +126,14 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="Improved Sync with server (redone, state livedata)&#10;Improved tag converter (redone)&#10;Improved image loader (placeholder and preload on full res)&#10;upload/download fail logs out now.&#10;Improved backhandler on other fragments (switch to main)&#10;adjusted Appupdater to new github&#10;improved scroller (new flow, separated from highlight)">
-      <change afterPath="$PROJECT_DIR$/.kotlin/sessions/kotlin-compiler-15280203788727665473.salive" afterDir="false" />
+    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="Fallback for image-only mode to go to previous image post if current position is in-between">
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__androidx_multidex_multidex_instrumentation_2_0_0_aar.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__androidx_transition_transition_1_2_0_aar.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.kotlin/sessions/kotlin-compiler-15280203788727665473.salive" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/version.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/version.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -718,14 +722,6 @@
       <option name="project" value="LOCAL" />
       <updated>1637616636225</updated>
     </task>
-    <task id="LOCAL-00053" summary="updated gradle plugin system&#10;upgraded packages but still support minsdk 16&#10;fixed warnings and technical stuff&#10;Zoom/Panel of fullview-image using Photoview library (mentioning licenses WIP)&#10;first implementation of google OSS license list, doesn't work, list empty&#10;replaced outdated staticLayout for floating text around images&#10;replaced outdated &quot;position&quot; in notifyItemChanged within viewHolder with itemView.invalidate()&#10;Updated name">
-      <option name="closed" value="true" />
-      <created>1733154625836</created>
-      <option name="number" value="00053" />
-      <option name="presentableId" value="LOCAL-00053" />
-      <option name="project" value="LOCAL" />
-      <updated>1733154625836</updated>
-    </task>
     <task id="LOCAL-00054" summary="Image layout mode update&#10;photoview for img zoom&#10;preparation for onboarding&#10;register link (updated website for phones)&#10;image getter update: both textviews get images, placeholder, caching&#10;dialogs for about, license">
       <option name="closed" value="true" />
       <created>1733582135208</created>
@@ -758,7 +754,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735486943769</updated>
     </task>
-    <option name="localTasksCounter" value="58" />
+    <task id="LOCAL-00058" summary="Fallback for image-only mode to go to previous image post if current position is in-between">
+      <option name="closed" value="true" />
+      <created>1735490000301</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1735490000302</updated>
+    </task>
+    <option name="localTasksCounter" value="59" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -787,7 +791,6 @@
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="corrected update url for json.&#10;Test working!" />
     <MESSAGE value="updating apk signed created" />
     <MESSAGE value="fixed crashing app by proguard-rules.pro and enums on release builds..." />
     <MESSAGE value="fixed error message when watching something new&#10;fix at checking target thread when adding to watchlist&#10;added stacktrace to volley errors&#10;new release signed apk" />
@@ -812,7 +815,8 @@
     <MESSAGE value="Full resolution option in fullwidth mode&#10;Fix for loading full urls as threads&#10;Added Reply form (fragment,viewmodel)&#10;Added Chapter overview from wiki (fragment,viewmodel)&#10;Unified message helper. Tried out snackbar, reverted to Toast.&#10;New Toasts now hide old ones&#10;tidied up code and layouts&#10;date,title,author click adds reference to reply form&#10;reply password generation &amp; storage&#10;Menu entry visibility fixes&#10;confirm dialog for deleting data&#10;screenshots for onboarding added" />
     <MESSAGE value="Custom error layout&#10;documented viewmodel&#10;offline mode detection and handling&#10;Questarch added" />
     <MESSAGE value="Improved Sync with server (redone, state livedata)&#10;Improved tag converter (redone)&#10;Improved image loader (placeholder and preload on full res)&#10;upload/download fail logs out now.&#10;Improved backhandler on other fragments (switch to main)&#10;adjusted Appupdater to new github&#10;improved scroller (new flow, separated from highlight)" />
-    <option name="LAST_COMMIT_MESSAGE" value="Improved Sync with server (redone, state livedata)&#10;Improved tag converter (redone)&#10;Improved image loader (placeholder and preload on full res)&#10;upload/download fail logs out now.&#10;Improved backhandler on other fragments (switch to main)&#10;adjusted Appupdater to new github&#10;improved scroller (new flow, separated from highlight)" />
+    <MESSAGE value="Fallback for image-only mode to go to previous image post if current position is in-between" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fallback for image-only mode to go to previous image post if current position is in-between" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -836,11 +840,6 @@
           <url>file://$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/GUIListViewClasses.kt</url>
           <line>352</line>
           <option name="timeStamp" value="25" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataViewModel.kt</url>
-          <line>168</line>
-          <option name="timeStamp" value="29" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
