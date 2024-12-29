@@ -138,7 +138,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Thread.setDefaultUncaughtExceptionHandler(errorHandler)
 
         onBackPressedDispatcher.addCallback(this) {
-            if (viewModel.backLinkStack.isNotEmpty()) {
+            if(currentFragment is SyncFragment || currentFragment is ReplyFragment || currentFragment is WikiFragment){
+                showMainList()
+                supportFragmentManager.popBackStack()
+            }else if (viewModel.backLinkStack.isNotEmpty()) {
                 val id = viewModel.backLinkStack.pop()
                 val pos = viewModel.getPositionById(id)
                 scrollHighlight(pos, backwards = true)
@@ -161,8 +164,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         AppUpdater(this)
             .setUpdateFrom(UpdateFrom.JSON)
-            // .setGitHubUserAndRepo("Dediggefedde", "Questden_Blick_Reader")
-            .setUpdateJSON("""https://raw.githubusercontent.com/Dediggefedde/Questden_Blick_Reader/WIP/app/version.json""") //TODO WIP to master
+            .setUpdateJSON("""https://raw.githubusercontent.com/Dediggefedde/Questden_Blick_Reader/release/app/version.json""")
             .start()
     }
     fun generateRandomPassword(length: Int = 6): String {

@@ -3,6 +3,7 @@ package de.dediggefedde.questden_blick_reader
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import androidx.lifecycle.AndroidViewModel
@@ -11,6 +12,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +32,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import org.json.JSONArray
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import java.io.IOException
@@ -65,6 +71,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     private var entryListImg = listOf<TgPost>() //only entries with images
     private var watchlist = mutableListOf<Watch>() //list of watched threads
     private var offlineList = mutableListOf<OfflineThread>() //list of offline available threads (first posts)
+    val fullImgDimMap = mutableMapOf<String, Pair<Int, Int>>()
 
     var logState = MutableLiveData<LoginState>() //Login state life data
     private val serverURL = "https://phi.pf-control.de/tgchan/API.php" //URL for my server to synchronize threads
@@ -99,13 +106,15 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         logState.value = LoginState()
     }
 
-    /** helper functions to update livedata */
+    /** update livedata */
     fun updateSet() {
         _setsLiveData.postValue(sets.copy())
     }
+
     private fun updateDownPrg() {
         _downProgLive.postValue(downProg.copy())
     }
+
     private fun updateReqPrg() {
         _reqProgLive.postValue(reqProg.copy())
     }
@@ -118,6 +127,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         )
         return Gson().toJson(safeSettings)
     }
+
     fun serializeWatchList(): String = Gson().toJson(watchlist)
     fun serializeDownloadList(): String = Gson().toJson(offlineList)
 
@@ -126,14 +136,14 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     fun getItemImageCnt(index: Int): Int = _displayList.value?.get(index)?.imgCounter ?: 0
 
     /** updates current reading ID for the given thread*/
-    private fun updateCurReadId(thread: String, postId: String) {
+    private fun updateCurReadInd(thread: String, postId: String) {
         if (postId == "" || thread == "") return
         sets.curReadPostID[thread] = postId
         updateSet()
     }
 
     /** updates current reading ID of current list to post at index*/
-    fun updateCurReadId(index: Int) {
+    fun updateCurReadInd(index: Int) {
         val currentList = _displayList.value
         if (sets.curThreadId.isNotEmpty() && currentList != null && hasIndex(index)) {
             val postId = currentList[index].postID
@@ -460,6 +470,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
     /** updates settings: thumbnail from full resolution in fullwidth mode. invokes lifedata update to refresh view*/
     fun setThumbFromFull(state: Boolean) {
         sets.thumbFromFull = state
+        if(state)preloadFullImages()
         updateSet()
     }
 
@@ -706,24 +717,12 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** Helper function: counts occurrences of a string in a text */
-    private fun countOccurrences(text: String, search: String): Int {
-        var count = 0
-        var index = text.indexOf(search)
-
-        while (index >= 0) {
-            count++
-            index = text.indexOf(search, index + 1)
-        }
-
-        return count
-    }
-
     /** Handles Threads/Quests. Accepts HTMLstring and newest ID for update watchlist*/
     private fun parseThreadMode(resp: String, newestId: String?): MutableList<TgPost> {
         if (newestId != null) { // Neuste Beiträge anzeigen
             val startIdx = resp.indexOf("""id="reply$newestId"""")
-            val trimmedResp = if (startIdx > 0) resp.substring(startIdx) else resp
+            var trimmedResp = if (startIdx > 0) resp.substring(startIdx) else resp
+            trimmedResp=StringUtils.preserveHTMLPreBreaks(trimmedResp)
             val doc = Jsoup.parse(trimmedResp)
 
             val posts = doc.select("table").map { parseJSoupToTgThread(it) }
@@ -739,7 +738,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 .firstOrNull { it.postID.isNotEmpty() }
             if (threadInfo !== null) {
                 if (threadInfo.title.isEmpty()) threadInfo.title = "Untitled"
-                threadInfo.postCount = countOccurrences(resp, "<blockquote>")
+                threadInfo.postCount = StringUtils.countOccurrences(resp, "<blockquote>")
             }
 
             if (posts.isEmpty()) { //nothing new
@@ -752,7 +751,9 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 return posts
             }
         } else {// Thread anzeigen, wenn keine neue ID vorhanden
-            val doc = Jsoup.parse(resp)
+            val presResp = StringUtils.preserveHTMLPreBreaks(resp)
+            val doc = Jsoup.parse(presResp)
+
             val tmpLi = doc.select("#delform,#delform>table").map { parseJSoupToTgThread(it) }
                 .filter { it.postID.isNotEmpty() }
                 .toMutableList()
@@ -820,12 +821,38 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun preloadFullImages(){
+        val context = getApplication<Application>().applicationContext
+        fullImgDimMap.clear()
+
+        entryListImg.forEach { entry ->
+            val fullImageUrl = entry.imgUrl.replace("thumb", "src").replace("s.", ".")
+            Glide.with(context)
+                .load(fullImageUrl)  // Liste der URLs für die Thumbnails
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(p0: GlideException?, p1: Any?, target: Target<Drawable>?, p3: Boolean): Boolean {
+                        return false
+                    }
+                    override fun onResourceReady(p0: Drawable?, p1: Any?, target: Target<Drawable>?, p3: DataSource?, p4: Boolean): Boolean {
+                        p0?.let {
+                            val width = it.intrinsicWidth
+                            val height = it.intrinsicHeight
+                            fullImgDimMap[fullImageUrl] = Pair(width, height)
+                        }
+                        return false
+                    }
+                })
+                .preload()
+        }
+    }
+
     /** Preloads all thumbnails for faster view while scrolling */
     private fun preloadThumbnails() {
         val context = getApplication<Application>().applicationContext
         Glide.with(context)
             .load(entryListImg.map { it.imgUrl })  // Liste der URLs für die Thumbnails
             .preload()  // Bilder werden im Hintergrund vorab geladen
+        if(sets.thumbFromFull)preloadFullImages()
     }
 
     /** Handles Watchlist Mode, updating thread counters. Posts before lastreadID are removed beforehand*/
@@ -954,6 +981,23 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
+    /** Logout from server, updating logState livedata and token */
+    fun logoutServer() {
+        logState.value?.token=""
+        logState.value?.accessDate = 0
+        logState.value?.errorCode = 0
+        logState.value?.promptText = "Logged out!"
+        logState.value?.statusText = "Logged out!"
+        logState.postValue(logState.value)//trigger observe
+    }
+
+    /** clears logstate without invoke. Called after logstate is handled to prevent double message */
+    fun clearLoginStatus(){
+        logState.value?.errorCode = 0
+        logState.value?.promptText = ""
+        logState.value?.statusText = ""
+    }
+
     /** Download watchlist from server using token */
     fun downloadServer() {
         val jsons = JSONObject().apply {
@@ -987,13 +1031,21 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
 
                     //unused in app, stored for upload
                     wat.highImgOnly = value.optBoolean("highImgOnly", true)
-                    wat.highIDs = value.optString("highIDs", "")
-                    wat.highNames = value.optString("highNames", "")
-                    wat.ignoreIDs = value.optString("ignoreIDs", "")
-                    wat.ignoreNames = value.optString("ignoreNames", "")
+                    wat.highIDs = value.optJSONArray("highIDs")?.let { jsonArray ->
+                        List(jsonArray.length()) { jsonArray.getString(it) }
+                    } ?: emptyList()
+                    wat.highNames = value.optJSONArray("highNames")?.let { jsonArray ->
+                        List(jsonArray.length()) { jsonArray.getString(it) }
+                    } ?: emptyList()
+                    wat.ignoreIDs = value.optJSONArray("ignoreIDs")?.let { jsonArray ->
+                        List(jsonArray.length()) { jsonArray.getString(it) }
+                    } ?: emptyList()
+                    wat.ignoreNames = value.optJSONArray("ignoreNames")?.let { jsonArray ->
+                        List(jsonArray.length()) { jsonArray.getString(it) }
+                    } ?: emptyList()
 
                     itemList.add(wat)
-                    updateCurReadId(key, value.optString("currentReadId", ""))
+                    updateCurReadInd(key, value.optString("currentReadId", ""))
                 }
                 importWatchlist(itemList)
 
@@ -1008,75 +1060,108 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 logState.value?.promptText = "Download failed(#3)!"
                 logState.value?.statusText = "Download failed(#3)!"
             }
-            /*
-             Server JSON format:
-            {
-                "numLinkMode":0,
-                "threads":{
-                    "_type":"Map",
-                    "value":[
-                        ["1092522",
-                     x       {"label":"History Unmade - Thread 3",
-                     x       "author":"Silicon",
-                     x       "section":"quest",
-                            "highImgOnly":true,
-                            "highIDs":[],
-                            "highNames":[],
-                            "ignoreIDs":[],
-                            "ignoreNames":[],
-                     x       "lastReadId":"1099138",
-                     x       "currentReadId":"",
-                            "newEntrCnt":0,
-                            "totalEntrCnt":164}
-                         ],
-                  }
-            }
-
-        // typescript types in userscript:
-        type threaddata = {
-            label: string, //title
-            author: string, //authorname
-            section: string, //board string
-            highImgOnly: boolean, //only highlight on new images
-            highIDs: string[], //only highlight on these IDs
-            highNames: string[], //only highlight on these names
-            ignoreIDs: string[], //ignore posts from these IDs
-            ignoreNames: string[], //ignore posts from these names
-            lastReadId: string, //id of last read post
-            currentReadId: string, //id of currently focues post
-            newEntrCnt: number,// new posts detected at last query
-            totalEntrCnt: number, //total number of posts
-        }
-        interface watchdataform {
-            threads: Map<string, threaddata>, //id -> threaddata
-            default: threaddata,
-            numLinkMode: number, //0:new, 1:lastread, 2:none;
-        };
-	**/
         })
     }
 
+    data class ThreadData(
+        val label: String,
+        val author: String,
+        val section: String,
+        val highImgOnly: Boolean,
+        val highIDs: List<String>,
+        val highNames: List<String>,
+        val ignoreIDs: List<String>,
+        val ignoreNames: List<String>,
+        val lastReadId: String,
+        val currentReadId: String,
+        val newEntrCnt: Int,
+        val totalEntrCnt: Int
+    )
+    data class Threads(
+        val type: String = "Map",
+        val value: List<Pair<String, ThreadData>>
+    )
+    data class Data(
+        val numLinkMode: Int,
+        val threads: Threads,
+        val default: ThreadData
+    )
+
     /** Upload watchlist to server using token */
     fun uploadServer() {
-        // Server JSON format:
-        // {"numLinkMode":0,"threads":{"_type":"Map","value":[["1092522",{"label":"History Unmade - Thread 3","author":"Silicon","section":"quest","highImgOnly":true,"highIDs":[],"highNames":[],"ignoreIDs":[],"ignoreNames":[],"lastReadId":"1099138","currentReadId":"","newEntrCnt":0,"totalEntrCnt":164}],}
-        var data = """{"numLinkMode":${sets.numLinkMode},"threads":{"_type":"Map","value":["""
-        watchlist.joinToString {
-            val currentReadId = sets.curReadPostID[it.thread.postID] ?: ""
 
-            """["${it.thread.postID}",{"label":"${it.thread.title}","author":"${it.thread.author}","section":"${it.thread.url.split("/")[2]}",
-                |"highImgOnly":${it.highImgOnly},"highIDs":${it.highIDs},"highNames":${it.highNames},"ignoreIDs":${it.ignoreIDs},
-                |"ignoreNames":${it.ignoreNames},"lastReadId":"${it.lastReadId}","currentReadId":"$currentReadId",
-                |"newEntrCnt":${it.newPosts},"totalEntrCnt":${it.thread.postCount}}]""".trimMargin()
+        val data = JSONObject()
+        data.put("numLinkMode", sets.numLinkMode)
+
+        val threads = JSONObject()
+        threads.put("_type", "Map")
+
+        val threadArray = JSONArray()
+        watchlist.forEach {
+            val threadData = JSONObject()
+            threadData.put("label", it.thread.title)
+            threadData.put("author", it.thread.author)
+            threadData.put("section", it.thread.url.split("/")[2])
+            threadData.put("highImgOnly", it.highImgOnly)
+            threadData.put("highIDs", JSONArray(it.highIDs))
+            threadData.put("highNames", JSONArray(it.highNames))
+            threadData.put("ignoreIDs", JSONArray(it.ignoreIDs))
+            threadData.put("ignoreNames", JSONArray(it.ignoreNames))
+            threadData.put("lastReadId", it.lastReadId)
+            threadData.put("currentReadId", sets.curReadPostID[it.thread.postID] ?: "")
+            threadData.put("newEntrCnt", it.newPosts)
+            threadData.put("totalEntrCnt", it.thread.postCount)
+
+            val threadEntry = JSONArray()
+            threadEntry.put(it.thread.postID)
+            threadEntry.put(threadData)
+
+            threadArray.put(threadEntry)
         }
-        data += """]}}"""
+
+        threads.put("value", threadArray)
+        data.put("threads", threads)
+
+        val default = JSONObject()
+        default.put("label", "Default")
+        default.put("author", "none")
+        default.put("section", "general")
+        default.put("highImgOnly", true)
+        default.put("highIDs", JSONArray())
+        default.put("highNames", JSONArray())
+        default.put("ignoreIDs", JSONArray())
+        default.put("ignoreNames", JSONArray())
+        default.put("lastReadId", "")
+        default.put("currentReadId", "")
+        default.put("newEntrCnt", 0)
+        default.put("totalEntrCnt", 0)
+
+        data.put("default", default)
+
+        val jsonData = data.toString()
+
+        // Server JSON format:
+        //{"0":"\"","1":"\"","numLinkMode":0,"threads":{"_type":"Map","value":[["1098850",{"label":"Why did you do that?","author":"tippler","section":"quest","highImgOnly":true,"highIDs":[],"highNames":[],"ignoreIDs":[],"ignoreNames":[],"lastReadId":"1101457","currentReadId":"1098852","newEntrCnt":0,"totalEntrCnt":283}]]},"default":{"label":"Default","author":"none","section":"general","highImgOnly":true,"highIDs":[],"highNames":[],"ignoreIDs":[],"ignoreNames":[],"lastReadId":"","currentReadId":"","newEntrCnt":0,"totalEntrCnt":0}}
+//        var data = """{"numLinkMode":${sets.numLinkMode},"threads":{"_type":"Map","value":["""
+//        data += watchlist.joinToString {
+//            val currentReadId = sets.curReadPostID[it.thread.postID] ?: ""
+//
+//            """["${it.thread.postID}",{"label":"${it.thread.title}","author":"${it.thread.author}","section":"${it.thread.url.split("/")[2]}",
+//                |"highImgOnly":${it.highImgOnly},"highIDs":${it.highIDs},"highNames":${it.highNames},"ignoreIDs":${it.ignoreIDs},
+//                |"ignoreNames":${it.ignoreNames},"lastReadId":"${it.lastReadId}","currentReadId":"$currentReadId",
+//                |"newEntrCnt":${it.newPosts},"totalEntrCnt":${it.thread.postCount}}]""".trimMargin()
+//        }
+//        data += """]}}"""
+
+        val jsonDataObject = JSONObject(jsonData)
 
         val jsons = JSONObject().apply {
             put("token", logState.value?.token)
             put("type", "upload")
-            put("data", data)
+            put("data", jsonDataObject) // Fügt den JSON-Inhalt direkt ein
             put("obj", "watchbar") //only watchbar data, not editor/sidebar settings
         }
+
         makePostRequest(jsons.toString(), onSuccess = { json ->
             if (json.has("access")) {
                 logState.value?.errorCode = 0
@@ -1106,6 +1191,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                 logState.value?.statusText = ("Failed: ${e.message}")
                 logState.value?.errorCode = 1
                 logState.postValue(logState.value)//trigger observe
+                logState.value?.token=""
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -1119,6 +1205,7 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
                     logState.value?.promptText = ("Request unsuccessfull: ${response.code}")
                     logState.value?.statusText = ("Error: ${response.code}")
                     logState.postValue(logState.value)//trigger observe
+                    logState.value?.token=""
                 }
             }
         })
@@ -1244,5 +1331,77 @@ class WikiViewModel : ViewModel() {
             }
         }
         return@withContext emptyList()
+    }
+}
+
+object StringUtils {
+    /** counts occurrences of a string in a text */
+    fun countOccurrences(text: String, search: String): Int {
+        var count = 0
+        var index = text.indexOf(search)
+
+        while (index >= 0) {
+            count++
+            index = text.indexOf(search, index + 1)
+        }
+
+        return count
+    }
+
+    /** fetches innerHTML of current HTML-span-tag until matching closing span
+     * if more span tags open, function will search for matching number of closing span tags.
+     * 1. search for first </span
+     * 2. if substring not includes <span, return substring.
+     * 3. otherwise search for next </span and check substring from last </span for span then repeat 2.
+     */
+    fun fetchUntilClosingSpan(html:String):String{
+        var spanind=html.indexOf("</span", startIndex = 0)
+        if(spanind<0) return html
+
+        var spanind2=0
+        var subt=html.substring(0,spanind)
+
+        while(subt.contains("<span")) {
+            spanind2 = html.indexOf("</span", startIndex = spanind + 1)
+            if(spanind2<0) break
+            subt=html.substring(spanind,spanind2)
+            spanind=spanind2
+        }
+        return html.substring(0,spanind)
+    }
+
+    /** replaces \n,\r,\r\n with <br> in HTML string within span tags with white-sprace:pre-wrap */
+    fun preserveHTMLPreBreaks(html:String):String{
+        var updatedHtml = html
+        val ident="<span style=\"white-space: pre-wrap !important; font-family: monospace, monospace !important;\">"
+        var pos= updatedHtml.indexOf(ident)
+
+        while (pos >=0) {
+            val originalText=fetchUntilClosingSpan(updatedHtml.substring(pos+ident.length)) //must be within range by definition
+            val replacedText=originalText.replace(Regex("(\\r\\n|\\n|\\r)"),"<br>") //not ()+ since I like linebreak for each \n more in display
+            if(originalText!=replacedText){
+                updatedHtml=updatedHtml.substring(0, pos+ident.length) + replacedText + updatedHtml.substring(pos+ident.length+originalText.length)
+            }
+            pos = updatedHtml.indexOf(ident, pos+ident.length + originalText.length)
+        }
+        return updatedHtml
+    }
+    fun replaceTag(html: String, tag: String, startReplace: String, endReplace: String):String{
+        var ret=html
+        var pos = ret.indexOf(tag)
+        var tagEndPos=ret.indexOf(">", pos+1)+1
+
+        while (pos >= 0) {
+            val tex = ret.substring(tagEndPos)
+            var innerHtml = fetchUntilClosingSpan(tex)
+            if(innerHtml.contains(tag))
+                innerHtml= replaceTag(innerHtml, tag, startReplace, endReplace)
+            val replacedInnerHtml = startReplace + innerHtml + endReplace
+            ret=ret.substring(0,pos)+replacedInnerHtml+ret.substring(tagEndPos+innerHtml.length)
+//            ret = ret.replace(tex, replacedInnerHtml)
+            pos = ret.indexOf(tag, tagEndPos+innerHtml.length)
+            tagEndPos=ret.indexOf(">", pos+1)+1
+        }
+        return ret
     }
 }

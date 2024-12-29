@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
@@ -24,6 +25,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.marginLeft
 import androidx.core.view.marginRight
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -34,6 +36,9 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
+import org.jsoup.select.Elements
 import org.xml.sax.XMLReader
 import java.io.File
 import java.lang.reflect.Field
@@ -55,6 +60,7 @@ class QuestDenListAdapter(val mContext: Context) :
     private var displaySet: ModelSettings = ModelSettings()
     private var textSize: Float = 16f
     private lateinit var replyViewModel: ReplyViewModel
+    private lateinit var viewModel: DataViewModel
 
     interface ItemActionListener {
         fun openThread(url: String)
@@ -322,10 +328,19 @@ class QuestDenListAdapter(val mContext: Context) :
             val offImgPath = File(mMain.filesDir, "offline/${displaySet.curThreadId}_img")
             if (offImgPath.exists() && File(offImgPath, imgNam).exists()) imgUrl = "${mMain.filesDir}/offline/${displaySet.curThreadId}_img/$imgNam"
 
-            if(displaySet.thumbFromFull)imgUrl=imgUrl.replace("thumb", "src").replace("s.", ".")
+            if(displaySet.thumbFromFull) {
+                imgUrl = imgUrl.replace("thumb", "src").replace("s.", ".")
+
+                val dimensions = viewModel.fullImgDimMap[imgUrl]
+                dimensions?.let { (width, height) ->
+                    val aspectRatio = width.toFloat() / height
+                    iVBinding.imgUrl.layoutParams.height = (iVBinding.imgUrl.width / aspectRatio).toInt()
+                }
+            }
 
             Glide.with(imageView)
                 .load(imgUrl)
+                .placeholder(ColorDrawable(Color.GRAY))
                 .listener(object : RequestListener<Drawable> {
                     override fun onLoadFailed(p0: GlideException?, p1: Any?, target: Target<Drawable>?, p3: Boolean): Boolean {
                         return false
@@ -333,11 +348,11 @@ class QuestDenListAdapter(val mContext: Context) :
 
                     override fun onResourceReady(p0: Drawable?, p1: Any?, target: Target<Drawable>?, p3: DataSource?, p4: Boolean): Boolean {
                         imageView.invalidate()
-                        imageView.post {
-                            if (displaySet.listType == ThrdItemTyps.THREAD) {
-                                mMain.repeatScroll()
-                            }
-                        }
+//                        imageView.post {
+//                            if (displaySet.listType == ThrdItemTyps.THREAD) {
+//                                mMain.repeatScroll()
+//                            }
+//                        }
                         return false
                     }
                 })
@@ -476,32 +491,48 @@ class QuestDenListAdapter(val mContext: Context) :
         private fun convertToCustomTags(str: String?): String {
             if (str == null) return ""
             var ret = str
+//            var tStop=System.nanoTime()
+//            tStart=System.nanoTime()
+            ret=StringUtils.replaceTag(ret,"""<span style="font-size:small;">""","<span></span><CSmall>", "</CSmall>")
+            ret=StringUtils.replaceTag(ret,"""<span style="font-family: Mona,'MS PGothic' !important;">""","<span></span><Caafont>", "</Caafont>")
+            ret=StringUtils.replaceTag(ret,"""<span style="white-space: pre-wrap !important; font-family: monospace, monospace !important;">""","<span></span><CCode>", "</CCode>")
+            ret=StringUtils.replaceTag(ret,"""<span class="unkfunc">""","<span></span><CQuote>", "</CQuote>")
+            ret=StringUtils.replaceTag(ret,"""<span class="spoiler"""","<span></span><CSpoil>", "</CSpoil>")
+//            tStop=System.nanoTime()
+//            println("Ausführungszeit html ${(tStop-tStart)/1e6}ms")
 
-            var rex = Regex("""<span style="font-size:small;">(.*?)</span>""", RegexOption.DOT_MATCHES_ALL)
-            ret = rex.replace(ret) {
-                "<span></span><CSmall>" + it.groupValues[1] + "</CSmall>"
-            }
-            rex = Regex("""<span style="font-family: Mona,'MS PGothic' !important;">(.*?)</span>""", RegexOption.DOT_MATCHES_ALL)
-            ret = rex.replace(ret) {
-                "<span></span><Caafont>" + it.groupValues[1] + "</Caafont>" //span needed for leading tags being recocnized
-            }
-            rex = Regex("""<span style="white-space: pre-wrap !important; font-family: monospace, monospace !important;">(.*?)</span>""", RegexOption.DOT_MATCHES_ALL)
-            ret = rex.replace(ret) {
-                "<span></span><CCode>" + it.groupValues[1] + "</CCode>" //span needed for leading tags being recocnized
-            }
-            rex = Regex("<span[^>]*?class=\"unkfunc\"[^>]*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
-            ret = rex.replace(ret) {
-                "<span></span><CQuote>" + it.groupValues[1] + "</CQuote>"
-            }
-            rex = Regex("<span[^>]*?class=\"spoiler\"[^>]*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
-            ret = rex.replace(ret) {
-                "<span></span><CSpoil>" + it.groupValues[1] + "</CSpoil>"
-            }
-            rex = Regex("<a[^>]*?href=\"(.*?)\"[^>]*?>(.*?)</a>", RegexOption.DOT_MATCHES_ALL)
+//            tStart=System.nanoTime()
+//            rex = Regex("""<span style="font-size:small;">(.*?)</span>""", RegexOption.DOT_MATCHES_ALL)
+//            ret = rex.replace(ret) {
+//                "<span></span><CSmall>" + it.groupValues[1] + "</CSmall>"
+//            }
+//            rex = Regex("""<span style="font-family: Mona,'MS PGothic' !important;">(.*?)</span>""", RegexOption.DOT_MATCHES_ALL)
+//            ret = rex.replace(ret) {
+//                "<span></span><Caafont>" + it.groupValues[1] + "</Caafont>" //span needed for leading tags being recocnized
+//            }
+//            rex = Regex("""<span style="white-space: pre-wrap !important; font-family: monospace, monospace !important;">(.*?)</span>""", RegexOption.DOT_MATCHES_ALL)
+//            ret = rex.replace(ret) {
+//                "<span></span><CCode>" + it.groupValues[1].replace("\n","<br/>\n") + "</CCode>" //span needed for leading tags being recocnized
+//            }
+//            rex = Regex("<span[^>]*?class=\"unkfunc\"[^>]*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
+//            ret = rex.replace(ret) {
+//                "<span></span><CQuote>" + it.groupValues[1] + "</CQuote>"
+//            }
+//
+//            rex = Regex("<span[^>]*?class=\"spoiler\"[^>]*?>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
+//            ret = rex.replace(ret) {
+//                "<span></span><CSpoil>" + it.groupValues[1] + "</CSpoil>"
+//            }
+//            tStop=System.nanoTime()
+//            println("Ausführungszeit regexp ${(tStop-tStart)/1e6}ms")
+
+
+            //            var tStart=System.nanoTime()
+
+            var rex = Regex("<a[^>]*?href=\"(.*?)\"[^>]*?>(.*?)</a>", RegexOption.DOT_MATCHES_ALL)
             ret = rex.replace(ret) {
                 "<span><CLink href='" + it.groupValues[2] + "'>" + it.groupValues[2] + "</CLink></span>"
             }
-
             rex = Regex("""<div[^>]*?>\s*?</div>\s*""")
             ret = rex.replace(ret, "")
             rex = Regex("""^\s*<br>""", RegexOption.DOT_MATCHES_ALL)
@@ -525,6 +556,7 @@ class QuestDenListAdapter(val mContext: Context) :
         val comView = inflater.inflate(refLayout, parent, false)
 
         replyViewModel = ViewModelProvider(mMain).get(ReplyViewModel::class.java)
+        viewModel = ViewModelProvider(mMain).get(DataViewModel::class.java)
 
         return FullViewHolder(comView)
     }

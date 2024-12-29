@@ -21,7 +21,7 @@ enum class URLBoards(val url: String) {
 /**
  * auto show/hide mode for spoiler images and texts
  */
-enum class SFWModes(val displayName:String) {
+enum class SFWModes(val displayName: String) {
     SFWREAL("Always-Hidden"), //spoiler images stay hidden. Note: Never requested
     SFWQUESTION("Show-On-Click"), //spoiler images reveal on click. Note: only request when clicked.
     NSFW("Always-Shown") //spoiler images loaded on default. Note: Immediatelly requested
@@ -44,11 +44,11 @@ data class TgPost(
     var postID: String = "", //ID of post
     var isHighlight: Boolean = false, //is currently selected
     var isSpoiler: Boolean = false, //is marked as spoiler (img)
-    var thumbHeight:Int=0, //height of thumb for floating text
-    var threadExtended:Boolean=false, //summary extended in board view
-    var imgCounter:Int=0, //counter for images in the thread
-    var postCount:Int=0 //amount of posts from overview
-):Parcelable
+    var thumbHeight: Int = 0, //height of thumb for floating text
+    var threadExtended: Boolean = false, //summary extended in board view
+    var imgCounter: Int = 0, //counter for images in the thread
+    var postCount: Int = 0 //amount of posts from overview
+) : Parcelable
 
 /**
  * watchlist processing data
@@ -66,12 +66,12 @@ data class Watch(
     var newPosts: Int = 0,
     var newImg: Int = 0,
 
-    var highImgOnly :Boolean=true,
-    var highIDs :String="",
-    var highNames :String="",
-    var ignoreIDs :String="",
-    var ignoreNames :String=""
-):Parcelable
+    var highImgOnly: Boolean = true,
+    var highIDs: List<String> = emptyList(),
+    var highNames: List<String> = emptyList(),
+    var ignoreIDs: List<String> = emptyList(),
+    var ignoreNames: List<String> = emptyList()
+) : Parcelable
 
 /**
  * watchlist processing data
@@ -85,65 +85,68 @@ data class Watch(
 @Parcelize
 data class OfflineThread(
     var thread: TgPost = TgPost(),
-    var onlyThumbs:Boolean=false,
-    var lastUpdate: Long=System.currentTimeMillis()
-):Parcelable
+    var onlyThumbs: Boolean = false,
+    var lastUpdate: Long = System.currentTimeMillis()
+) : Parcelable
 
 //Types of display:
 // Board=list of threads, thread=a quest, watch=list of watched threads, offline= list of downloaded threads
 enum class ThrdItemTyps {
-    BOARD,THREAD,WATCH,OFFLINE
+    BOARD, THREAD, WATCH, OFFLINE
 }
-enum class imgMode(val displayName:String){SMALL("Small-Images"),BIG("Big-Images"),FULL("Full-Width-Images")}
+
+enum class imgMode(val displayName: String) { SMALL("Small-Images"), BIG("Big-Images"), FULL("Full-Width-Images") }
 
 //how model renders view
 @Parcelize
 data class ModelSettings(
     var showOnlyPics: Boolean = false,
     var sfw: SFWModes = SFWModes.SFWQUESTION,
-    var listType: ThrdItemTyps =ThrdItemTyps.BOARD,
-    var curTitle:String="",
-    var curURL:String=URLBoards.QUEST.url,
-    var curThreadId:String="",
-    var boardPage: Int=0,
-    var curMaxPage:Int=0,
+    var listType: ThrdItemTyps = ThrdItemTyps.BOARD,
+    var curTitle: String = "",
+    var curURL: String = URLBoards.QUEST.url,
+    var curThreadId: String = "",
+    var boardPage: Int = 0,
+    var curMaxPage: Int = 0,
     val curReadPostID: MutableMap<String, String> = mutableMapOf(), //thread ids → last read pos
     var txsize: Float = 16f,
-    var loginName:String="",
-    var loginPW:String="",
-    var autoLogin:Boolean=true,
-    var numLinkMode:Int=0, //for upload, not used in app
-    var imageMode:imgMode=imgMode.SMALL, //in thread mode image size
-    var thumbFromFull:Boolean=false //in thread mode image size
-):Parcelable
+    var loginName: String = "",
+    var loginPW: String = "",
+    var autoLogin: Boolean = true,
+    var numLinkMode: Int = 0, //for upload, not used in app
+    var imageMode: imgMode = imgMode.SMALL, //in thread mode image size
+    var thumbFromFull: Boolean = false //in thread mode image size
+) : Parcelable
 
 /**
  * enum for navigation object
  * page for quest/tg etc switch, link for quote-clicked, thread for thread opened
  */
-enum class ScrollMode{
-    ALL,IMAGES
+enum class ScrollMode {
+    ALL, IMAGES
 }
 
 //progress from viewmodel
 data class ProgData(
-    var pos:Int=0,
-    var max:Int=0,
-    var status:ProgStatus=ProgStatus.IDLE,
-    var msg:String=""
-)
-enum class ProgStatus{
-    IDLE, RUNNING,DONE,ERROR
-}
-data class LoginState(
-    var accessDate:Long=0,
-    var token:String="",
-    var promptText:String="",
-    var statusText:String="",
-    var errorCode:Int=0
+    var pos: Int = 0,
+    var max: Int = 0,
+    var status: ProgStatus = ProgStatus.IDLE,
+    var msg: String = ""
 )
 
-data class backPage (
-    var type:ThrdItemTyps,
-    var url:String
+enum class ProgStatus {
+    IDLE, RUNNING, DONE, ERROR
+}
+
+data class LoginState(
+    var accessDate: Long = 0,
+    var token: String = "",
+    var promptText: String = "",
+    var statusText: String = "",
+    var errorCode: Int = 0
+)
+
+data class backPage(
+    var type: ThrdItemTyps,
+    var url: String
 )

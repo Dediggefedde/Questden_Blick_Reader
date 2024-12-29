@@ -14,7 +14,7 @@
         android:padding="8dp"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:text="An Error Occured!"
+        android:text="@string/an_error_occured"
         android:gravity="start"
         />
 
@@ -29,12 +29,13 @@
             android:layout_height="wrap_content"
             android:gravity="start"
             android:padding="8dp"
-            android:text="Error message goes here"
+            android:text="@string/error_message_goes_here"
             android:textSize="16sp" />
     </ScrollView>
 
 
     <LinearLayout
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -42,24 +43,27 @@
 
         <Button
             android:id="@+id/cancel_button"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cancel" />
+            android:text="@string/cancel" />
 
         <Button
             android:id="@+id/send_button"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="18dp"
             android:layout_marginLeft="18dp"
-            android:text="Send\nonly error" />
+            android:text="@string/send_only_error" />
 
         <Button
             android:id="@+id/send_with_data_button"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="18dp"
             android:layout_marginLeft="18dp"
-            android:text="Send\nwith data" />
+            android:text="@string/send_with_data" />
     </LinearLayout>
 </LinearLayout>

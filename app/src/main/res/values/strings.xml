@@ -128,4 +128,13 @@
     <string name="watch_thread">watch thread</string>
     <string name="open_chapter_overview">Open chapter overview</string>
     <string name="quest_archive">Quest Archive</string>
+    <string name="logout">Logout</string>
+    <string name="welcomelogin">Welcome %1$s</string>
+    <string name="login">Login</string>
+    <string name="login_to_server">Login to Server</string>
+    <string name="an_error_occured">An Error Occured!</string>
+    <string name="error_message_goes_here">Error message goes here</string>
+    <string name="cancel">Cancel</string>
+    <string name="send_only_error">Send\nonly error</string>
+    <string name="send_with_data">Send\nwith data</string>
 </resources>

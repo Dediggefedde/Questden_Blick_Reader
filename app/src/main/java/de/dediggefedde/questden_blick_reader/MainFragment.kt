@@ -15,7 +15,6 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
@@ -26,7 +25,6 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import de.dediggefedde.questden_blick_reader.databinding.FragmentMainBinding
 import java.io.File
-import kotlin.math.abs
 
 class MainFragment : Fragment() {
     private lateinit var viewModel: DataViewModel
@@ -38,7 +36,7 @@ class MainFragment : Fragment() {
 
     lateinit var binding: FragmentMainBinding
     private lateinit var scrollListener: RecyclerView.OnScrollListener
-    var autoscroll = false
+    var softwareScroll = false
     var atWatchPosition = -1
 
     inner class TopSnappingScroller(context: Context) : LinearSmoothScroller(context) {
@@ -176,18 +174,45 @@ class MainFragment : Fragment() {
         }
     }
 
+    private fun jumpToPosition(pos: Int = 0, lastSaved: Boolean = true, update: Boolean = false) {
+        val layoutManager = binding.postListRecView.layoutManager as LinearLayoutManager
+        if (!update) softwareScroll = true
+        val mpos = if (!lastSaved) pos else viewModel.getLastReadIndex()
+        if(mpos<0)return
+
+        val currentPosition = layoutManager.findFirstVisibleItemPosition()
+        val distance = kotlin.math.abs(mpos - currentPosition)
+
+        binding.postListRecView.post {
+            if (distance <= 10) {
+                val smoothScroller = TopSnappingScroller(binding.postListRecView.context)
+                smoothScroller.targetPosition = mpos
+                layoutManager.startSmoothScroll(smoothScroller)
+            } else {
+                layoutManager.scrollToPositionWithOffset(mpos, 0)
+            }
+
+            if(update)viewModel.updateCurReadInd(mpos)
+            if (!update) {
+                binding.postListRecView.postDelayed({ softwareScroll = false }, 100)
+            }
+        }
+    }
+
+
     private fun setRecyclerViewScrollListener() {
         scrollListener = object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 curViewedInd = (binding.postListRecView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                updatePositionDisplay()
-                autoscroll = false
+                if (!softwareScroll && newState == RecyclerView.SCROLL_STATE_IDLE)
+                    viewModel.updateCurReadInd(curViewedInd)
             }
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (!autoscroll) curViewedInd = (binding.postListRecView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+//                if (!softwareScroll)
+                    curViewedInd = (binding.postListRecView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
                 updatePositionDisplay()
             }
         }
@@ -195,8 +220,7 @@ class MainFragment : Fragment() {
     }
 
     fun repeatScroll() {
-        if (!autoscroll) return
-//        val pos = (binding.postListRecView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+        if (!softwareScroll) return
         val smoothScroller = TopSnappingScroller(binding.postListRecView.context)
         smoothScroller.targetPosition = curViewedInd
         (binding.postListRecView.layoutManager as LinearLayoutManager).startSmoothScroll(smoothScroller)
@@ -205,7 +229,7 @@ class MainFragment : Fragment() {
     fun scrollHighlight(pos: Int, backwards: Boolean = false) {
         if (!viewModel.hasIndex(pos)) return
 
-        if (!backwards) viewModel.displayList.value?.get(curViewedInd)?.postID?.let { postID ->
+        if (!backwards && viewModel.hasIndex(curViewedInd)) viewModel.displayList.value?.get(curViewedInd)?.postID?.let { postID ->
             viewModel.backLinkStack.add(postID)
         }
         val lasthighInd = viewModel.highLightInd
@@ -214,19 +238,7 @@ class MainFragment : Fragment() {
         var vholder = binding.postListRecView.findViewHolderForAdapterPosition(lasthighInd)
         vholder?.itemView?.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.color_list_bg))
 
-        autoscroll = true
-        val smoothScroller = TopSnappingScroller(binding.postListRecView.context)
-        smoothScroller.targetPosition = pos
-
-        val layoutManag = (binding.postListRecView.layoutManager as LinearLayoutManager)
-        val firstvisiblePos = layoutManag.findFirstVisibleItemPosition()
-
-        if (abs(firstvisiblePos - pos) < 10) (binding.postListRecView.layoutManager as LinearLayoutManager).startSmoothScroll(smoothScroller)
-        else {
-            layoutManag.scrollToPositionWithOffset(pos, 0)
-        }
-        curViewedInd = pos
-        updatePositionDisplay()
+        jumpToPosition(pos, lastSaved = false, update = true)
 
         // Mark the new highlight
         val handler = Handler(Looper.getMainLooper())
@@ -334,7 +346,6 @@ class MainFragment : Fragment() {
                 curPos = curViewedInd + 1
                 posMod = "Post:\n"
             }
-            viewModel.updateCurReadId(curViewedInd)
         } else {
             maxPos = viewModel.sets.curMaxPage + 1
             curPos = viewModel.sets.boardPage + 1
@@ -346,9 +357,8 @@ class MainFragment : Fragment() {
 
     private fun addObservers() {
         val scrolling = {
-            (binding.postListRecView.layoutManager as LinearLayoutManager)
-                .scrollToPositionWithOffset(viewModel.getLastReadIndex().takeIf { it >= 0 } ?: 0, 0)
-            updatePositionDisplay()
+            jumpToPosition(0, lastSaved = true, update = false)
+//          updatePositionDisplay()
         }
 
         viewModel.displayList.observe(viewLifecycleOwner) { list ->
@@ -480,25 +490,25 @@ class MainFragment : Fragment() {
         }
 
         binding.btnWiki.setOnClickListener {
-            val threadId =viewModel.sets.curThreadId
+            val threadId = viewModel.sets.curThreadId
             wikiModel.loadTableData(threadId)
         }
-        wikiModel.reqProgLive.observe(viewLifecycleOwner){state->
-            if(state==ProgStatus.RUNNING){
+        wikiModel.reqProgLive.observe(viewLifecycleOwner) { state ->
+            if (state == ProgStatus.RUNNING) {
                 binding.progressBarUndet.visibility = View.VISIBLE
-            }else{
+            } else {
                 binding.progressBarUndet.visibility = View.GONE
             }
 
-            if(state==ProgStatus.DONE){
+            if (state == ProgStatus.DONE) {
                 wikiModel.setIdle()
-                if(wikiModel.linksLiveData.value.isNullOrEmpty()){
+                if (wikiModel.linksLiveData.value.isNullOrEmpty()) {
                     return@observe
                 }
                 (requireActivity() as MainActivity).openWiki()
             }
-            if(state==ProgStatus.ERROR){
-                MsgHelper.showMsg(requireContext(),wikiModel.errorLiveData.value?:"Unknown Error")
+            if (state == ProgStatus.ERROR) {
+                MsgHelper.showMsg(requireContext(), wikiModel.errorLiveData.value ?: "Unknown Error")
             }
         }
 

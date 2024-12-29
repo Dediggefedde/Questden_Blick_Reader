@@ -126,20 +126,22 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="Full resolution option in fullwidth mode&#10;Fix for loading full urls as threads&#10;Added Reply form (fragment,viewmodel)&#10;Added Chapter overview from wiki (fragment,viewmodel)&#10;Unified message helper. Tried out snackbar, reverted to Toast.&#10;New Toasts now hide old ones&#10;tidied up code and layouts&#10;date,title,author click adds reference to reply form&#10;reply password generation &amp; storage&#10;Menu entry visibility fixes&#10;confirm dialog for deleting data&#10;screenshots for onboarding added">
-      <change afterPath="$PROJECT_DIR$/.kotlin/sessions/kotlin-compiler-8053890412899634742.salive" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/dialog_error.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="Improved Sync with server (redone, state livedata)&#10;Improved tag converter (redone)&#10;Improved image loader (placeholder and preload on full res)&#10;upload/download fail logs out now.&#10;Improved backhandler on other fragments (switch to main)&#10;adjusted Appupdater to new github&#10;improved scroller (new flow, separated from highlight)">
+      <change afterPath="$PROJECT_DIR$/.kotlin/errors/errors-1735007110880.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jsoup_jsoup_1_13_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jsoup_jsoup_1_15_3.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.kotlin/sessions/kotlin-compiler-8053890412899634742.salive" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataClasses.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataClasses.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataViewModel.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/ErrorHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/ErrorHandler.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/GUIListViewClasses.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/GUIListViewClasses.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/MainActivity.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/MainFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/MainFragment.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/drawer_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/drawer_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/NetworkSingleton.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/NetworkSingleton.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/SyncFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/SyncFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/dialog_error.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/dialog_error.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_sync.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_sync.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -206,7 +208,6 @@
     </option>
   </component>
   <component name="GenerateSignedApkSettings">
-    <option name="EXPORT_PRIVATE_KEY" value="false" />
     <option name="KEY_STORE_PATH" value="K:\Dokumente und Einstellungen\Sword\Eigene Dateien\keys\android.jks" />
     <option name="KEY_ALIAS" value="questden" />
     <option name="REMEMBER_PASSWORDS" value="true" />
@@ -289,7 +290,8 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Android App.app.executor": "Run",
+    "Android App.app.executor": "Debug",
+    "ApkExportedModule": "Questden_Blick_Reader.app",
     "Gradle.Upgrade Gradle wrapper.executor": "Run",
     "RunOnceActivity.cidr.known.project.marker": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
@@ -729,14 +731,6 @@
       <option name="project" value="LOCAL" />
       <updated>1637616636225</updated>
     </task>
-    <task id="LOCAL-00051" summary="Fragments instead of activities&#10;Finished login/sync&#10;error display and reporting&#10;fallback for empty titles/authors&#10;first page on opening set to &quot;/quest&quot;&#10;smaller bugfixes">
-      <option name="closed" value="true" />
-      <created>1732840819250</created>
-      <option name="number" value="00051" />
-      <option name="presentableId" value="LOCAL-00051" />
-      <option name="project" value="LOCAL" />
-      <updated>1732840819250</updated>
-    </task>
     <task id="LOCAL-00052" summary="Smaller bugfixes&#10;sfw mode readable text&#10;back button implementation&#10;screen rotation fixes&#10;menu for deleting data&#10;error report fixes and tests&#10;using thread/post ID instead of url/pos&#10;show img url in offline mode&#10;Watch button eye closed/open in thread&#10;delete offline button fixed&#10;backup/restore fileformat fixed">
       <option name="closed" value="true" />
       <created>1733010998541</created>
@@ -769,7 +763,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734703177093</updated>
     </task>
-    <option name="localTasksCounter" value="56" />
+    <task id="LOCAL-00056" summary="Custom error layout&#10;documented viewmodel&#10;offline mode detection and handling&#10;Questarch added">
+      <option name="closed" value="true" />
+      <created>1734802285456</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1734802285456</updated>
+    </task>
+    <option name="localTasksCounter" value="57" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -798,8 +800,6 @@
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="switch updater to json, create json version.json" />
-    <MESSAGE value="oder version format" />
     <MESSAGE value="corrected update url for json.&#10;Test working!" />
     <MESSAGE value="updating apk signed created" />
     <MESSAGE value="fixed crashing app by proguard-rules.pro and enums on release builds..." />
@@ -823,7 +823,9 @@
     <MESSAGE value="updated gradle plugin system&#10;upgraded packages but still support minsdk 16&#10;fixed warnings and technical stuff&#10;Zoom/Panel of fullview-image using Photoview library (mentioning licenses WIP)&#10;first implementation of google OSS license list, doesn't work, list empty&#10;replaced outdated staticLayout for floating text around images&#10;replaced outdated &quot;position&quot; in notifyItemChanged within viewHolder with itemView.invalidate()&#10;Updated name" />
     <MESSAGE value="Image layout mode update&#10;photoview for img zoom&#10;preparation for onboarding&#10;register link (updated website for phones)&#10;image getter update: both textviews get images, placeholder, caching&#10;dialogs for about, license" />
     <MESSAGE value="Full resolution option in fullwidth mode&#10;Fix for loading full urls as threads&#10;Added Reply form (fragment,viewmodel)&#10;Added Chapter overview from wiki (fragment,viewmodel)&#10;Unified message helper. Tried out snackbar, reverted to Toast.&#10;New Toasts now hide old ones&#10;tidied up code and layouts&#10;date,title,author click adds reference to reply form&#10;reply password generation &amp; storage&#10;Menu entry visibility fixes&#10;confirm dialog for deleting data&#10;screenshots for onboarding added" />
-    <option name="LAST_COMMIT_MESSAGE" value="Full resolution option in fullwidth mode&#10;Fix for loading full urls as threads&#10;Added Reply form (fragment,viewmodel)&#10;Added Chapter overview from wiki (fragment,viewmodel)&#10;Unified message helper. Tried out snackbar, reverted to Toast.&#10;New Toasts now hide old ones&#10;tidied up code and layouts&#10;date,title,author click adds reference to reply form&#10;reply password generation &amp; storage&#10;Menu entry visibility fixes&#10;confirm dialog for deleting data&#10;screenshots for onboarding added" />
+    <MESSAGE value="Custom error layout&#10;documented viewmodel&#10;offline mode detection and handling&#10;Questarch added" />
+    <MESSAGE value="Improved Sync with server (redone, state livedata)&#10;Improved tag converter (redone)&#10;Improved image loader (placeholder and preload on full res)&#10;upload/download fail logs out now.&#10;Improved backhandler on other fragments (switch to main)&#10;adjusted Appupdater to new github&#10;improved scroller (new flow, separated from highlight)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Improved Sync with server (redone, state livedata)&#10;Improved tag converter (redone)&#10;Improved image loader (placeholder and preload on full res)&#10;upload/download fail logs out now.&#10;Improved backhandler on other fragments (switch to main)&#10;adjusted Appupdater to new github&#10;improved scroller (new flow, separated from highlight)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -837,6 +839,16 @@
           <url>file://$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/ReplyFragment.kt</url>
           <line>183</line>
           <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataViewModel.kt</url>
+          <line>824</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/GUIListViewClasses.kt</url>
+          <line>352</line>
+          <option name="timeStamp" value="25" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -855,6 +867,12 @@
         <watch expression="maxLines" />
         <watch expression="topTexHeight" />
         <watch expression="thumbHeight" />
+        <watch expression="viewModel.getLastReadIndex()" />
+        <watch expression="sets.curReadPostID[sets.curThreadId]" />
+        <watch expression="it.groupValues[1]" language="kotlin" />
+        <watch expression="tg.summary" />
+        <watch expression="ret" />
+        <watch expression="currentList.indexOfFirst { it.postID == lastid }" />
       </configuration>
     </watches-manager>
   </component>

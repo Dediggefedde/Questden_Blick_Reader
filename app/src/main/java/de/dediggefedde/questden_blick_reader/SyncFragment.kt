@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.lifecycle.ViewModelProvider
 import de.dediggefedde.questden_blick_reader.databinding.FragmentSyncBinding
 
@@ -38,15 +39,26 @@ class SyncFragment : Fragment() {
                     MsgHelper.showMsg(requireContext(), state.promptText)
                 if(state.statusText.isNotEmpty())binding.statusText.text = state.statusText
             }
+            viewModel.clearLoginStatus()
             if(state.token!=""){
                 binding.btnDownload.visibility=View.VISIBLE
                 binding.btnUpload.visibility=View.VISIBLE
+                binding.loginLayout.visibility=View.GONE
+                binding.btnLogin.text = getString(R.string.logout)
+                binding.welcomeText.text= getString(R.string.welcomelogin, binding.editLoginName.text)
             }else{
                 binding.btnDownload.visibility=View.GONE
                 binding.btnUpload.visibility=View.GONE
+                binding.loginLayout.visibility=View.VISIBLE
+                binding.btnLogin.text = getString(R.string.login)
+                binding.welcomeText.text= getString(R.string.login_to_server)
             }
         }
 
+        binding.closeButton.setOnClickListener{
+            (requireActivity() as MainActivity).showMainList()
+            viewModel.logoutServer()
+        }
         binding.btnDownload.setOnClickListener{btnDownload()}
         binding.btnUpload.setOnClickListener{btnUpload()}
         binding.btnLogin.setOnClickListener{ loginClick() }
@@ -54,7 +66,11 @@ class SyncFragment : Fragment() {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://phi.pf-control.de/tgchan/reg.php"))
             startActivity(intent)
         }
+    }
 
+    override fun onDestroy() {
+        viewModel.logoutServer()
+        super.onDestroy()
     }
 
     private fun btnDownload() {
@@ -69,7 +85,12 @@ class SyncFragment : Fragment() {
 
     private fun loginClick() {//login button
         binding.btnLogin.animate()
-        viewModel.setCredServer(binding.editLoginName.text.toString(),binding.editLoginPW.text.toString(),binding.cbAutologin.isChecked)
-        viewModel.loginServer()
+        if(viewModel.logState.value?.token==""){
+            viewModel.setCredServer(binding.editLoginName.text.toString(),binding.editLoginPW.text.toString(),binding.cbAutologin.isChecked)
+            viewModel.loginServer()
+        }else{
+            viewModel.logoutServer()
+        }
+        view?.clearFocus()
     }
 }

@@ -1,9 +1,11 @@
 package de.dediggefedde.questden_blick_reader
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.view.LayoutInflater
+import android.widget.FrameLayout
 import com.google.gson.Gson
 import de.dediggefedde.questden_blick_reader.databinding.DialogErrorBinding
 import okhttp3.*
@@ -18,6 +20,7 @@ fun getCurrentStackTrace(): String {
     val stackTraceElements = Thread.currentThread().stackTrace
     return stackTraceElements.joinToString("\n") { it.toString() }
 }
+@SuppressLint("InflateParams")
 fun handleError(
     context: Context,
     errorType: String,
@@ -27,7 +30,7 @@ fun handleError(
 ) {
     saveErrorToFile(context, errorType, errorMessage, stackTrace)
 
-    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_error, null)
+    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_error,null)
     val binding:DialogErrorBinding=DialogErrorBinding.bind(dialogView)
 
     val dialog = AlertDialog.Builder(context).apply {
