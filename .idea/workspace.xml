@@ -127,22 +127,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="Improved Sync with server (redone, state livedata)&#10;Improved tag converter (redone)&#10;Improved image loader (placeholder and preload on full res)&#10;upload/download fail logs out now.&#10;Improved backhandler on other fragments (switch to main)&#10;adjusted Appupdater to new github&#10;improved scroller (new flow, separated from highlight)">
-      <change afterPath="$PROJECT_DIR$/.kotlin/errors/errors-1735007110880.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jsoup_jsoup_1_13_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jsoup_jsoup_1_15_3.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.kotlin/sessions/kotlin-compiler-15280203788727665473.salive" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.kotlin/sessions/kotlin-compiler-8053890412899634742.salive" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataClasses.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataClasses.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataViewModel.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/ErrorHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/ErrorHandler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/GUIListViewClasses.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/GUIListViewClasses.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/MainActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/MainFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/MainFragment.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/NetworkSingleton.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/NetworkSingleton.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/SyncFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/SyncFragment.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/dialog_error.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/dialog_error.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_sync.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_sync.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -731,14 +718,6 @@
       <option name="project" value="LOCAL" />
       <updated>1637616636225</updated>
     </task>
-    <task id="LOCAL-00052" summary="Smaller bugfixes&#10;sfw mode readable text&#10;back button implementation&#10;screen rotation fixes&#10;menu for deleting data&#10;error report fixes and tests&#10;using thread/post ID instead of url/pos&#10;show img url in offline mode&#10;Watch button eye closed/open in thread&#10;delete offline button fixed&#10;backup/restore fileformat fixed">
-      <option name="closed" value="true" />
-      <created>1733010998541</created>
-      <option name="number" value="00052" />
-      <option name="presentableId" value="LOCAL-00052" />
-      <option name="project" value="LOCAL" />
-      <updated>1733010998541</updated>
-    </task>
     <task id="LOCAL-00053" summary="updated gradle plugin system&#10;upgraded packages but still support minsdk 16&#10;fixed warnings and technical stuff&#10;Zoom/Panel of fullview-image using Photoview library (mentioning licenses WIP)&#10;first implementation of google OSS license list, doesn't work, list empty&#10;replaced outdated staticLayout for floating text around images&#10;replaced outdated &quot;position&quot; in notifyItemChanged within viewHolder with itemView.invalidate()&#10;Updated name">
       <option name="closed" value="true" />
       <created>1733154625836</created>
@@ -771,7 +750,15 @@
       <option name="project" value="LOCAL" />
       <updated>1734802285456</updated>
     </task>
-    <option name="localTasksCounter" value="57" />
+    <task id="LOCAL-00057" summary="Improved Sync with server (redone, state livedata)&#10;Improved tag converter (redone)&#10;Improved image loader (placeholder and preload on full res)&#10;upload/download fail logs out now.&#10;Improved backhandler on other fragments (switch to main)&#10;adjusted Appupdater to new github&#10;improved scroller (new flow, separated from highlight)">
+      <option name="closed" value="true" />
+      <created>1735486943768</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1735486943769</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -842,13 +829,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataViewModel.kt</url>
-          <line>824</line>
+          <line>831</line>
           <option name="timeStamp" value="24" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/GUIListViewClasses.kt</url>
           <line>352</line>
           <option name="timeStamp" value="25" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/de/dediggefedde/questden_blick_reader/DataViewModel.kt</url>
+          <line>168</line>
+          <option name="timeStamp" value="29" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -863,15 +855,7 @@
         <watch expression="((TreeMap)((NetworkResponse)response).headers).entrySet().toArray()[0]" custom="java.util.TreeMap,com.android.volley.NetworkResponse" />
       </configuration>
       <configuration name="AndroidRunConfigurationType">
-        <watch expression="availableWidth" />
-        <watch expression="maxLines" />
-        <watch expression="topTexHeight" />
-        <watch expression="thumbHeight" />
-        <watch expression="viewModel.getLastReadIndex()" />
-        <watch expression="sets.curReadPostID[sets.curThreadId]" />
-        <watch expression="it.groupValues[1]" language="kotlin" />
-        <watch expression="tg.summary" />
-        <watch expression="ret" />
+        <watch expression="lastSaved" language="kotlin" />
         <watch expression="currentList.indexOfFirst { it.postID == lastid }" />
       </configuration>
     </watches-manager>

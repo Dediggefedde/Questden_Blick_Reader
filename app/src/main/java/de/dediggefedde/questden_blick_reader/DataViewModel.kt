@@ -159,12 +159,19 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         updateSet()
     }
 
-    /**get index of last read post in current displaylist*/
+    /**get index of last read post in current displaylist
+     * if post is not in list due to image-only-mode, go to previous image post*/
     fun getLastReadIndex(): Int {
         val currentList = _displayList.value
         val lastid = sets.curReadPostID[sets.curThreadId]
         if (currentList.isNullOrEmpty() || lastid.isNullOrEmpty()) return 0
-        return currentList.indexOfFirst { it.postID == lastid }
+        var index = currentList.indexOfFirst { it.postID == lastid }
+        if(index==-1 && sets.showOnlyPics) {
+            val rawIt = entryListRaw.findLast { it.postID <= lastid  && it.imgUrl!=""}
+            if(rawIt==null)return -1
+            index = currentList.indexOfFirst { it.postID==rawIt.postID}
+        }
+        return index
     }
 
     /** lists watched threads*/
