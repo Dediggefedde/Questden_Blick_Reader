@@ -17,8 +17,9 @@ android {
         applicationId 'de.dediggefedde.questden_blick_reader'
         minSdk 16
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+
+        versionCode 13
+        versionName "1.3"
         multiDexEnabled true
 
         vectorDrawables.useSupportLibrary = true

@@ -126,8 +126,9 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="Release attempt">
+    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="Release attempt, updated updateURL for apk to latest github release path">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/version.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/version.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -717,14 +718,6 @@
       <option name="project" value="LOCAL" />
       <updated>1637616636225</updated>
     </task>
-    <task id="LOCAL-00055" summary="Full resolution option in fullwidth mode&#10;Fix for loading full urls as threads&#10;Added Reply form (fragment,viewmodel)&#10;Added Chapter overview from wiki (fragment,viewmodel)&#10;Unified message helper. Tried out snackbar, reverted to Toast.&#10;New Toasts now hide old ones&#10;tidied up code and layouts&#10;date,title,author click adds reference to reply form&#10;reply password generation &amp; storage&#10;Menu entry visibility fixes&#10;confirm dialog for deleting data&#10;screenshots for onboarding added">
-      <option name="closed" value="true" />
-      <created>1734703177093</created>
-      <option name="number" value="00055" />
-      <option name="presentableId" value="LOCAL-00055" />
-      <option name="project" value="LOCAL" />
-      <updated>1734703177093</updated>
-    </task>
     <task id="LOCAL-00056" summary="Custom error layout&#10;documented viewmodel&#10;offline mode detection and handling&#10;Questarch added">
       <option name="closed" value="true" />
       <created>1734802285456</created>
@@ -757,7 +750,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735490549824</updated>
     </task>
-    <option name="localTasksCounter" value="60" />
+    <task id="LOCAL-00060" summary="Release attempt, updated updateURL for apk to latest github release path">
+      <option name="closed" value="true" />
+      <created>1735490775773</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1735490775773</updated>
+    </task>
+    <option name="localTasksCounter" value="61" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -786,7 +787,6 @@
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="fixed crashing app by proguard-rules.pro and enums on release builds..." />
     <MESSAGE value="fixed error message when watching something new&#10;fix at checking target thread when adding to watchlist&#10;added stacktrace to volley errors&#10;new release signed apk" />
     <MESSAGE value="version corrected" />
     <MESSAGE value="features:&#10; * title display current thread&#10;bugfix:&#10; * check posts when added to watchlist when board page&gt;0&#10; * next/prev page scroll to 0&#10;new release apk same dev." />
@@ -811,7 +811,8 @@
     <MESSAGE value="Improved Sync with server (redone, state livedata)&#10;Improved tag converter (redone)&#10;Improved image loader (placeholder and preload on full res)&#10;upload/download fail logs out now.&#10;Improved backhandler on other fragments (switch to main)&#10;adjusted Appupdater to new github&#10;improved scroller (new flow, separated from highlight)" />
     <MESSAGE value="Fallback for image-only mode to go to previous image post if current position is in-between" />
     <MESSAGE value="Release attempt" />
-    <option name="LAST_COMMIT_MESSAGE" value="Release attempt" />
+    <MESSAGE value="Release attempt, updated updateURL for apk to latest github release path" />
+    <option name="LAST_COMMIT_MESSAGE" value="Release attempt, updated updateURL for apk to latest github release path" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
