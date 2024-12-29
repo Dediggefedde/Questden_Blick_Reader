@@ -128,7 +128,6 @@
   <component name="ChangeListManager">
     <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="Release attempt, updated updateURL for apk to latest github release path">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/version.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/version.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -718,14 +717,6 @@
       <option name="project" value="LOCAL" />
       <updated>1637616636225</updated>
     </task>
-    <task id="LOCAL-00056" summary="Custom error layout&#10;documented viewmodel&#10;offline mode detection and handling&#10;Questarch added">
-      <option name="closed" value="true" />
-      <created>1734802285456</created>
-      <option name="number" value="00056" />
-      <option name="presentableId" value="LOCAL-00056" />
-      <option name="project" value="LOCAL" />
-      <updated>1734802285456</updated>
-    </task>
     <task id="LOCAL-00057" summary="Improved Sync with server (redone, state livedata)&#10;Improved tag converter (redone)&#10;Improved image loader (placeholder and preload on full res)&#10;upload/download fail logs out now.&#10;Improved backhandler on other fragments (switch to main)&#10;adjusted Appupdater to new github&#10;improved scroller (new flow, separated from highlight)">
       <option name="closed" value="true" />
       <created>1735486943768</created>
@@ -758,7 +749,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735490775773</updated>
     </task>
-    <option name="localTasksCounter" value="61" />
+    <task id="LOCAL-00061" summary="Release attempt, updated updateURL for apk to latest github release path">
+      <option name="closed" value="true" />
+      <created>1735491428320</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1735491428320</updated>
+    </task>
+    <option name="localTasksCounter" value="62" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
