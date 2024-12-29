@@ -126,10 +126,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="Release attempt, updated updateURL for apk to latest github release path">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/version.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/version.json" afterDir="false" />
-    </list>
+    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="updated github url to /latest/" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -717,14 +714,6 @@
       <option name="project" value="LOCAL" />
       <updated>1637616636225</updated>
     </task>
-    <task id="LOCAL-00057" summary="Improved Sync with server (redone, state livedata)&#10;Improved tag converter (redone)&#10;Improved image loader (placeholder and preload on full res)&#10;upload/download fail logs out now.&#10;Improved backhandler on other fragments (switch to main)&#10;adjusted Appupdater to new github&#10;improved scroller (new flow, separated from highlight)">
-      <option name="closed" value="true" />
-      <created>1735486943768</created>
-      <option name="number" value="00057" />
-      <option name="presentableId" value="LOCAL-00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1735486943769</updated>
-    </task>
     <task id="LOCAL-00058" summary="Fallback for image-only mode to go to previous image post if current position is in-between">
       <option name="closed" value="true" />
       <created>1735490000301</created>
@@ -757,7 +746,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735491428320</updated>
     </task>
-    <option name="localTasksCounter" value="62" />
+    <task id="LOCAL-00062" summary="updated github url to /latest/">
+      <option name="closed" value="true" />
+      <created>1735492038860</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1735492038860</updated>
+    </task>
+    <option name="localTasksCounter" value="63" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -786,7 +783,6 @@
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="fixed error message when watching something new&#10;fix at checking target thread when adding to watchlist&#10;added stacktrace to volley errors&#10;new release signed apk" />
     <MESSAGE value="version corrected" />
     <MESSAGE value="features:&#10; * title display current thread&#10;bugfix:&#10; * check posts when added to watchlist when board page&gt;0&#10; * next/prev page scroll to 0&#10;new release apk same dev." />
     <MESSAGE value="release build&#10;local git/androidstudio did strange things yesterday..." />
@@ -811,7 +807,8 @@
     <MESSAGE value="Fallback for image-only mode to go to previous image post if current position is in-between" />
     <MESSAGE value="Release attempt" />
     <MESSAGE value="Release attempt, updated updateURL for apk to latest github release path" />
-    <option name="LAST_COMMIT_MESSAGE" value="Release attempt, updated updateURL for apk to latest github release path" />
+    <MESSAGE value="updated github url to /latest/" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated github url to /latest/" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
