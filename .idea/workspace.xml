@@ -126,13 +126,8 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="Fallback for image-only mode to go to previous image post if current position is in-between">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__androidx_multidex_multidex_instrumentation_2_0_0_aar.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__androidx_transition_transition_1_2_0_aar.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+    <list default="true" id="f3d3a5c4-da82-41c4-aded-d0a114ea982e" name="Default Changelist" comment="Release attempt">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.kotlin/sessions/kotlin-compiler-15280203788727665473.salive" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/version.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/version.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -722,14 +717,6 @@
       <option name="project" value="LOCAL" />
       <updated>1637616636225</updated>
     </task>
-    <task id="LOCAL-00054" summary="Image layout mode update&#10;photoview for img zoom&#10;preparation for onboarding&#10;register link (updated website for phones)&#10;image getter update: both textviews get images, placeholder, caching&#10;dialogs for about, license">
-      <option name="closed" value="true" />
-      <created>1733582135208</created>
-      <option name="number" value="00054" />
-      <option name="presentableId" value="LOCAL-00054" />
-      <option name="project" value="LOCAL" />
-      <updated>1733582135208</updated>
-    </task>
     <task id="LOCAL-00055" summary="Full resolution option in fullwidth mode&#10;Fix for loading full urls as threads&#10;Added Reply form (fragment,viewmodel)&#10;Added Chapter overview from wiki (fragment,viewmodel)&#10;Unified message helper. Tried out snackbar, reverted to Toast.&#10;New Toasts now hide old ones&#10;tidied up code and layouts&#10;date,title,author click adds reference to reply form&#10;reply password generation &amp; storage&#10;Menu entry visibility fixes&#10;confirm dialog for deleting data&#10;screenshots for onboarding added">
       <option name="closed" value="true" />
       <created>1734703177093</created>
@@ -762,7 +749,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735490000302</updated>
     </task>
-    <option name="localTasksCounter" value="59" />
+    <task id="LOCAL-00059" summary="Release attempt">
+      <option name="closed" value="true" />
+      <created>1735490549824</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1735490549824</updated>
+    </task>
+    <option name="localTasksCounter" value="60" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -791,7 +786,6 @@
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="updating apk signed created" />
     <MESSAGE value="fixed crashing app by proguard-rules.pro and enums on release builds..." />
     <MESSAGE value="fixed error message when watching something new&#10;fix at checking target thread when adding to watchlist&#10;added stacktrace to volley errors&#10;new release signed apk" />
     <MESSAGE value="version corrected" />
@@ -816,7 +810,8 @@
     <MESSAGE value="Custom error layout&#10;documented viewmodel&#10;offline mode detection and handling&#10;Questarch added" />
     <MESSAGE value="Improved Sync with server (redone, state livedata)&#10;Improved tag converter (redone)&#10;Improved image loader (placeholder and preload on full res)&#10;upload/download fail logs out now.&#10;Improved backhandler on other fragments (switch to main)&#10;adjusted Appupdater to new github&#10;improved scroller (new flow, separated from highlight)" />
     <MESSAGE value="Fallback for image-only mode to go to previous image post if current position is in-between" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fallback for image-only mode to go to previous image post if current position is in-between" />
+    <MESSAGE value="Release attempt" />
+    <option name="LAST_COMMIT_MESSAGE" value="Release attempt" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
