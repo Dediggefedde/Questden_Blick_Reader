@@ -1,51 +1,43 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
-
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
-
-    # GSON.
--keepnames class com.google.gson.** {*;}
--keepnames enum com.google.gson.** {*;}
--keepnames interface com.google.gson.** {*;}
+-dontwarn com.google.gson.**
+-dontwarn javax.annotation.Nullable
+-dontwarn org.conscrypt.Conscrypt
+-dontwarn org.conscrypt.OpenSSLProvider
+-keep class * extends java.util.ArrayList { *; }
+-keep class * extends java.util.HashMap { *; }
+-keep class * implements java.util.List { *; }
+-keep class * implements java.util.Map { *; }
+-keep class androidx.paging.** { *; }
+-keep class androidx.room.** { *; }
+-keep class androidx.room.**$Companion { *; }
+-keep class androidx.room.RoomDatabase { *; }
 -keep class com.google.gson.** { *; }
--keepnames class org.** {*;}
--keepnames enum org.** {*;}
--keepnames interface org.** {*;}
--keep class org.** { *; }
-
--keepnames class com.yourpackagename.net.** {*;}
--keepnames enum com.yourpackagename.net.** {*;}
--keepnames interface com.yourpackagename.net.** {*;}
--keep class com.yourpackagename.net.** { *; }
-
--keepattributes Signature
--keepattributes *Annotation*
--keep class sun.misc.Unsafe { *; }
+-keep class com.google.gson.reflect.TypeToken { *; }
 -keep class com.google.gson.stream.** { *; }
-
+-keep class com.yourpackagename.net.** { *; }
+-keep class kotlin.reflect.** { *; }
+-keep class org.** { *; }
+-keepattributes *Annotation*
+-keepattributes Signature
+-keepclassmembers class com.google.gson.** { *; }
+-keepclassmembers class com.google.gson.reflect.TypeToken { *; }
+-keepclassmembers class com.google.gson.stream.** { *; }
 -keepclassmembers enum * { *; }
+-keepnames class com.google.gson.** {*;}
+-keepnames class com.yourpackagename.net.** {*;}
+-keepnames class org.** {*;}
+-keepnames enum com.google.gson.** {*;}
+-keepnames enum com.yourpackagename.net.** {*;}
+-keepnames enum org.** {*;}
+-keepnames interface com.google.gson.** {*;}
+-keepnames interface com.yourpackagename.net.** {*;}
+-keepnames interface org.** {*;}
 
 -keepclassmembers enum * {
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
--dontwarn javax.annotation.Nullable
--dontwarn org.conscrypt.Conscrypt
--dontwarn org.conscrypt.OpenSSLProvider
+-keepclassmembers class * {
+    public <methods>;
+    public <fields>;
+}

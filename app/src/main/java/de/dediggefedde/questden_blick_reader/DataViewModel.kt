@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -17,6 +18,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -52,7 +54,7 @@ class DataRepository(context: Context) {
         editor.apply()
     }
 
-    fun <T> loadData(key: String, type: Type): T? {
+    fun <T> loadData(key: String, type: Type): T? { //gets killed by optimization
         val jsonData = sharedPreferences.getString(key, null)
         return if (jsonData != null) {
             Gson().fromJson<T>(jsonData, type) // Verwende hier den Type
@@ -60,6 +62,11 @@ class DataRepository(context: Context) {
             null
         }
     }
+
+    fun getJSON(s: String): String? {
+        return sharedPreferences.getString(s,null)
+    }
+
 }
 
 /** Main Data View Model for MVVM approach
@@ -212,19 +219,39 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
 
     /** loads data from SharedPreferences and updates view*/
     fun loadData() {
-        entryListRaw = dataRepository.loadData("tgchanItems", object : TypeToken<List<TgPost>>() {}.type) ?: entryListRaw
-        watchlist = dataRepository.loadData("watchItems", object : TypeToken<MutableList<Watch>>() {}.type) ?: watchlist
-        offlineList = dataRepository.loadData("offlineList", object : TypeToken<MutableList<OfflineThread>>() {}.type) ?: offlineList
-        sets = dataRepository.loadData("modelSettings", object : TypeToken<ModelSettings>() {}.type) ?: sets
-        updateSet() //invoke lifedata update on setings
+        var json:String?=""
 
-        if (entryListRaw.isEmpty()) { //default page
+        json=dataRepository.getJSON("tgchanItems")
+        if(!json.isNullOrEmpty())
+            entryListRaw = Gson().fromJson(json, Array<TgPost>::class.java).toList()
+
+        json=dataRepository.getJSON("watchItems")
+        if(!json.isNullOrEmpty())
+            watchlist = Gson().fromJson(json, Array<Watch>::class.java).toMutableList()
+
+        json=dataRepository.getJSON("offlineList")
+        if(!json.isNullOrEmpty())
+            offlineList = Gson().fromJson(json, Array<OfflineThread>::class.java).toMutableList()
+
+        json=dataRepository.getJSON("modelSettings")
+        if(!json.isNullOrEmpty())
+            sets = Gson().fromJson(json, ModelSettings::class.java)
+
+//        entryListRaw = dataRepository.loadData("tgchanItems", object : TypeToken<List<TgPost>>() {}.type,sharedPreferences) ?: entryListRaw;"tgchanItems",  object : TypeToken<List<TgPost>>() {}.type,sharedPreferences) ?: entryListRaw
+//        watchlist = dataRepository.loadData("watchItems", object : TypeToken<MutableList<Watch>>() {}.type) ?: watchlist
+//        offlineList = dataRepository.loadData("offlineList", object : TypeToken<MutableList<OfflineThread>>() {}.type) ?: offlineList
+//        sets = dataRepository.loadData("modelSettings", object : TypeToken<ModelSettings>() {}.type) ?: sets
+//        updateSet() //invoke lifedata update on settings
+//
+        if (entryListRaw.isEmpty()) { // default page
             loadThread(URLBoards.QUEST.url, ThrdItemTyps.BOARD)
         } else {
-            postProcessRawList() //last displaylist is saved, works also offline, but no image guarantee
-            updateDisplayList() //invoke lifedata update on displaylist
+            postProcessRawList() // last displaylist is saved, works also offline, but no image guarantee
+            updateDisplayList() // invoke lifedata update on displaylist
         }
     }
+
+
 
     /** toggles watchlist status of current thread*/
     fun toggleWatch(threadId: String = sets.curThreadId) {
