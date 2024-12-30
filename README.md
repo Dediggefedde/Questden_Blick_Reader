@@ -1,48 +1,69 @@
 # About
 
-Reader app for questden.org<br/>
-This app aims for making reading quests and threads on questden.org enjoyable for smartphone-users.
-[Download the apk](https://github.com/Dediggefedde/Questden_Blick_Reader/raw/release/app/release/app-release.apk)<br/>
+Reader app for questden.org
 
-# Features
+This app aims for making reading quests and threads on questden.org enjoyable for smartphone-users!
+[Download Apk!](https://github.com/Dediggefedde/Questden_Blick_Reader/releases/latest/download/Questden_Blick_Reader.apk)
+
+---
+
+# Summary of Features
+* **Reading**: Cleaner posts, bigger font, bigger images, better touch support
+* **Navigating**: Tracking reading position, chapter overview, prev/next for next image post, hide non-image posts
+* **Watching**: Keep track of new posts
+* **Offline**: Download thred with images for offline reading
+* **Synchronize**: sync watchlist/reading position with your browser
+* **Privacy**: no background activity, no internet communcation unless triggert by user, no adds, no hidden data collection
+
+# Features (Detail)
 
 * Reading:
-  + Font size bigger/smaller
+  + Make font size bigger/smaller
   + 3 NSFW modes: always hide (*SFW*, doesn't download spoiler-images), download/show on tap (*SFW?*) and always show spoilers (*NSFW*)
-  + Hide all posts without images
-  + three image sizes
-  + Navigation to next/previous image/post
-  + Tapping ref-links jumps to their post.
-  + Links to open posts/threads/images in your browser on demand
-  + fullview images with zoom
-  + saves last-read position for each thread
+  + Image-mode: hide all posts without images
+  + three image layouts (small ~ 1/4 screen width, big ~ 1/2 screen width, full ~full screen width)
+  + In full images layout, thumbnails can be replaced with full resolution images
+  + Images can be opened by tapping and zoomed. Tapping a link opens their url in a browser.
+  + Navigation to next/previous image/post depending on navigation mode.
+  + Tapping ref-links jumps to their post. Back-button jumps back to previous post.
+  + Tap the post IDs to open the thread in your browser 
+  + Tracking last-read position for each thread (Post at the top frame)
   + Reply form with basic editor
 * Chapter Overview
-  + Connects with questden-wiki and shows available thread chapters.
+  + shows available thread chapters
+  + Connects with questden-wiki to read the infobox information
 * Watchlist
-  + watched threads to get counters of new posts/images since your last visit
-  + refresh watchlist to check all watched threads for new posts
+  + watch threads to get counters of new posts/images since your last visit
+  + "refresh" watchlist to check all watched threads for new posts
 * Download
   + Download threads and their images to read them while offline!
   + Image quality can be lowered to reduce traffic
 * Synchronize with questden_BLICK
-  + Synchronize devices or create backups
-  + Works with the Questden_Blick userscript! Synchronize your reading status with your desktop-PC!
+  + Synchronize devices via server or create backups
+  + Works with the Questden_Blick userscript! Synchronize your reading status and watchlist with your desktop-PC!
   + No communication with the server except you press "login", "upload" or "download"
+  + It uses my own server for communcation (located in Germany, following EU Data Privacy regulations)
 * Offline backup
   + Can create and load backup files on your phone
-  
+
+---
+
 # Requirements
 
-Full support Android version >20.<br/>
-Compatibility support Android version >17.
+Full support Android 4.4 (API 20)<br/>
+Compatibility support Android version 4.1 (API 17).
+Tested using Moto Z Play with Lineage OS 18.1, Nothing Phone 2a with Android 14, and Emulated "Medium Phone" (Android 11). 
 
 # Install
 
-[Download the apk](https://github.com/Dediggefedde/Questden_Blick_Reader/raw/release/app/release/app-release.apk)<br/>
-You might need to allow installing apps from unknown sources.
-Open the file via browser or file-explorer and you will be prompted to install
-Since I'm unknown on playstore, "play protect" will warn you once. 
+[Download the apk](https://github.com/Dediggefedde/Questden_Blick_Reader/releases/latest/download/Questden_Blick_Reader.apk)<br/>
+You might need to allow installing apps from unknown sources:
+* Open the file via browser or file-explorer and you will be prompted to install
+* You might need to allow installing APKs from your browser app.
+* Since I'm not on playstore, "play protect" might warn you once or ask you to scan the app.
+
+Afterwards, the app should install without issues and take around 20 MB of space on your phone.<br>
+On first start, the app will show you the "onboarding" images from below. You can zoom into them by a pinching gesture on your phone.<br>
 If there is an update, the app will prompt you to download the latest apk from this website (same link as above).
 
 # Quickstart
